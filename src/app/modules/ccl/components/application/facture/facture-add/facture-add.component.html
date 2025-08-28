@@ -1,0 +1,75 @@
+<div class="modal-header">
+    <h5 class="modal-title">{{title}}</h5>
+    <button type="button" class="close" (click)="activeModal.dismiss('Cross click')" aria-label="Close">
+        <span aria-hidden="true">×</span>
+    </button>
+</div>
+<div class="modal-body">
+    <form #detailForm="ngForm">
+        <div class="form-row">
+            <div class="form-group">
+                <div class="input-group-append mb-3">
+                    <button type="button" (click)="openListMouvement()" class="btn btn-add">
+                        <i class="fa fa-exchange-alt"></i> Sélectionner une réservation/occupation
+                    </button>
+                </div>
+                <div class="text-danger" *ngIf="!newItem.mouvement?.id">
+                    *Veuillez sélectionner une réservation/occupation
+                </div>
+                <br>
+                <label>Mouvement :</label>
+                <div class="row">
+                    <div class="col-md-6 md-2">
+                        <label>Infrastructure</label>
+                        <input  type="text" class="form-control" name="infrastructure" [value]="newItem.mouvement?.infrastructure?.nom || ''" readonly>
+                    </div>
+                    <div class="col-md-6 md-2">
+                        <label>Client</label>
+                        <input type="text" class="form-control" name="client" [value]="newItem.mouvement?.client?.nom || ''" readonly>
+                    </div>
+                    <div class="col-md-6 md-2">
+                        <label>Période début</label>
+                        <input type="datetime-local" step="1" class="form-control" name="periodeDebut" [value]="newItem.mouvement?.periodeDebut | date:'yyyy-MM-ddTHH:mm:ss'" readonly>
+                    </div>
+                    <div class="col-md-6 md-2">
+                        <label>Période fin</label>
+                        <input type="datetime-local" step="1" class="form-control" name="periodeFin" [value]="newItem.mouvement?.periodeFin | date:'yyyy-MM-ddTHH:mm:ss'" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>État</label>
+                <select class="form-control" name="etat"
+                        [(ngModel)]="newItem.etat.id" required
+                        [ngModel]="newItem.etat.id??null"
+                >
+                    <option [ngValue]="null">-- Choisir l'état --</option>
+                    <option *ngFor="let etat of etats" value="{{etat.id}}" >{{etat.etat}}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Référence de la facture</label>
+                <input type="text" class="form-control" placeholder="Ex : REF.0012345" name="refFacture" [(ngModel)]="newItem.refFacture">
+            </div>
+            <div class="form-group">
+                <label>Montant total dû (Ariary)</label>
+                <input type="number" step="0.01" class="form-control" placeholder="Ex : 10000"  name="montantTotal" [(ngModel)]="newItem.montantTotal" required>
+            </div>
+            <div class="form-group">
+                <label>Acompte versé</label>
+                <input type="number" step="0.01" class="form-control"  placeholder="Ex : 5000"  name="acompteVerse" [(ngModel)]="newItem.acompteVerse" required>
+            </div>
+            <div class="form-group">
+                <label>Remise (en %)</label>
+                <input type="number" step="0.01" class="form-control" placeholder="50" name="remise" [(ngModel)]="newItem.remise" required>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-grey" (click)="activeModal.dismiss('Cross click')">Annuler</button>
+            <button type="button" class="btn btn-blue" (click)="functionAddAction()" title="Enregistrer" [disabled]="detailForm.invalid">
+                <i class="fas fa-save"></i>
+            </button>
+        </div>
+    </form>
+</div>

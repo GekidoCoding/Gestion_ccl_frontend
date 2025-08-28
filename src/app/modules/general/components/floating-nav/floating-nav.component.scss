@@ -1,0 +1,42 @@
+.floating-nav {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+.chevron-btn {
+  background-color: #103372DD;
+  border: none;
+  border-radius: 25px; /* Adjusted for pill shape to fit text */
+  width: 100px; /* Increased width to accommodate text */
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  padding: 0 10px;
+}
+.chevron-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+.chevron {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: solid #ffffff;
+  border-width: 0 3px 3px 0;
+  margin-right: 5px; /* Space between chevron and text */
+}
+.chevron.left {
+  transform: rotate(135deg);
+}
+.button-text {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+}
+.chevron-btn:hover:not(:disabled) {
+  background-color: #054387;
+}

@@ -1,0 +1,156 @@
+<div class="modal-header">
+    <h5 class="modal-title">Détails du Mouvement</h5>
+    <button type="button" class="close" (click)="activeModal.dismiss('Cross click')" aria-label="Fermer"><span aria-hidden="true">×</span></button>
+</div>
+<div class="modal-body" *ngIf="selectedItem">
+    <app-loading [loading]="isLoading"></app-loading>
+
+    <form #detailForm="ngForm" (ngSubmit)="update()">
+        <div class="row">
+            <div class="form-group col-md-12">
+                <label>Infrastructure&nbsp;:</label>
+                <div class="input-group-append mb-3" *ngIf="isEditing">
+                    <button type="button" (click)="openPopup(infrastructureListModal)" class="btn btn-add">
+                        <i class="fa fa-building"></i> Sélectionner une infrastructure
+                    </button>
+                </div>
+                <div class="row" *ngIf="selectedItem?.infrastructure?.id">
+                    <div class="col-md-6 mb-3">
+                        <label>Nom</label>
+                        <input type="text" class="form-control" [value]="selectedItem.infrastructure.nom || 'N/A'" name="nom" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Numéro</label>
+                        <input type="text" class="form-control" [value]="selectedItem.infrastructure.numero || 'N/A'" name="numero" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Modèle</label>
+                        <input type="text" class="form-control" [value]="selectedItem.infrastructure.modeleInfra.nom || 'N/A'" name="modele" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Catégorie</label>
+                        <input type="text" class="form-control" [value]="selectedItem.infrastructure.modeleInfra.catInfra.nom || 'N/A'" name="categorie" readonly>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group col-md-12">
+                <label>Client&nbsp;:</label>
+                <div class="input-group-append mb-3" *ngIf="isEditing">
+                    <button type="button" class="btn btn-add" (click)="openPopup(clientListModal)">
+                        <i class="fa fa-users"></i> Sélectionner un client
+                    </button>
+                </div>
+                <div class="row" *ngIf="selectedItem?.client?.id">
+                    <div class="col-md-6 mb-3">
+                        <label>Type de client</label>
+                        <input type="text" class="form-control" [value]="selectedItem.client.typeClient.typeClient || 'N/A'" name="typeClient" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Client</label>
+                        <input type="text" class="form-control"
+                               [value]="selectedItem.client?.typeClient?.typeClient === 'Entreprise'
+                                    ? (selectedItem.client?.raisonSociale || 'N/A')
+                                    : ((selectedItem.client?.nom && selectedItem.client?.prenom)
+                                       ? selectedItem.client.nom + ' ' + selectedItem.client.prenom
+                                       : 'N/A')"
+                               name="client" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Adresse</label>
+                        <input type="text" class="form-control" [value]="selectedItem.client.adresse || 'N/A'" name="adresse" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>CIN</label>
+                        <input type="text" class="form-control" [value]="selectedItem.client.cin || 'N/A'" name="cin" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Contact(s)</label>
+                        <input type="text" class="form-control" [value]="selectedItem.client.contacts || 'N/A'" name="contacts" readonly>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group col-md-12">
+                <label>Type de mouvement</label>
+                <select class="form-control" [(ngModel)]="selectedItem.typeMouvement.id" name="typeMouvement" required [disabled]="!isEditing" (ngModelChange)="onTypeMouvementChange()">
+                    <option value="">Choisir un type</option>
+                    <option *ngFor="let type of filteredTypeMouvements" [value]="type.id">{{ type.nom }}</option>
+                </select>
+            </div>
+            <div class="form-group col-md-12">
+                <label>Date de creation</label>
+                <input type="datetime-local" class="form-control" [(ngModel)]="selectedItem.dhMouvement" name="dhMouvement" step="1" readonly>
+            </div>
+            <div class="form-group col-md-12" *ngIf="isReservation">
+                <label>Période début</label>
+                <input type="datetime-local" class="form-control" [(ngModel)]="selectedItem.periodeDebut" name="periodeDebut" step="1" [disabled]="!isEditing">
+            </div>
+            <div class="form-group col-md-12" *ngIf="isReservation">
+                <label>Période fin</label>
+                <input type="datetime-local" class="form-control" [(ngModel)]="selectedItem.periodeFin" name="periodeFin" step="1" [disabled]="!isEditing">
+            </div>
+            <div class="form-group col-md-12" *ngIf="isReservation">
+                <label>Nombre de personnes</label>
+                <input type="number" class="form-control" [(ngModel)]="selectedItem.nombre" name="nombre"  [disabled]="!isEditing">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button *ngIf="!isEditing" type="button" class="btn btn-black" style="background-color: #3e3e3e" (click)="toggleEditMode()"><i class="fas fa-edit"></i> Modifier</button>
+
+            <button *ngIf="!isEditing&&selectedItem.typeMouvement.nom!='Renseignement'" type="button" class="btn btn-eye" (click)="toggleAddFacture()"><i class="fas fa-plus-circle"></i> Ajouter une facture pour ce mouvement</button>
+            <button *ngIf="!isEditing&&selectedItem.typeMouvement.nom!='Renseignement'" type="button" class="btn btn-blue" (click)="toggleListFacture()"><i class="fas fa-file-invoice"></i> Voir ses factures</button>
+            <button *ngIf="isEditing" type="button" class="btn btn-green" (click)="update()" [disabled]="detailForm.invalid"><i class="fas fa-check"></i> Confirmer</button>
+            <button *ngIf="isEditing" type="button" class="btn btn-red" (click)="cancelEdit()"><i class="fas fa-times"></i> Annuler</button>
+
+            <button type="button" class="btn btn-grey" (click)="activeModal.dismiss('Cancel click')">Fermer</button>
+        </div>
+    </form>
+</div>
+
+<ng-template #clientListModal let-modal>
+    <div class="modal-header">
+        <h5 class="modal-title">Liste des clients</h5>
+        <button type="button" class="close" (click)="modal.dismiss('Cross Click')" aria-label="Fermer">
+            <span aria-hidden="true">×</span>
+        </button>
+    </div>
+    <app-client-list (clientSelectedChange)="handleClientSelected($event, modal)"></app-client-list>
+</ng-template>
+
+<ng-template #infrastructureListModal let-modal>
+    <div class="modal-header">
+        <h5 class="modal-title">Liste des infrastructures</h5>
+        <button type="button" class="close" (click)="modal.dismiss('Cross Click')" aria-label="Fermer">
+            <span aria-hidden="true">×</span>
+        </button>
+    </div>
+    <app-infrastructure-list-popup (infrastructureSelected)="handleInfrastructureSelected($event, modal)"></app-infrastructure-list-popup>
+</ng-template>
+
+<ng-template #confirmClasserModal let-modal>
+    <div class="modal-header">
+        <h5 class="modal-title">Confirmation de Suppression</h5>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="modal-body">
+        <p>Voulez-vous vraiment classer ce mouvement  ?</p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-red" (click)="modal.dismiss('Cancel click')"><i class="fas fa-times"></i>Annuler</button>
+        <button type="button" class="btn btn-green" (click)="classerMouvement(mouvementId);modal.dismiss('Cancel click')"><i class="fas fa-check"></i>Oui</button>
+    </div>
+</ng-template>
+
+
+<ng-template #confirmAccorderModal let-modal>
+    <div class="modal-header">
+        <h5 class="modal-title">Confirmation de Suppression</h5>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="modal-body">
+        <p>Voulez-vous vraiment accorder c'est a dire mettre en occupation cet reservation ?</p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-red" (click)="modal.dismiss('Cancel click')"><i class="fas fa-times"></i>Annuler</button>
+        <button type="button" class="btn btn-green" (click)="accorderMouvement(mouvementId);modal.dismiss('Cancel click')"><i class="fas fa-check"></i> Oui</button>
+    </div>
+</ng-template>

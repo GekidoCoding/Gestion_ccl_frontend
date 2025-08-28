@@ -1,0 +1,61 @@
+<div class="modal-header">
+    <h5 class="modal-title">Détails du Client</h5>
+    <button type="button" class="close" (click)="activeModal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
+</div>
+<div class="modal-body" *ngIf="selectedItem">
+    <app-loading [loading]="isLoading"></app-loading>
+    <form #detailForm="ngForm" (ngSubmit)="update(detailForm)">
+        <div class="row">
+            <div class="form-group col-md-6 md-2" >
+                <label>Total de personnes integrés par ce client</label>
+                <input type="text" class="form-control" [(ngModel)]="totalPersonnes" name="total" readonly>
+            </div>
+
+            <div class="form-group col-md-6 md-2">
+                <label>Type de Client</label>
+                <select class="form-control" [(ngModel)]="selectedItem.typeClient.id" name="typeClient" [disabled]="!isEditing" required (ngModelChange)="onTypeClientChange()">
+                    <option value="">Choisir un type</option>
+                    <option *ngFor="let type of typeClients" [value]="type.id">{{ type.typeClient }}</option>
+                </select>
+            </div>
+            <div class="form-group col-md-6 md-2" *ngIf="!isEntreprise">
+                <label>Nom</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedItem.nom" name="nom" [disabled]="!isEditing" required>
+            </div>
+            <div class="form-group col-md-6 md-2" *ngIf="!isEntreprise">
+                <label>Prénom</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedItem.prenom" name="prenom" [disabled]="!isEditing">
+            </div>
+            <div class="form-group col-md-6 md-2" *ngIf="isEntreprise">
+                <label>Raison Sociale</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedItem.raisonSociale" name="raisonSociale" [disabled]="!isEditing" required>
+            </div>
+            <div class="form-group col-md-6 md-2">
+                <label>Adresse</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedItem.adresse" name="adresse" [disabled]="!isEditing" required>
+            </div>
+            <div class="form-group col-md-6 md-2" *ngIf="!isEntreprise">
+                <label>CIN</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedItem.cin" name="cin" [disabled]="!isEditing" required>
+            </div>
+            <div class="form-group col-md-6 md-2">
+                <label>Contact(s)</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedItem.contacts" name="contacts" [disabled]="!isEditing" required>
+            </div>
+            <div class="form-group col-md-6 md-2">
+                <label>Email</label>
+                <input type="email" class="form-control" [(ngModel)]="selectedItem.email" name="email" [disabled]="!isEditing" required>
+            </div>
+            <div class="form-group col-md-6 md-2">
+                <label>Fonction</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedItem.fonction" name="fonction" [disabled]="!isEditing">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button *ngIf="!isEditing" type="button" class="btn btn-green" (click)="toggleEditMode()" ><i class="fas fa-edit"></i>Modifier</button>
+            <button *ngIf="isEditing" type="submit" class="btn btn-green" [disabled]="detailForm.invalid" ><i class="fas fa-check"></i>Confirmer </button>
+            <button *ngIf="isEditing" type="button" class="btn btn-red" (click)="cancelEdit()"><i class="fas fa-times"></i> Annuler</button>
+            <button type="button" class="btn btn-eye"  (click)="addMouvementClient()" ><i class="fas fa-plus-circle"></i>Ajouter un mouvement pour ce client</button>
+        </div>
+    </form>
+</div>

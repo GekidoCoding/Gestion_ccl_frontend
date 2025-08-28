@@ -1,0 +1,92 @@
+<form [formGroup]="addForm" (ngSubmit)="submitForm()">
+    <div class="row">
+        <div class="form-group col-md-6 col-12">
+            <label>Type de Client</label>
+            <select class="form-control" formControlName="typeClient" (change)="onTypeClientChange()">
+                <option [ngValue]="null">-- Sélectionnez le type du client -- </option>
+                <option *ngFor="let type of typeClients" [value]="type.id">{{type.typeClient}}</option>
+            </select>
+            <div class="text-danger" *ngIf="f['typeClient'].errors?.required">
+                * Le type de client est obligatoire
+            </div>
+        </div>
+
+        <div class="form-group col-md-6 col-12" *ngIf="!isEntreprise">
+            <label>Nom</label>
+            <input type="text" class="form-control" formControlName="nom" placeholder="Ex : RAKOTO" />
+            <div class="text-danger" *ngIf="f['nom'].errors?.required">
+              *  Nom ou Prénom est obligatoire
+            </div>
+        </div>
+
+        <div class="form-group col-md-6 col-12" *ngIf="!isEntreprise">
+            <label>Prénom</label>
+            <input type="text" class="form-control" formControlName="prenom" placeholder="Ex : Jean Bernard" />
+            <div class="text-danger" *ngIf="f['prenom'].errors?.required">
+               * Nom ou Prénom est obligatoire
+            </div>
+        </div>
+
+        <div class="form-group col-md-6 col-12" *ngIf="isEntreprise">
+            <label>Raison Sociale</label>
+            <input type="text" class="form-control" formControlName="raisonSociale"
+                   placeholder="Ex : CNaPS (Caisse Nationale de Prévoyance Sociale)"/>
+            <div class="text-danger" *ngIf="f['raisonSociale'].errors?.required">
+               * La raison sociale est obligatoire
+            </div>
+        </div>
+
+        <div class="form-group col-md-6 col-12">
+            <label>Adresse</label>
+            <input type="text" class="form-control" formControlName="adresse" placeholder="Ex : Lot 66 BLE-67Ha Sud-Tana III" />
+            <div class="text-danger" *ngIf="f['adresse'].errors?.required">
+               * L’adresse est obligatoire
+            </div>
+        </div>
+
+        <div class="form-group col-md-6 col-12" *ngIf="!isEntreprise">
+            <label>CIN</label>
+            <input type="number" class="form-control" formControlName="cin" placeholder="Ex : 12111121021" />
+            <div class="text-danger" *ngIf="f['cin'].errors?.required">
+               * Le CIN est obligatoire
+            </div>
+            <div class="text-danger" *ngIf="f['cin'].errors?.pattern">
+                * Le CIN doit avoir 12 chiffres
+            </div>
+        </div>
+
+        <div class="form-group col-md-6 col-12">
+            <label>Contact(s)</label>
+            <input type="text" class="form-control" formControlName="contacts" placeholder="Ex : 0344444444 ou +261344444444" />
+            <div class="text-danger" *ngIf="f['contacts'].errors?.required">
+                * Le contact est obligatoire
+            </div>
+            <div class="text-danger" *ngIf="f['contacts'].errors?.pattern">
+                * Le contact est invalide
+            </div>
+        </div>
+
+        <div class="form-group col-md-6 col-12">
+            <label>Email</label>
+            <input type="email" class="form-control" formControlName="email" placeholder="Ex : jean2505@gmail.com" />
+            <div class="text-danger" *ngIf="f['email'].errors?.required">
+                * L’email est obligatoire
+            </div>
+            <div class="text-danger" *ngIf="f['email'].errors?.email">
+                * L’email n’est pas valide
+            </div>
+        </div>
+
+        <div class="form-group col-md-6 col-12">
+            <label>Fonction</label>
+            <input type="text" class="form-control" formControlName="fonction" placeholder="Ex : Chauffeur" />
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-grey" (click)="cancelForm()">Annuler</button>
+        <button type="submit" class="btn btn-green" [disabled]="addForm.invalid">
+            <i class="fas fa-save"></i> Enregistrer
+        </button>
+    </div>
+</form>

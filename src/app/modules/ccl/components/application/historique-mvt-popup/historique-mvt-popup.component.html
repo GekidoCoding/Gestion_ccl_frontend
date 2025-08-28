@@ -1,0 +1,51 @@
+    <div class="modal-header">
+        <h5 class="modal-title">Historique du Mouvement</h5>
+        <button type="button" class="close" (click)="activeModal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="modal-body">
+        <app-loading [loading]="isLoading"></app-loading>
+        <div class="statistics-section" *ngIf="selectedMouvement">
+            <h3>Statistiques du Mouvement</h3>
+            <div class="form-row">
+                <div class="form-group col-md-2 ">
+                    <label>ID</label>
+                    <p>{{ selectedMouvement.id || 'N/A' }}</p>
+                </div>
+                <div class="form-group col-md-2">
+                    <label>Type</label>
+                    <p>{{ selectedMouvement.typeMouvement.nom || 'N/A' }}</p>
+                </div>
+                <div class="form-group col-md-2">
+                    <label>Infrastructure</label>
+                    <p>{{ selectedMouvement.infrastructure.nom || 'N/A' }}</p>
+                </div>
+                <div class="form-group col-md-2">
+                    <label>Client</label>
+                    <p>{{ componentUtil.getClientName(selectedMouvement.client) }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive" *ngIf="!isLoading">
+            <table class="table table-normal" *ngIf="historiqueMvt.length > 0">
+                <thead>
+                <tr>
+                    <th>Date et Heure</th>
+<!--                    <th>matricule</th>-->
+                    <th>Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of historiqueMvt" class="row-animation">
+                        <td class="nom-column">{{ item.dhAction.replace("T" , " " ) || 'N/A' }}</td>
+<!--                        <td class="nom-column">{{ item.gestionnaire.agent.matricule || 'N/A' }}</td>-->
+                        <td class="nom-column">{{ item.typeMouvement.nom || 'N/A' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div *ngIf="historiqueMvt.length === 0" class="no-results">Pas d'historique pour ce mouvement</div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-grey" (click)="activeModal.dismiss('Close click')" title="Fermer">Fermer</button>
+    </div>

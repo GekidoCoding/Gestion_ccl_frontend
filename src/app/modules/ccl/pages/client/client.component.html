@@ -1,0 +1,182 @@
+<div class="main-content">
+   <app-loading [loading]="isLoading"></app-loading>
+    <div class="table-title">Gestion des Clients</div>
+
+    <div class="list-container">
+        <div class="table-controls">
+            <div class="entries-select">
+                <label style="margin-top: 10px;">Afficher</label>
+                <select [(ngModel)]="itemsPerPage" (ngModelChange)="changePage(1)">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                <span>entrée(s)</span>
+            </div>
+            <div class="action-buttons">
+                <button type="button" class="btn btn-add" (click)="openAddModal(addModal)">
+                    <i class="fa fa-plus"></i>Ajouter un nouveau client
+                </button>
+<!--                <button type="button" class="btn btn-select" (click)="toggleSelectionMode()" title="{{ isSelectionMode ? 'Quitter la sélection' : 'Sélectionner des entrées' }}">-->
+<!--                    <i class="fa" [ngClass]="isSelectionMode ? 'fa-times' : 'fa-check-square'"></i> {{ isSelectionMode ? 'Quitter' : 'Sélectionner pour supprimer' }}-->
+<!--                </button>-->
+                <button type="button" class="btn btn-delete" (click)="openDeleteModal(deleteModal)" title="Supprimer les entrées sélectionnées" [disabled]="selectedCount === 0" *ngIf="isSelectionMode">
+                    <i class="fa fa-trash"></i>Supprimer
+                </button>
+<!--                <button type="button" class="btn btn-search" (click)="toggleSearchForm()">-->
+<!--                    <i class="fa fa-search"></i>Cliquez pour rechercher-->
+<!--                </button>-->
+            </div>
+        </div>
+
+        <div class="search-form slide-in-out">
+            <form #searchForm="ngForm" (ngSubmit)="applySearch()">
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        <label>Type Client</label>
+                        <select class="form-control"  name="typeClient" required
+                                [(ngModel)]="searchCriteria.typeClient.id"
+                                [ngModel]="searchCriteria.typeClient.id ?? null"
+                        >
+                            <option [ngValue]="null" >-- Selectionnez le type de client -- </option>
+                            <option *ngFor="let type of typeClients" [value]="type.id">{{ type.typeClient }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label>Nom & Prenom / Raison Sociale</label>
+                        <input type="text" class="form-control" placeholder="Ex : CNaPS ou RAKOTO" [(ngModel)]="searchCriteria.nom" name="nom" >
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label>Email</label>
+                        <input type="text" class="form-control" [(ngModel)]="searchCriteria.email" placeholder="Ex : rakoto2505@gmail.com" name="numero" email>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label>Contacts</label>
+                        <input type="text" class="form-control" [(ngModel)]="searchCriteria.contacts" placeholder="Ex : 0344444444 ou +2613444444" name="contacts" >
+                    </div>
+
+                    <div class="form-group col-md-2" style="margin-top: 10px">
+<!--                        <button type="button" class="btn btn-grey" (click)="toggleSearchForm()">Fermer</button>-->
+                        <button type="submit" class="btn btn-search">
+                            <i class="fas fa-search"></i>Rechercher
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-normal">
+                <thead>
+                <tr>
+                    <th *ngIf="isSelectionMode" class="checkbox-column">
+                        <input type="checkbox" [(ngModel)]="selectAll" (ngModelChange)="toggleSelectAll()">
+                    </th>
+                    <th class="sortable">
+                        Type
+                    </th>
+                    <th class="sortable" >
+                        Nom & Prenom/ Raison Sociale
+                    </th>
+                    <th class="sortable" >
+                        Adresse
+                    </th>
+                    <th class="sortable">
+                        CIN
+                        <i class="fas">
+                        </i>
+                    </th>
+                    <th class="sortable" >
+                        Contact(s)
+                    </th>
+                    <th class="action-column"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <ng-container *ngFor="let item of filteredItems; let i = index">
+                    <tr class="row-animation" [ngClass]="{'row-animation-delay': i > 0}" [attr.data-index]="i">
+                        <td *ngIf="isSelectionMode" class="checkbox-column">
+                            <input type="checkbox" [(ngModel)]="selectedIds[item.id]" (ngModelChange)="updateSelect(item.id)">
+                        </td>
+                        <td class="name-column">{{item.typeClient.typeClient}}</td>
+                        <td class="name-column">{{item.typeClient.typeClient === 'Entreprise' ? item.raisonSociale : item.nom +' '+item.prenom }}</td>
+                        <td class="name-column">{{item.adresse}}</td>
+                        <td class="name-column">{{item.cin || 'N/A' }}</td>
+                        <td class="name-column">{{item.contacts}}</td>
+                        <td class="action-column action-buttons-cell">
+                            <button class="btn btn-eye" (click)="openDetailModal(item)">
+                                <i class="fa fa-info-circle"></i> Detail
+                            </button>
+                            <button type="button" class="btn btn-black" (click)="navigateToMovements(item.id)" ><i class="fas fa-exchange-alt"></i>Voir ses mouvements</button>
+                        </td>
+                    </tr>
+                </ng-container>
+                </tbody>
+            </table>
+            <div *ngIf="filteredItems.length === 0" class="no-results">Aucun résultat trouvé.</div>
+        </div>
+
+        <div class="pagination-controls">
+            <div class="pagination-container">
+                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage === 0" (click)="changePage(currentPage)" title="Page précédente"><</button>
+                <div class="pagination-buttons">
+                    <span *ngFor="let page of pageNumbers" class="page-number btn btn-blue page-animation" [class.active]="page === currentPage + 1" (click)="changePage(page)">{{page}}</span>
+                </div>
+                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage + 1 === totalPages" (click)="changePage(currentPage + 2)" title="Page suivante">></button>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #addModal let-modal>
+        <div class="modal-header">
+            <h5 class="modal-title">Ajouter un Nouveau Client</h5>
+            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <app-client-add-form
+                    [isLoading]="isLoading"
+                    (formSubmit)="handleAddFormSubmit($event); modal.close('Save click')"
+                    (formCancel)="modal.dismiss('Cancel click')"
+            ></app-client-add-form>
+        </div>
+    </ng-template>
+
+    <ng-template #updateModal let-modal>
+        <div class="modal-header">
+            <h5 class="modal-title">Modifier un Client</h5>
+            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <app-client-update-form
+                    [client]="selectedItem"
+                    [typeClients]="typeClients"
+                    (formSubmit)="confirmUpdate($event); modal.close('Save click')"
+                    (formCancel)="modal.dismiss('Cancel click')"
+            ></app-client-update-form>
+        </div>
+    </ng-template>
+
+    <ng-template #deleteModal let-modal>
+        <div class="modal-header">
+            <h5 class="modal-title">Confirmation de Suppression</h5>
+            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>Voulez-vous vraiment supprimer cet(ces) <strong>{{ selectedCount }}</strong> élément(s) ?</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-grey" (click)="modal.dismiss('Cancel click')">Annuler</button>
+            <button type="button" class="btn btn-grey" (click)="deleteSelectedItems(modal)">Oui</button>
+        </div>
+    </ng-template>
+
+</div>

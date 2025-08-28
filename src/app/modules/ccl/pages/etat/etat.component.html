@@ -1,0 +1,213 @@
+<div class="main-content">
+    <app-loading [loading]="isLoading"></app-loading>
+    <div class="table-title">Gestion des États</div>
+
+    <div class="list-container">
+        <div class="table-controls">
+            <div class="entries-select">
+                <label style="margin-top: 10px;">Afficher</label>
+                <select [(ngModel)]="itemsPerPage" (ngModelChange)="changePage(1)">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                <span>entrée(s)</span>
+            </div>
+            <div class="action-buttons">
+                <button type="button" class="btn btn-add" (click)="openAddModal(addModal)" title="Ajouter un nouvel état">
+                    <i class="fa fa-plus"></i>
+                </button>
+                <button type="button" class="btn btn-select" (click)="toggleSelectionMode()" title="{{ isSelectionMode ? 'Quitter la sélection' : 'Sélectionner des entrées' }}">
+                    <i class="fa" [ngClass]="isSelectionMode ? 'fa-times' : 'fa-check-square'"></i> {{ isSelectionMode ? 'Quitter' : 'Sélectionner' }}
+                </button>
+                <button type="button" class="btn btn-delete" (click)="openDeleteModal(deleteModal)" title="Supprimer les entrées sélectionnées" [disabled]="selectedCount === 0" *ngIf="isSelectionMode">
+                    <i class="fa fa-trash"></i>
+                </button>
+                <button type="button" class="btn btn-search" (click)="toggleSearchForm()" title="Afficher le formulaire de recherche">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="search-form slide-in-out" *ngIf="showSearchForm">
+            <form #searchForm="ngForm" (ngSubmit)="applySearch()">
+                <div class="form-row">
+                    <div class="form-group col-md-3 col-12">
+                        <label>Identifiant</label>
+                        <input type="text" class="form-control" [(ngModel)]="searchCriteria.id" name="id" (input)="applySearchDebounced()" placeholder="ETT-XXXX">
+                    </div>
+                    <div class="form-group col-md-3 col-12">
+                        <label>État</label>
+                        <input type="text" class="form-control" [(ngModel)]="searchCriteria.etat" name="etat" (input)="applySearchDebounced()" maxlength="255">
+                    </div>
+                    <div class="form-group col-md-3 col-12">
+                        <label>Code</label>
+                        <input type="number" class="form-control" [(ngModel)]="searchCriteria.code" name="code" (input)="applySearchDebounced()">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-3 col-12">
+                        <button type="button" class="btn btn-grey" (click)="toggleSearchForm()">Fermer</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-normal">
+                <thead>
+                <tr>
+                    <th *ngIf="isSelectionMode" class="checkbox-column">
+                        <input type="checkbox" [(ngModel)]="selectAll" (ngModelChange)="toggleSelectAll()">
+                    </th>
+                    <th class="sortable" (click)="sortByColumn('id')">
+                        Identifiant
+                        <i class="fas" [ngClass]="{
+                'fa-sort-up': sortConfig.column === 'id' && sortConfig.order === 'asc',
+                'fa-sort-down': sortConfig.column === 'id' && sortConfig.order === 'desc',
+                'fa-sort': sortConfig.column !== 'id' || !sortConfig.order
+              }"></i>
+                    </th>
+                    <th class="sortable" (click)="sortByColumn('etat')">
+                        État
+                        <i class="fas" [ngClass]="{
+                'fa-sort-up': sortConfig.column === 'etat' && sortConfig.order === 'asc',
+                'fa-sort-down': sortConfig.column === 'etat' && sortConfig.order === 'desc',
+                'fa-sort': sortConfig.column !== 'etat' || !sortConfig.order
+              }"></i>
+                    </th>
+                    <th class="sortable" (click)="sortByColumn('code')">
+                        Code
+                        <i class="fas" [ngClass]="{
+                'fa-sort-up': sortConfig.column === 'code' && sortConfig.order === 'asc',
+                'fa-sort-down': sortConfig.column === 'code' && sortConfig.order === 'desc',
+                'fa-sort': sortConfig.column !== 'code' || !sortConfig.order
+              }"></i>
+                    </th>
+                    <th class="action-column"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <ng-container *ngFor="let item of filteredItems; let i = index">
+                    <tr class="row-animation" [ngClass]="{'row-animation-delay': i > 0}" [attr.data-index]="i">
+                        <td *ngIf="isSelectionMode" class="checkbox-column">
+                            <input type="checkbox" [(ngModel)]="selectedIds[item.id]" (ngModelChange)="updateSelect(item.id)">
+                        </td>
+                        <td class="id-column">{{item.id}}</td>
+                        <td class="etat-column">{{item.etat}}</td>
+                        <td class="code-column">{{item.code}}</td>
+                        <td class="action-column action-buttons-cell">
+                            <button class="btn btn-update" (click)="openUpdateModal(updateModal, item)" title="Modifier cet état">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </ng-container>
+                </tbody>
+            </table>
+            <div *ngIf="filteredItems.length === 0" class="no-results">Aucun résultat trouvé.</div>
+        </div>
+
+        <div class="pagination-controls">
+            <div class="pagination-container">
+                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage === 0" (click)="changePage(currentPage)" title="Page précédente"><</button>
+                <div class="pagination-buttons">
+                    <span *ngFor="let page of pageNumbers" class="page-number btn btn-blue page-animation" [class.active]="page === currentPage + 1" (click)="changePage(page)">{{page}}</span>
+                </div>
+                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage + 1 === totalPages" (click)="changePage(currentPage + 2)" title="Page suivante">></button>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #addModal let-modal>
+        <div class="modal-header">
+            <h5 class="modal-title">Ajouter un Nouvel État</h5>
+            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form #addForm="ngForm" (ngSubmit)="addItem(); modal.close('Save click')">
+                <div class="form-row">
+                    <div class="form-group col-md-6 col-12">
+                        <label>État</label>
+                        <input type="text" class="form-control" [(ngModel)]="newItem.etat" name="etat" required maxlength="255">
+                    </div>
+                    <div class="form-group col-md-6 col-12">
+                        <label>Code</label>
+                        <input type="number" class="form-control" [(ngModel)]="newItem.code" name="code" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-grey" (click)="modal.dismiss('Cancel click')">Annuler</button>
+                    <button type="submit" class="btn btn-blue" title="Enregistrer" [disabled]="addForm.invalid"><i class="fas fa-save"></i></button>
+                </div>
+            </form>
+        </div>
+    </ng-template>
+
+    <ng-template #updateModal let-modal>
+        <div class="modal-header">
+            <h5 class="modal-title">Modifier un État</h5>
+            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form #updateForm="ngForm" (ngSubmit)="confirmUpdate(modal)">
+                <div class="form-row">
+                    <div class="form-group col-md-6 col-12">
+                        <label>Identifiant</label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedItem.id" name="id" readonly>
+                    </div>
+                    <div class="form-group col-md-6 col-12">
+                        <label>État</label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedItem.etat" name="etat" required maxlength="255">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6 col-12">
+                        <label>Code</label>
+                        <input type="number" class="form-control" [(ngModel)]="selectedItem.code" name="code" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-grey" (click)="modal.dismiss('Cancel click')">Annuler</button>
+                    <button type="submit" class="btn btn-blue" title="Modifier" [disabled]="updateForm.invalid"><i class="fas fa-save"></i></button>
+                </div>
+            </form>
+        </div>
+    </ng-template>
+
+    <ng-template #deleteModal let-modal>
+        <div class="modal-header">
+            <h5 class="modal-title">Confirmation de Suppression</h5>
+            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>Voulez-vous vraiment supprimer <strong>{{ selectedCount }}</strong> élément(s) ?</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-grey" (click)="modal.dismiss('Cancel click')">Annuler</button>
+            <button type="button" class="btn btn-grey" (click)="deleteSelectedItems(modal)">Oui</button>
+        </div>
+    </ng-template>
+
+    <div class="toast-container" *ngIf="showConfirmation">
+        <div class="toast fade-animation">
+            {{confirmationMessage}}
+            <button class="toast-close" (click)="closeToast()">×</button>
+        </div>
+    </div>
+
+    <div class="toast-container" *ngIf="showError">
+        <div class="toast fade-animation">
+            {{errorMessage}}
+            <button class="toast-close" (click)="closeToast()">×</button>
+        </div>
+    </div>
+</div>

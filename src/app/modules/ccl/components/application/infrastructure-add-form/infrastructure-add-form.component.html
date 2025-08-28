@@ -1,0 +1,141 @@
+<div class="modal-body">
+    <form #addForm="ngForm" (ngSubmit)="onSubmit(addForm)">
+        <div class="form-row">
+            <div class="form-left">
+                <div class="form-group col-md-6 col-lg-10">
+                    <label>Nom</label>
+                    <input type="text" class="form-control" placeholder="Ex : Chambre . 101" [(ngModel)]="newItem.nom" name="nom" required>
+                </div>
+                <div class="form-group col-md-6 col-lg-10">
+                    <label>Numéro</label>
+                    <input type="text" class="form-control" placeholder="Ex : CHB-101" [(ngModel)]="newItem.numero" name="numero" required>
+                </div>
+                <div class="form-group col-md-6 col-lg-10">
+                    <label>Capacité</label>
+                    <input type="number" placeholder="10" class="form-control" [(ngModel)]="newItem.capacite" name="capacite" required>
+                </div>
+                <div class="form-group col-md-6 col-lg-10">
+                    <label>Éléments</label>
+                    <textarea class="form-control" placeholder="Ex : 1 douche interieure , 2 WC exterieures , 1 chaufaud" [(ngModel)]="newItem.elements" name="elements"></textarea>
+                </div>
+                <div class="form-group col-md-6 col-lg-10">
+                    <label>Prix (Ariary)</label>
+                    <input type="number" class="form-control" placeholder="10000" [(ngModel)]="newItem.prix" name="prix" step="0.01">
+                </div>
+                <div class="form-group col-md-6 col-lg-10">
+                    <label>État</label>
+                    <select class="form-control" [ngModel]="newItem.etat?.id ?? null" name="etat" (ngModelChange)="newItem.etat!.id = $event" required>
+                        <option [ngValue]="null" >-- Sélectionnez état --</option>
+                        <option *ngFor="let etat of etats" [value]="etat.id">{{ etat.etat }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-right">
+                <div class="form-group">
+                    <label>Localisation</label>
+                    <div class="input-group">
+                        <select class="form-control" [ngModel]="newItem.localisation?.id ?? null" name="localisation" (ngModelChange)="newItem.localisation!.id = $event" required>
+                            <option [ngValue]="null" >-- Sélectionnez localisation --</option>
+                            <option *ngFor="let localisation of localisations" [value]="localisation.id">{{ localisation.nom }}</option>
+                        </select>
+                        <button type="button" class="btn btn-add" (click)="openLocalisationModal(localisationModal)" title="Ajouter une localisation">+</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Catégorie d'Infra</label>
+                    <div class="input-group">
+                        <select class="form-control" [ngModel]="newItem.modeleInfra?.catInfra?.id ?? null" name="catInfra" (ngModelChange)="onCategoryChange($event); newItem.modeleInfra!.catInfra.id = $event">
+                            <option [ngValue]="null" >-- Sélectionnez catégorie --</option>
+                            <option *ngFor="let category of categories" [value]="category.id">{{ category.nom }}</option>
+                        </select>
+                        <button type="button" class="btn btn-add" (click)="openCategoryModal(categoryModal)" title="Ajouter une catégorie">+</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Modèle d'Infra</label>
+                    <div class="input-group">
+                        <select class="form-control" [ngModel]="newItem.modeleInfra?.id ?? null" name="modeleInfra" (ngModelChange)="newItem.modeleInfra!.id = $event" required>
+                            <option [ngValue]="null" >-- Sélectionnez modèle --</option>
+                            <option *ngFor="let modele of filteredModeles" [value]="modele.id">{{ modele.nom }}</option>
+                        </select>
+                        <button type="button" class="btn btn-add" (click)="openModeleModal(modeleModal)" title="Ajouter un modèle">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-grey" (click)="onCancel()">Annuler</button>
+            <button type="submit" class="btn btn-blue" [disabled]="addForm.invalid"><i class="fas fa-save"></i>Enregistrer</button>
+        </div>
+    </form>
+</div>
+
+<ng-template #localisationModal let-modal>
+    <div class="modal-header">
+        <h5 class="modal-title">Ajouter une Localisation</h5>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="modal-body">
+        <form #localisationForm="ngForm" (ngSubmit)="addLocalisation(); modal.close('Save click')">
+            <div class="form-row">
+                <div class="form-group col-md-6 col-lg-10">
+                    <label>Nom de la Localisation</label>
+                    <input type="text" class="form-control" [(ngModel)]="newLocalisation.nom" name="localisationNom" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-grey" (click)="modal.dismiss('Cancel click')">Annuler</button>
+                <button type="submit" class="btn btn-blue" [disabled]="!newLocalisation.nom"><i class="fas fa-save"></i></button>
+            </div>
+        </form>
+    </div>
+</ng-template>
+
+<ng-template #categoryModal let-modal>
+    <div class="modal-header">
+        <h5 class="modal-title">Ajouter une Catégorie</h5>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="modal-body">
+        <form #categoryForm="ngForm" (ngSubmit)="addCategory(); modal.close('Save click')">
+            <div class="form-row">
+                <div class="form-group col-md-6 col-lg-10">
+                    <label>Nom de la Catégorie</label>
+                    <input type="text" class="form-control" [(ngModel)]="newCategory.nom" name="nom" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-grey" (click)="modal.dismiss('Cancel click')">Annuler</button>
+                <button type="submit" class="btn btn-blue" [disabled]="!newCategory.nom"><i class="fas fa-save"></i></button>
+            </div>
+        </form>
+    </div>
+</ng-template>
+
+<ng-template #modeleModal let-modal>
+    <div class="modal-header">
+        <h5 class="modal-title">Ajouter un Modèle</h5>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="modal-body">
+        <form #modeleForm="ngForm" (ngSubmit)="addModele(); modal.close('Save click')">
+            <div class="form-row">
+                <div class="form-group col-md-6 col-lg-10">
+                    <label>Nom du Modèle</label>
+                    <input type="text" class="form-control" [(ngModel)]="newModele.nom" name="modeleNom" required>
+                </div>
+                <div class="form-group col-md-6 col-lg-10">
+                    <label>Catégorie du Modèle</label>
+                    <select class="form-control" [ngModel]="newModele.catInfra?.id ?? null" name="modeleCategorie" (ngModelChange)="newModele.catInfra.id = $event" required>
+                        <option [ngValue]="null" >-- Sélectionnez catégorie --</option>
+                        <option *ngFor="let category of categories" [value]="category.id">{{ category.nom }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-grey" (click)="modal.dismiss('Cancel click')">Annuler</button>
+                <button type="submit" class="btn btn-blue" [disabled]="!newModele.nom || !newModele.catInfra"><i class="fas fa-save"></i></button>
+            </div>
+        </form>
+    </div>
+</ng-template>

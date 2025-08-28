@@ -1,0 +1,297 @@
+@import '../../components/base/base-crud.component';
+
+.main-content {
+  @extend .list-container;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 97%;
+  margin: 5% auto;
+  padding: 1.5rem;
+  background-color: map-get($colors, soft-white);
+  border-radius: 0.5rem;
+  min-height: 90vh;
+  max-height: 90vh;
+  overflow-y: auto;
+  @include card-3d-effect;
+  scrollbar-width: thin;
+  scrollbar-color: map-get($colors, blue) map-get($colors, soft-white);
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: map-get($colors, soft-white);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: map-get($colors, blue);
+    border-radius: 4px;
+  }
+
+  .table-title {
+    background-color: map-get($colors, blue);
+    color: #ffffff;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    border-radius: 0.3rem;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 1.5rem;
+    @include responsive-text(1.3rem);
+    @include card-3d-effect;
+
+    @media (max-width: 768px) {
+      padding: 0.5rem 1rem;
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 576px) {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.9rem;
+    }
+  }
+
+  .navigation-controls {
+    display: flex;
+    margin: 1rem;
+
+    button {
+      @extend .btn, .btn-blue;
+      padding: 0.5rem 1rem;
+      margin: 0.5rem;
+      margin-top: -1rem;
+      font-size: 0.9rem;
+
+      @media (max-width: 576px) {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+      }
+    }
+  }
+
+  .calendar-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    width: 100%;
+
+    label {
+      margin-bottom: 0.4rem;
+    }
+
+    select,
+    input[type="date"] {
+      @extend .form-control;
+      max-width: 200px;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      border-radius: 0.3rem;
+      background-color: #ffffff;
+      border: 1px solid map-get($colors, border-grey);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+      &:focus {
+        border-color: map-get($colors, blue);
+        box-shadow: 0 0 5px rgba(map-get($colors, blue), 0.3);
+      }
+
+      @media (max-width: 576px) {
+        max-width: 100%;
+        font-size: 0.8rem;
+        padding: 0.4rem 0.75rem;
+      }
+    }
+  }
+}
+
+mwl-calendar-month-view,
+mwl-calendar-week-view,
+mwl-calendar-day-view {
+  width: 100%;
+  background-color: map-get($colors, soft-white);
+  border: 1px solid map-get($colors, border-grey);
+  border-radius: 0.5rem;
+  @include card-3d-effect;
+
+  .cal-header {
+    background-color: map-get($colors, blue);
+    color: #ffffff;
+    padding: 0.75rem;
+    font-weight: 600;
+    @include responsive-text(1rem);
+  }
+
+  .cal-day-cell {
+    border: 1px solid map-get($colors, border-grey);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+
+    &:hover {
+      background-color: lighten(map-get($colors, blue), 60%);
+      transform: scale(1.02);
+    }
+
+    &.cal-today {
+      background-color: rgba(map-get($colors, blue), 0.1);
+    }
+
+    &.cal-weekend {
+      background-color: map-get($colors, light-grey);
+    }
+  }
+
+  .cal-event {
+    display: none; // Hide default event dots
+  }
+
+  .cal-day-cell:not(.cal-out-month) {
+    position: relative;
+
+    &.cal-has-events::after {
+      content: '\f073'; // Font Awesome calendar icon
+      font-family: 'Font Awesome 5 Free';
+      font-weight: 900;
+      color: map-get($colors, blue);
+      font-size: 0.8rem;
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      transition: transform 0.3s ease;
+
+      &:hover {
+        transform: scale(1.2);
+      }
+    }
+  }
+
+  .cal-event-title {
+    @include responsive-text(0.85rem);
+    color: map-get($colors, text-color);
+    padding: 0.5rem;
+    background-color: rgba(map-get($colors, blue), 0.1);
+    border-radius: 0.3rem;
+    margin: 0.5rem;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: rgba(map-get($colors, blue), 0.2);
+    }
+  }
+}
+
+mwl-calendar-week-view,
+mwl-calendar-day-view {
+  max-height: 60vh; /* Set a maximum height for week and day views */
+  overflow-y: auto; /* Enable vertical scrollbar */
+  scrollbar-width: thin; /* Firefox scrollbar */
+  scrollbar-color: map-get($colors, blue) map-get($colors, soft-white);
+
+  &::-webkit-scrollbar {
+    width: 8px; /* Webkit scrollbar width */
+  }
+
+  &::-webkit-scrollbar-track {
+    background: map-get($colors, soft-white);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: map-get($colors, blue);
+    border-radius: 4px;
+  }
+
+  .cal-hour-segment {
+    border: 1px solid map-get($colors, border-grey);
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: lighten(map-get($colors, blue), 60%);
+    }
+  }
+
+  .cal-event {
+    display: block;
+    background-color: map-get($colors, blue);
+    color: #ffffff;
+    border-radius: 0.3rem;
+    padding: 0.5rem;
+    @include responsive-text(0.8rem);
+    @include card-3d-effect;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .calendar-content {
+    width: 100%;
+    padding: 1rem;
+    margin: 1rem auto;
+    max-height: 70vh;
+  }
+
+  mwl-calendar-month-view,
+  mwl-calendar-week-view,
+  mwl-calendar-day-view {
+    .cal-day-cell {
+      padding: 0.5rem;
+    }
+
+    .cal-event-title {
+      font-size: 0.75rem;
+      padding: 0.3rem;
+    }
+  }
+
+  mwl-calendar-week-view,
+  mwl-calendar-day-view {
+    max-height: 50vh; /* Slightly smaller height for medium screens */
+  }
+}
+
+@media (max-width: 576px) {
+  .calendar-content {
+    padding: 0.75rem;
+    max-height: 60vh;
+  }
+
+  .calendar-controls {
+    flex-direction: column;
+    align-items: stretch;
+
+    select,
+    input[type="date"],
+    button {
+      width: 100%;
+    }
+  }
+
+  mwl-calendar-month-view,
+  mwl-calendar-week-view,
+  mwl-calendar-day-view {
+    .cal-day-cell {
+      font-size: 0.7rem;
+      padding: 0.3rem;
+
+      &.cal-has-events::after {
+        font-size: 0.6rem;
+        bottom: 3px;
+        right: 3px;
+      }
+    }
+
+    .cal-header {
+      font-size: 0.8rem;
+      padding: 0.5rem;
+    }
+  }
+
+  mwl-calendar-week-view,
+  mwl-calendar-day-view {
+    max-height: 40vh; /* Smaller height for mobile screens */
+  }
+}

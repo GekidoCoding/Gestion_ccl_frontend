@@ -1,0 +1,59 @@
+<div class="modal-content">
+    <app-loading [loading]="isLoading"></app-loading>
+
+    <div class="modal-body">
+        <div class="action-buttons mb-3">
+            <button type="button" class="btn btn-add" (click)="openAddModal(addModal)" >
+                <i class="fa fa-plus"></i> Ajouter un client
+            </button>
+        </div>
+
+        <div class="table-controls">
+            <div class="table-responsive">
+                <table class="table table-normal" *ngIf="items.length > 0">
+                    <thead class="thead-light">
+                    <tr>
+                        <th scope="col">Type</th>
+                        <th scope="col">Nom & Prénom / Raison sociale</th>
+                        <th scope="col">Contact(s)</th>
+                        <th scope="col" class="text-center">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let item of items" class="row-animation">
+                        <td>{{ item.typeClient.typeClient }}</td>
+                        <td>{{ item.typeClient.typeClient === 'Entreprise' ? item.raisonSociale : item.nom + ' ' + (item.prenom || '') }}</td>
+                        <td>{{ item.contacts }}</td>
+                        <td class="action-column action-buttons-cell">
+                            <button class="btn btn-eye" (click)="openDetailModal(item)">
+                                <i class="fa fa-info-circle"></i>
+                            </button>
+                            <button class="btn btn-green" (click)="selectionnedClient(item.id)" >
+                                <i class="fa fa-check"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div *ngIf="items.length === 0 && !isLoading" class="text-muted mt-3">Aucun client trouvé pour le moment.</div>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #addModal let-modal>
+        <div class="modal-header">
+            <h5 class="modal-title">Ajouter un nouveau client</h5>
+            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Fermer la fenêtre">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <app-client-add-form
+                    [isLoading]="isLoading"
+                    (formSubmit)="handleAddFormSubmit($event); modal.close('Save click')"
+                    (formCancel)="modal.dismiss('Cancel click')"
+            ></app-client-add-form>
+        </div>
+    </ng-template>
+
+</div>

@@ -1,0 +1,59 @@
+<div [ngClass]="{ logo: true, 'hide-sidebar': config?.hideSideBar }"
+     style="background-color: #103373 !important; cursor: pointer">
+    <a class="simple-text logo-mini">
+        <div [ngClass]="{ 'logo-img': true, 'hide-sidebar': config?.hideSideBar }">
+            <img src="../../../../../assets/img/logocnaps.JPG" />
+        </div>
+    </a>
+    <a class="simple-text logo-normal" style="font-weight: bold; text-transform: none">
+        CNaPS MADAGASCAR
+    </a>
+</div>
+
+<div [ngClass]="{ 'sidebar-wrapper': true, 'hide-sidebar': config?.hideSideBar }"
+     style="background-color: #103373 !important">
+    <ul class="nav">
+        <li *ngFor="let menuItem of menuItems"
+            class="li-no-bg"
+            [ngClass]="{ 'has-submenu': hasSubItems(menuItem) }">
+
+            <a *ngIf="!hasSubItems(menuItem); else menuWithSub"
+               [routerLink]="[menuItem.path]"
+               class="a-no-bg menu-link"
+               routerLinkActive="active"
+               style="font-weight: bold; font-size: 0.8em">
+                <i class="{{menuItem.icon}}" style="color: #FFFFFF"></i>
+                <p>{{ menuItem.title }}</p>
+            </a>
+
+            <!-- Menu avec sous-éléments -->
+            <ng-template #menuWithSub>
+                <a (click)="toggleSubMenu(menuItem.title)"
+                   class="a-no-bg menu-link expandable-menu"
+                   style="font-weight: bold; font-size: 0.8em">
+                    <i class="{{menuItem.icon}}" style="color: #FFFFFF"></i>
+                    <p>{{ menuItem.title }}</p>
+                    <i class="now-ui-icons arrows-1_minimal-right arrow-icon"
+                       [ngClass]="{ 'rotated': isExpanded(menuItem.title) }"
+                       style="color: #FFFFFF; margin-left: auto; transition: transform 0.3s ease;"></i>
+                </a>
+
+                <!-- Sous-menu -->
+                <ul class="submenu"
+                    [ngClass]="{ 'expanded': isExpanded(menuItem.title) }"
+                    *ngIf="menuItem.subItems">
+                    <li *ngFor="let subItem of menuItem.subItems"
+                        class="li-no-bg submenu-item">
+                        <a [routerLink]="[subItem.path]"
+                           class="a-no-bg submenu-link"
+                           routerLinkActive="active"
+                           style="font-weight: normal; font-size: 0.75em;">
+                            <i class="{{ subItem.icon }}" style="color: #CCCCCC"></i>
+                            <p>{{ subItem.title }}</p>
+                        </a>
+                    </li>
+                </ul>
+            </ng-template>
+        </li>
+    </ul>
+</div>

@@ -1,0 +1,157 @@
+<div class="modal-header">
+    <h5 class="modal-title">Ajouter un Mouvement</h5>
+    <button type="button" class="close" (click)="activeModal.dismiss('Cross click')" aria-label="Close">
+        <span aria-hidden="true">×</span>
+    </button>
+</div>
+<div class="modal-body">
+    <app-loading [loading]="isLoading"></app-loading>
+    <form [formGroup]="mouvementForm" (ngSubmit)="allActions()">
+        <div class="form-row">
+            <div class="form-group col-md-12">
+                <label>Type de Mouvement</label>
+                <select class="form-control" formControlName="typeMouvement" (change)="onTypeMouvementChange()">
+                    <option [ngValue]="null">--Sélectionnez le type de mouvement--</option>
+                    <option *ngFor="let type of filteredTypeMouvements" [value]="type.id">{{ type.nom }}</option>
+                </select>
+                <div *ngIf="mouvementForm.get('typeMouvement')?.touched && mouvementForm.get('typeMouvement')?.hasError('required')" class="text-danger">
+                    Le type de mouvement est requis.
+                </div>
+            </div>
+            <div class="form-group col-md-12">
+                <label>Infrastructure Concernée :</label>
+                <div class="input-group-append mb-3">
+                    <button type="button" (click)="openPopup(infrastructureListModal)" class="btn btn-add">
+                        <i class="fa fa-building"></i> Sélectionner une Infrastructure
+                    </button>
+                </div>
+                <div *ngIf="mouvementForm.get('infrastructureId')?.touched && mouvementForm.get('infrastructureId')?.hasError('required')" class="text-danger">
+                    Veuillez sélectionner une infrastructure.
+                </div>
+                <div class="row" *ngIf="newItem?.infrastructure?.id && infrastructure.id">
+                    <div class="col-md-6 mb-3">
+                        <label>Nom</label>
+                        <input type="text" class="form-control" [value]="newItem.infrastructure.nom || 'N/A'" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Numéro</label>
+                        <input type="text" class="form-control" [value]="newItem.infrastructure.numero || 'N/A'" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Modèle</label>
+                        <input type="text" class="form-control" [value]="newItem.infrastructure.modeleInfra.nom || 'N/A'" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Catégorie</label>
+                        <input type="text" class="form-control" [value]="newItem.infrastructure.modeleInfra.catInfra.nom || 'N/A'" readonly>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group col-md-12">
+                <label>Client Concerné :</label>
+                <div class="input-group-append mb-3">
+                    <button type="button" class="btn btn-add" (click)="openPopup(clientListModal)">
+                        <i class="fa fa-users"></i> Sélectionner un Client
+                    </button>
+                </div>
+                <div *ngIf="mouvementForm.get('clientId')?.touched && mouvementForm.get('clientId')?.hasError('required')" class="text-danger">
+                    Veuillez sélectionner un client.
+                </div>
+                <div class="row" *ngIf="newItem?.client?.id">
+                    <div class="col-md-6 mb-3">
+                        <label>Type Client</label>
+                        <input type="text" class="form-control" [value]="newItem.client.typeClient.typeClient || 'N/A'" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Client</label>
+                        <input
+                                type="text"
+                                class="form-control"
+                                [value]="newItem.client?.typeClient?.typeClient === 'Entreprise'
+                ? (newItem.client?.raisonSociale || 'N/A')
+                : ((newItem.client?.nom && newItem.client?.prenom)
+                   ? newItem.client.nom + ' ' + newItem.client.prenom
+                   : 'N/A')"
+                                readonly
+                        >
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Adresse</label>
+                        <input type="text" class="form-control" [value]="newItem.client.adresse || 'N/A'" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>CIN</label>
+                        <input type="text" class="form-control" [value]="newItem.client.cin || 'N/A'" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Contact(s)</label>
+                        <input type="text" class="form-control" [value]="newItem.client.contacts || 'N/A'" readonly>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group col-md-12" *ngIf="isReservation">
+                <label>Période de début de la réservation du client</label>
+                <input type="datetime-local" class="form-control" formControlName="periodeDebut">
+                <div *ngIf="mouvementForm.get('periodeDebut')?.touched && mouvementForm.get('periodeDebut')?.hasError('required')" class="text-danger">
+                    La période de début est requise.
+                </div>
+                <div *ngIf="mouvementForm.get('periodeDebut')?.touched && mouvementForm.get('periodeDebut')?.hasError('dateAfterToday')" class="text-danger">
+                    La période de début ne peut pas être après aujourd'hui.
+                </div>
+            </div>
+            <div class="form-group col-md-12" *ngIf="isReservation">
+                <label>Période fin de la réservation du client</label>
+                <input type="datetime-local" class="form-control" formControlName="periodeFin">
+                <div *ngIf="mouvementForm.get('periodeFin')?.touched && mouvementForm.get('periodeFin')?.hasError('required')" class="text-danger">
+                    La période de fin est requise.
+                </div>
+                <div *ngIf="mouvementForm.hasError('invalidDateRange')" class="text-danger">
+                    La période de fin ne peut pas être avant la période de début.
+                </div>
+            </div>
+            <div class="form-group col-md-12" *ngIf="isReservation">
+                <label>Nombre de Personnes</label>
+                <input type="number" class="form-control" formControlName="nombre">
+                <div *ngIf="mouvementForm.get('nombre')?.touched && mouvementForm.get('nombre')?.hasError('required')" class="text-danger">
+                    Le nombre de personnes est requis.
+                </div>
+                <div *ngIf="mouvementForm.get('nombre')?.touched && mouvementForm.get('nombre')?.hasError('min')" class="text-danger">
+                    Le nombre de personnes doit être supérieur ou égal à 1.
+                </div>
+                <div *ngIf="mouvementForm.hasError('invalidCapacity')" class="text-danger">
+                    Le nombre de personnes doit être inférieur ou égal à {{ newItem.infrastructure.capacite || 0 }}.
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-grey" (click)="activeModal.dismiss('Cross click')">Annuler</button>
+            <button type="submit" class="btn btn-blue" [disabled]="!isFormValid() || isLoading" title="Enregistrer">
+                <i class="fas fa-save"></i> Enregistrer
+            </button>
+        </div>
+    </form>
+
+    <ng-template #clientListModal let-modal>
+        <div class="modal-header">
+            <h5 class="modal-title">Liste Des Clients</h5>
+            <button type="button" class="close" (click)="modal.dismiss('Cross Click')" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <app-client-list
+                [clientSelected]="newItem.client"
+                (clientSelectedChange)="handleClientSelected($event, modal)"
+        ></app-client-list>
+    </ng-template>
+    <ng-template #infrastructureListModal let-modal>
+        <div class="modal-header">
+            <h5 class="modal-title">Liste Des Infrastructures</h5>
+            <button type="button" class="close" (click)="modal.dismiss('Cross Click')" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <app-infrastructure-list-popup
+                (infrastructureSelected)="handleInfrastructureSelected($event, modal)"
+        ></app-infrastructure-list-popup>
+    </ng-template>
+</div>
