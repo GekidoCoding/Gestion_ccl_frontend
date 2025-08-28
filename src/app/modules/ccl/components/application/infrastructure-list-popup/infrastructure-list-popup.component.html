@@ -1,0 +1,138 @@
+<div class="modal-content">
+    <app-loading [loading]="isLoading"></app-loading>
+
+    <div class="modal-body">
+        <div class="action-buttons">
+            <button type="button" class="btn btn-add" (click)="openAddModal(addModal)">
+                <i class="fa fa-plus"></i> Ajouter Infrastructure
+            </button>
+
+        </div>
+
+        <div class="table-controls">
+            <div class="search-form slide-in-out">
+                <form #searchForm="ngForm" (ngSubmit)="applySearch()">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nom</label>
+                            <input type="text" class="form-control" [(ngModel)]="searchCriteria.nom" name="nom">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Catégorie</label>
+                            <select class="form-control"
+                                    [(ngModel)]="searchCriteria.modeleInfra.catInfra.id"
+                                    [ngModel]="searchCriteria.modeleInfra.catInfra.id ?? null"
+                                    name="catInfra"
+                                    (ngModelChange)="onCategoryChange($event)"
+                            >
+                                <option [ngValue]="null">Toutes</option>
+                                <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.nom }}</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Disponible Entre</label>
+                            <input type="datetime-local" class="form-control" [(ngModel)]="debutSearch" name="debut">
+                        </div>
+                        <div class="form-group">
+                            <label>Et</label>
+                            <input type="datetime-local" class="form-control" [(ngModel)]="finSearch" name="fin">
+                        </div>
+                        <div class="form-group">
+                            <label>Localisations</label>
+                            <div class="checkbox-group">
+                                <div *ngFor="let localisation of localisations" class="checkbox-item">
+                                    <input type="checkbox" [id]="'loc-' + localisation.id" [(ngModel)]="localisationSelectionned[localisation.id]" name="localisation-{{localisation.id}}" (ngModelChange)="updateLocalisationSelection(localisation.id)">
+                                    <label [for]="'loc-' + localisation.id">{{ localisation.nom }}</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Modèles</label>
+                            <div class="checkbox-group">
+                                <div *ngFor="let modele of filteredModeles" class="checkbox-item">
+                                    <input type="checkbox" [id]="'mod-' + modele.id" [(ngModel)]="modelesInfraSelectionned[modele.id]" name="modele-{{modele.id}}" (ngModelChange)="updateModeleSelection(modele.id)">
+                                    <label [for]="'mod-' + modele.id">{{ modele.nom }}</label>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-grey" (click)="toggleSearchForm()">Fermer</button>
+                            <button type="submit" class="btn btn-search">
+                                <i class="fas fa-search"></i> Rechercher
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-normal" *ngIf="items.length > 0">
+                    <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Numéro</th>
+                        <th>Modèle</th>
+                        <th>Catégorie</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let item of filteredItems" class="row-animation">
+                        <td class="name-column">{{ item.nom }}</td>
+                        <td class="name-column">{{ item.numero }}</td>
+                        <td class="name-column">{{ item.modeleInfra.nom }}</td>
+                        <td class="name-column">{{ item.modeleInfra.catInfra.nom }}</td>
+                        <td class="action-column action-buttons-cell">
+                            <button class="btn btn-eye" (click)="navigateToDetailInfra(item.id)" title="Modifier ce client">
+                                <i class="fa fa-info-circle"></i>
+                            </button>
+                            <button class="btn btn-green" (click)="selectionnedInfrastructure(item.id)" title="Sélectionner">
+                                <i class="fa fa-check"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    </tbody>
+                </table>
+                <div *ngIf="items.length === 0 && !isLoading" class="no-results">Aucune infrastructure trouvée.</div>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #addModal let-modal>
+        <div class="modal-header">
+            <h5 class="modal-title">Ajouter une Nouvelle Infrastructure</h5>
+            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <app-infrastructure-add-form
+                    [newItem]="newItem"
+                    [localisations]="localisations"
+                    [etats]="etats"
+                    [categories]="categories"
+                    [filteredModeles]="filteredModeles"
+                    (submitForm)="handleAddFormSubmit($event); modal.close('Save click')"
+                    (cancel)="modal.dismiss('Cancel click')"
+                    (categoryChange)="onCategoryChange($event)"
+            ></app-infrastructure-add-form>
+        </div>
+    </ng-template>
+
+    <div class="toast-container" *ngIf="showConfirmation">
+        <div class="toast fade-animation">
+            {{ confirmationMessage }}
+            <button class="toast-close" (click)="closeToast()">×</button>
+        </div>
+    </div>
+
+    <div class="toast-container" *ngIf="showError">
+        <div class="toast fade-animation">
+            {{ errorMessage }}
+            <button class="toast-close" (click)="closeToast()">×</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,50 @@
+<form #updateForm="ngForm" (ngSubmit)="onSubmit(updateForm)">
+    <div class="form-row">
+        <div class="form-group col-md-6 col-12">
+            <label>Identifiant</label>
+            <input type="text" class="form-control" [(ngModel)]="client.id" name="id" readonly>
+        </div>
+        <div class="form-group col-md-6 col-12">
+            <label>Type de Client</label>
+            <select class="form-control" [(ngModel)]="client.typeClient.id" [disabled]="true" name="typeClient" required>
+                <option *ngFor="let type of typeClients" [value]="type.id">{{type.typeClient}}</option>
+            </select>
+        </div>
+        <div class="form-group col-md-6 col-12" *ngIf="!client.typeClient.id">
+            <label>Nom</label>
+            <input type="text" class="form-control" [(ngModel)]="client.nom" name="nom" required>
+        </div>
+        <div class="form-group col-md-6 col-12" *ngIf="!client.typeClient.id">
+            <label>Prénom</label>
+            <input type="text" class="form-control" [(ngModel)]="client.prenom" name="prenom" required>
+        </div>
+        <div class="form-group col-md-6 col-12" *ngIf="client.typeClient.id">
+            <label>Raison Sociale</label>
+            <input type="text" class="form-control" [(ngModel)]="client.raisonSociale" name="raisonSociale" required>
+        </div>
+        <div class="form-group col-md-6 col-12">
+            <label>Adresse</label>
+            <input type="text" class="form-control" [(ngModel)]="client.adresse" name="adresse" required>
+        </div>
+        <div class="form-group col-md-6 col-12" *ngIf="!client.typeClient.id">
+            <label>CIN</label>
+            <input type="text" class="form-control" [(ngModel)]="client.cin" name="cin" required>
+        </div>
+        <div class="form-group col-md-6 col-12">
+            <label>Contact(s)</label>
+            <input type="text" class="form-control" [(ngModel)]="client.contacts" name="contacts" required>
+        </div>
+        <div class="form-group col-md-6 col-12">
+            <label>Email</label>
+            <input type="email" class="form-control" [(ngModel)]="client.email" name="email" required>
+        </div>
+        <div class="form-group col-md-6 col-12">
+            <label>Fonction</label>
+            <input type="text" class="form-control" [(ngModel)]="client.fonction" name="fonction">
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-grey" (click)="onCancel()" title="Annuler">Annuler</button>
+        <button type="submit" class="btn btn-blue" title="Modifier" [disabled]="updateForm.invalid"><i class="fas fa-save"></i> </button>
+    </div>
+</form>

@@ -1,0 +1,1025 @@
+<div class="main-content">
+    <div class="table-title">Ajout des Gestionnaires et des Administrateurs</div>
+    <ul class="nav nav-tabs" id="agentTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="tab1-tab" data-toggle="tab" href="#tab1" role="tab" aria-controls="tab1" aria-selected="true">Agents Non Gestionnaire </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="tab2-tab" data-toggle="tab" href="#tab2" role="tab" aria-controls="tab2" aria-selected="false">Gestionnaires</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="tab3-tab" data-toggle="tab" href="#tab3" role="tab" aria-controls="tab3" aria-selected="false">Administrateurs</a>
+        </li>
+    </ul>
+    <div class="tab-content" id="agentTabsContent">
+        <div class="tab-pane fade show active" id="tab1" role="tabpanel" aria-labelledby="tab1-tab">
+            <div class="total-elements">Nombre d'élément(s) trouvé(s) : {{agents.length}}</div>
+            <div class="list-container">
+                <div class="search-form">
+                    <form>
+                        <div class="form-group">
+                            <label>Matricule</label>
+                            <input type="text" class="form-control" [(ngModel)]="criteriaAgent.matricule"  placeholder="Entrez le matricule">
+                        </div>
+                        <div class="form-group">
+                            <label>Nom</label>
+                            <input type="text" class="form-control" [(ngModel)]="criteriaAgent.nom" name="matricule" placeholder="Entrez le nom">
+                        </div>
+                        <div class="form-group">
+                            <label>Prénom(s)</label>
+                            <input type="text" class="form-control"  [(ngModel)]="criteriaAgent.prenoms" name="prenoms"  placeholder="Entrez les prénoms">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="text" class="form-control"  [(ngModel)]="criteriaAgent.mail" name="mail" placeholder="Entrez l' Email">
+                        </div>
+                        <div class="form-group">
+                            <label>Direction</label>
+                            <select class="form-control" [(ngModel)]="criteriaAgent.codeDirection" name="direction" >
+                                <option value="">Sélectionnez</option>
+                                <option *ngFor="let direction of directions" [value]="direction.codeDirection" >{{direction.libelleDirection}}  </option>
+
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Service</label>
+                            <select class="form-control" [(ngModel)]="criteriaAgent.codeService" name="service">
+                                <option value="">Sélectionnez</option>
+                                <option *ngFor="let service of services" [value]="service.codeService">{{service.libelleService}} </option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-red" title="Effacer" (click)="clearSearch()">X</button>
+                            <button type="button" class="btn btn-blue" title="Rechercher" (click)="searchAgents()" ><i class="fas fa-search"></i></button>
+                        </div>
+                    </form>
+                </div>
+                <div class="agent-list" *ngIf="!isLoading;else loadingTemplate">
+                    <div class="agent-card" *ngFor="let obj of agents ; let i=index">
+                        <div class="agent-image">NO IMAGE AVAILABLE</div>
+                        <div class="agent-info">
+                            <span data-label="Matricule" [attr.data-value]="obj.matricule || 'N/A' " ></span>
+                            <span data-label="Nom & Prénom" [attr.data-value]="(obj.nom || obj.prenoms )?(obj.nom || 'N/A' )+' '+(obj.prenoms || 'N/A'  ):'N/A'"></span>
+                            <span data-label="Service" [attr.data-value]="obj.libelleService || 'N/A' "></span>
+                            <span data-label="Direction"[attr.data-value]="obj.libelleDirection || 'N/A' "></span>
+                            <span data-label="Email" [attr.data-value]="obj.mail || 'N/A' "></span>
+                        </div>
+                        <div class="button-checkbox-container">
+                            <button class="add-button" data-toggle="modal" data-target="#confirmationModal0-tab1" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            <button class="admin-button" data-toggle="modal" data-target="#adminConfirmationModal0-tab1" title="Ajouter au admin"><i class="fas fa-user-shield"></i></button>
+                        </div>
+                    </div>
+                    <div class="agent-card">
+                        <div class="agent-image">NO IMAGE AVAILABLE</div>
+                        <div class="agent-info">
+                            <span data-label="Matricule" data-value="B456"></span>
+                            <span data-label="Nom & Prénom" data-value="Smith Jane"></span>
+                            <span data-label="Service" data-value="Développement"></span>
+                            <span data-label="Direction" data-value="Technologie"></span>
+                            <span data-label="Email" data-value="jane.smith@example.com"></span>
+                        </div>
+                        <div class="button-checkbox-container">
+                            <button class="add-button" data-toggle="modal" data-target="#confirmationModal1-tab1" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            <button class="admin-button" data-toggle="modal" data-target="#adminConfirmationModal1-tab1" title="Ajouter au admin"><i class="fas fa-user-shield"></i></button>
+                        </div>
+                    </div>
+                    <div class="agent-card">
+                        <div class="agent-image">NO IMAGE AVAILABLE</div>
+                        <div class="agent-info">
+                            <span data-label="Matricule" data-value="C789"></span>
+                            <span data-label="Nom & Prénom" data-value="Brown Mike"></span>
+                            <span data-label="Service" data-value="Comptabilité"></span>
+                            <span data-label="Direction" data-value="Finance"></span>
+                            <span data-label="Email" data-value="mike.brown@example.com"></span>
+                        </div>
+                        <div class="button-checkbox-container">
+                            <button class="add-button" data-toggle="modal" data-target="#confirmationModal2-tab1" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            <button class="admin-button" data-toggle="modal" data-target="#adminConfirmationModal2-tab1" title="Ajouter au admin"><i class="fas fa-user-shield"></i></button>
+                        </div>
+                    </div>
+                    <div class="agent-card">
+                        <div class="agent-image">NO IMAGE AVAILABLE</div>
+                        <div class="agent-info">
+                            <span data-label="Matricule" data-value="D012"></span>
+                            <span data-label="Nom & Prénom" data-value="Wilson Emma"></span>
+                            <span data-label="Service" data-value="Ressources Humaines"></span>
+                            <span data-label="Direction" data-value="HR"></span>
+                            <span data-label="Email" data-value="emma.wilson@example.com"></span>
+                        </div>
+                        <div class="button-checkbox-container">
+                            <button class="add-button" data-toggle="modal" data-target="#confirmationModal3-tab1" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            <button class="admin-button" data-toggle="modal" data-target="#adminConfirmationModal3-tab1" title="Ajouter au admin"><i class="fas fa-user-shield"></i></button>
+                        </div>
+                    </div>
+                    <div class="agent-card">
+                        <div class="agent-image">NO IMAGE AVAILABLE</div>
+                        <div class="agent-info">
+                            <span data-label="Matricule" data-value="E345"></span>
+                            <span data-label="Nom & Prénom" data-value="Taylor Tom"></span>
+                            <span data-label="Service" data-value="Informatique"></span>
+                            <span data-label="Direction" data-value="Technologie"></span>
+                            <span data-label="Email" data-value="tom.taylor@example.com"></span>
+                        </div>
+                        <div class="button-checkbox-container">
+                            <button class="add-button" data-toggle="modal" data-target="#confirmationModal4-tab1" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            <button class="admin-button" data-toggle="modal" data-target="#adminConfirmationModal4-tab1" title="Ajouter au admin"><i class="fas fa-user-shield"></i></button>
+                        </div>
+                    </div>
+                    <div class="agent-card">
+                        <div class="agent-image">NO IMAGE AVAILABLE</div>
+                        <div class="agent-info">
+                            <span data-label="Matricule" data-value="F678"></span>
+                            <span data-label="Nom & Prénom" data-value="Lee Sarah"></span>
+                            <span data-label="Service" data-value="Comptabilité"></span>
+                            <span data-label="Direction" data-value="Finance"></span>
+                            <span data-label="Email" data-value="sarah.lee@example.com"></span>
+                        </div>
+                        <div class="button-checkbox-container">
+                            <button class="add-button" data-toggle="modal" data-target="#confirmationModal5-tab1" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            <button class="admin-button" data-toggle="modal" data-target="#adminConfirmationModal5-tab1" title="Ajouter au admin"><i class="fas fa-user-shield"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmationModal0-tab1" tabindex="-1" aria-labelledby="confirmationModalLabel0-tab1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel0-tab1">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Doe John (A123) au gestionnaire de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="adminConfirmationModal0-tab1" tabindex="-1" aria-labelledby="adminConfirmationModalLabel0-tab1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminConfirmationModalLabel0-tab1">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Doe John (A123) au administrateur de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmationModal1-tab1" tabindex="-1" aria-labelledby="confirmationModalLabel1-tab1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel1-tab1">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Smith Jane (B456) au gestionnaire de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="adminConfirmationModal1-tab1" tabindex="-1" aria-labelledby="adminConfirmationModalLabel1-tab1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminConfirmationModalLabel1-tab1">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Smith Jane (B456) au administrateur de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmationModal2-tab1" tabindex="-1" aria-labelledby="confirmationModalLabel2-tab1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel2-tab1">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Brown Mike (C789) au gestionnaire de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="adminConfirmationModal2-tab1" tabindex="-1" aria-labelledby="adminConfirmationModalLabel2-tab1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminConfirmationModalLabel2-tab1">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Brown Mike (C789) au administrateur de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmationModal3-tab1" tabindex="-1" aria-labelledby="confirmationModalLabel3-tab1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel3-tab1">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Wilson Emma (D012) au gestionnaire de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="adminConfirmationModal3-tab1" tabindex="-1" aria-labelledby="adminConfirmationModalLabel3-tab1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminConfirmationModalLabel3-tab1">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Wilson Emma (D012) au administrateur de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmationModal4-tab1" tabindex="-1" aria-labelledby="confirmationModalLabel4-tab1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel4-tab1">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Taylor Tom (E345) au gestionnaire de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="adminConfirmationModal4-tab1" tabindex="-1" aria-labelledby="adminConfirmationModalLabel4-tab1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminConfirmationModalLabel4-tab1">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Taylor Tom (E345) au administrateur de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmationModal5-tab1" tabindex="-1" aria-labelledby="confirmationModalLabel5-tab1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel5-tab1">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Lee Sarah (F678) au gestionnaire de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="adminConfirmationModal5-tab1" tabindex="-1" aria-labelledby="adminConfirmationModalLabel5-tab1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminConfirmationModalLabel5-tab1">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Lee Sarah (F678) au administrateur de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="tab2" role="tabpanel" aria-labelledby="tab2-tab">
+
+            <div class="total-elements">Nombre d'élément(s) trouvé(s) : 6</div>
+            <div class="list-container">
+                <div class="search-form">
+                    <form>
+                        <div class="form-group">
+                            <label>Matricule</label>
+                            <input type="text" class="form-control" value="" placeholder="Entrez le matricule">
+                        </div>
+                        <div class="form-group">
+                            <label>Nom</label>
+                            <input type="text" class="form-control" value="" placeholder="Entrez le nom">
+                        </div>
+                        <div class="form-group">
+                            <label>Prénom(s)</label>
+                            <input type="text" class="form-control" value="" placeholder="Entrez les prénoms">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="text" class="form-control" value="" placeholder="Entrez l' Email">
+                        </div>
+                        <div class="form-group">
+                            <label>Direction</label>
+                            <select class="form-control">
+                                <option value="">Sélectionnez</option>
+                                <option value="TECH">Technologie</option>
+                                <option value="HR">Ressources Humaines</option>
+                                <option value="FIN">Finance</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Service</label>
+                            <select class="form-control">
+                                <option value="">Sélectionnez</option>
+                                <option value="IT">Informatique</option>
+                                <option value="DEV">Développement</option>
+                                <option value="ACC">Comptabilité</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-red" title="Effacer">X</button>
+                            <button type="button" class="btn btn-blue" title="Rechercher"><i class="fas fa-search"></i></button>
+                        </div>
+                    </form>
+                </div>
+                <div class="agent-list">
+                    <div class="agent-card">
+                        <div class="agent-image">NO IMAGE AVAILABLE</div>
+                        <div class="agent-info">
+                            <span data-label="Matricule" data-value="A123"></span>
+                            <span data-label="Nom & Prénom" data-value="Doe John"></span>
+                            <span data-label="Service" data-value="Informatique"></span>
+                            <span data-label="Direction" data-value="Technologie"></span>
+                            <span data-label="Email" data-value="john.doe@example.com"></span>
+                        </div>
+                        <div class="button-checkbox-container">
+                            <button class="add-button" data-toggle="modal" data-target="#confirmationModal0-tab2" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            <button class="admin-button" data-toggle="modal" data-target="#adminConfirmationModal0-tab2" title="Ajouter au admin"><i class="fas fa-user-shield"></i></button>
+                        </div>
+                    </div>
+                    <div class="agent-card">
+                        <div class="agent-image">NO IMAGE AVAILABLE</div>
+                        <div class="agent-info">
+                            <span data-label="Matricule" data-value="B456"></span>
+                            <span data-label="Nom & Prénom" data-value="Smith Jane"></span>
+                            <span data-label="Service" data-value="Développement"></span>
+                            <span data-label="Direction" data-value="Technologie"></span>
+                            <span data-label="Email" data-value="jane.smith@example.com"></span>
+                        </div>
+                        <div class="button-checkbox-container">
+                            <button class="add-button" data-toggle="modal" data-target="#confirmationModal1-tab2" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            <button class="admin-button" data-toggle="modal" data-target="#adminConfirmationModal1-tab2" title="Ajouter au admin"><i class="fas fa-user-shield"></i></button>
+                        </div>
+                    </div>
+                    <div class="agent-card">
+                        <div class="agent-image">NO IMAGE AVAILABLE</div>
+                        <div class="agent-info">
+                            <span data-label="Matricule" data-value="C789"></span>
+                            <span data-label="Nom & Prénom" data-value="Brown Mike"></span>
+                            <span data-label="Service" data-value="Comptabilité"></span>
+                            <span data-label="Direction" data-value="Finance"></span>
+                            <span data-label="Email" data-value="mike.brown@example.com"></span>
+                        </div>
+                        <div class="button-checkbox-container">
+                            <button class="add-button" data-toggle="modal" data-target="#confirmationModal2-tab2" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            <button class="admin-button" data-toggle="modal" data-target="#adminConfirmationModal2-tab2" title="Ajouter au admin"><i class="fas fa-user-shield"></i></button>
+                        </div>
+                    </div>
+                    <div class="agent-card">
+                        <div class="agent-image">NO IMAGE AVAILABLE</div>
+                        <div class="agent-info">
+                            <span data-label="Matricule" data-value="D012"></span>
+                            <span data-label="Nom & Prénom" data-value="Wilson Emma"></span>
+                            <span data-label="Service" data-value="Ressources Humaines"></span>
+                            <span data-label="Direction" data-value="HR"></span>
+                            <span data-label="Email" data-value="emma.wilson@example.com"></span>
+                        </div>
+                        <div class="button-checkbox-container">
+                            <button class="add-button" data-toggle="modal" data-target="#confirmationModal3-tab2" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            <button class="admin-button" data-toggle="modal" data-target="#adminConfirmationModal3-tab2" title="Ajouter au admin"><i class="fas fa-user-shield"></i></button>
+                        </div>
+                    </div>
+                    <div class="agent-card">
+                        <div class="agent-image">NO IMAGE AVAILABLE</div>
+                        <div class="agent-info">
+                            <span data-label="Matricule" data-value="E345"></span>
+                            <span data-label="Nom & Prénom" data-value="Taylor Tom"></span>
+                            <span data-label="Service" data-value="Informatique"></span>
+                            <span data-label="Direction" data-value="Technologie"></span>
+                            <span data-label="Email" data-value="tom.taylor@example.com"></span>
+                        </div>
+                        <div class="button-checkbox-container">
+                            <button class="add-button" data-toggle="modal" data-target="#confirmationModal4-tab2" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            <button class="admin-button" data-toggle="modal" data-target="#adminConfirmationModal4-tab2" title="Ajouter au admin"><i class="fas fa-user-shield"></i></button>
+                        </div>
+                    </div>
+                    <div class="agent-card">
+                        <div class="agent-image">NO IMAGE AVAILABLE</div>
+                        <div class="agent-info">
+                            <span data-label="Matricule" data-value="F678"></span>
+                            <span data-label="Nom & Prénom" data-value="Lee Sarah"></span>
+                            <span data-label="Service" data-value="Comptabilité"></span>
+                            <span data-label="Direction" data-value="Finance"></span>
+                            <span data-label="Email" data-value="sarah.lee@example.com"></span>
+                        </div>
+                        <div class="button-checkbox-container">
+                            <button class="add-button" data-toggle="modal" data-target="#confirmationModal5-tab2" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            <button class="admin-button" data-toggle="modal" data-target="#adminConfirmationModal5-tab2" title="Ajouter au admin"><i class="fas fa-user-shield"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmationModal0-tab2" tabindex="-1" aria-labelledby="confirmationModalLabel0-tab2" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel0-tab2">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Doe John (A123) au gestionnaire de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="adminConfirmationModal0-tab2" tabindex="-1" aria-labelledby="adminConfirmationModalLabel0-tab2" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminConfirmationModalLabel0-tab2">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Doe John (A123) au administrateur de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmationModal1-tab2" tabindex="-1" aria-labelledby="confirmationModalLabel1-tab2" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel1-tab2">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Smith Jane (B456) au gestionnaire de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="adminConfirmationModal1-tab2" tabindex="-1" aria-labelledby="adminConfirmationModalLabel1-tab2" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminConfirmationModalLabel1-tab2">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Smith Jane (B456) au administrateur de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmationModal2-tab2" tabindex="-1" aria-labelledby="confirmationModalLabel2-tab2" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel2-tab2">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Brown Mike (C789) au gestionnaire de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="adminConfirmationModal2-tab2" tabindex="-1" aria-labelledby="adminConfirmationModalLabel2-tab2" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminConfirmationModalLabel2-tab2">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Brown Mike (C789) au administrateur de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmationModal3-tab2" tabindex="-1" aria-labelledby="confirmationModalLabel3-tab2" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel3-tab2">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Wilson Emma (D012) au gestionnaire de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="adminConfirmationModal3-tab2" tabindex="-1" aria-labelledby="adminConfirmationModalLabel3-tab2" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminConfirmationModalLabel3-tab2">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Wilson Emma (D012) au administrateur de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmationModal4-tab2" tabindex="-1" aria-labelledby="confirmationModalLabel4-tab2" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel4-tab2">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Taylor Tom (E345) au gestionnaire de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="adminConfirmationModal4-tab2" tabindex="-1" aria-labelledby="adminConfirmationModalLabel4-tab2" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminConfirmationModalLabel4-tab2">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Taylor Tom (E345) au administrateur de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmationModal5-tab2" tabindex="-1" aria-labelledby="confirmationModalLabel5-tab2" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel5-tab2">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Lee Sarah (F678) au gestionnaire de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="adminConfirmationModal5-tab2" tabindex="-1" aria-labelledby="adminConfirmationModalLabel5-tab2" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminConfirmationModalLabel5-tab2">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Lee Sarah (F678) au administrateur de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="tab3" role="tabpanel" aria-labelledby="tab3-tab">
+            <div class="total-elements">Nombre d'élément(s) trouvé(s) : 6</div>
+            <div class="list-container">
+                <div class="search-form">
+                    <form>
+                        <div class="form-group">
+                            <label>Matricule</label>
+                            <input type="text" class="form-control" value="" placeholder="Entrez le matricule">
+                        </div>
+                        <div class="form-group">
+                            <label>Nom</label>
+                            <input type="text" class="form-control" value="" placeholder="Entrez le nom">
+                        </div>
+                        <div class="form-group">
+                            <label>Prénom(s)</label>
+                            <input type="text" class="form-control" value="" placeholder="Entrez les prénoms">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="text" class="form-control" value="" placeholder="Entrez l' Email">
+                        </div>
+                        <div class="form-group">
+                            <label>Direction</label>
+                            <select class="form-control">
+                                <option value="">Sélectionnez</option>
+                                <option value="TECH">Technologie</option>
+                                <option value="HR">Ressources Humaines</option>
+                                <option value="FIN">Finance</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Service</label>
+                            <select class="form-control">
+                                <option value="">Sélectionnez</option>
+                                <option value="IT">Informatique</option>
+                                <option value="DEV">Développement</option>
+                                <option value="ACC">Comptabilité</option>
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-red" title="Effacer">X</button>
+                            <button type="button" class="btn btn-blue" title="Rechercher"><i class="fas fa-search"></i></button>
+                        </div>
+                    </form>
+                </div>
+                <div class="agent-list">
+                    <div class="agent-card">
+                        <div class="agent-image">NO IMAGE AVAILABLE</div>
+                        <div class="agent-info">
+                            <span data-label="Matricule" data-value="A123"></span>
+                            <span data-label="Nom & Prénom" data-value="Doe John"></span>
+                            <span data-label="Service" data-value="Informatique"></span>
+                            <span data-label="Direction" data-value="Technologie"></span>
+                            <span data-label="Email" data-value="john.doe@example.com"></span>
+                        </div>
+                        <div class="button-checkbox-container">
+                            <button class="add-button" data-toggle="modal" data-target="#confirmationModal0-tab3" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            <button class="admin-button" data-toggle="modal" data-target="#adminConfirmationModal0-tab3" title="Ajouter au admin"><i class="fas fa-user-shield"></i></button>
+                        </div>
+                    </div>
+                    <div class="agent-card">
+                        <div class="agent-image">NO IMAGE AVAILABLE</div>
+                        <div class="agent-info">
+                            <span data-label="Matricule" data-value="B456"></span>
+                            <span data-label="Nom & Prénom" data-value="Smith Jane"></span>
+                            <span data-label="Service" data-value="Développement"></span>
+                            <span data-label="Direction" data-value="Technologie"></span>
+                            <span data-label="Email" data-value="jane.smith@example.com"></span>
+                        </div>
+                        <div class="button-checkbox-container">
+                            <button class="add-button" data-toggle="modal" data-target="#confirmationModal1-tab3" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            <button class="admin-button" data-toggle="modal" data-target="#adminConfirmationModal1-tab3" title="Ajouter au admin"><i class="fas fa-user-shield"></i></button>
+                        </div>
+                    </div>
+                    <div class="agent-card">
+                        <div class="agent-image">NO IMAGE AVAILABLE</div>
+                        <div class="agent-info">
+                            <span data-label="Matricule" data-value="C789"></span>
+                            <span data-label="Nom & Prénom" data-value="Brown Mike"></span>
+                            <span data-label="Service" data-value="Comptabilité"></span>
+                            <span data-label="Direction" data-value="Finance"></span>
+                            <span data-label="Email" data-value="mike.brown@example.com"></span>
+                        </div>
+                        <div class="button-checkbox-container">
+                            <button class="add-button" data-toggle="modal" data-target="#confirmationModal2-tab3" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            <button class="admin-button" data-toggle="modal" data-target="#adminConfirmationModal2-tab3" title="Ajouter au admin"><i class="fas fa-user-shield"></i></button>
+                        </div>
+                    </div>
+                    <div class="agent-card">
+                        <div class="agent-image">NO IMAGE AVAILABLE</div>
+                        <div class="agent-info">
+                            <span data-label="Matricule" data-value="D012"></span>
+                            <span data-label="Nom & Prénom" data-value="Wilson Emma"></span>
+                            <span data-label="Service" data-value="Ressources Humaines"></span>
+                            <span data-label="Direction" data-value="HR"></span>
+                            <span data-label="Email" data-value="emma.wilson@example.com"></span>
+                        </div>
+                        <div class="button-checkbox-container">
+                            <button class="add-button" data-toggle="modal" data-target="#confirmationModal3-tab3" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            <button class="admin-button" data-toggle="modal" data-target="#adminConfirmationModal3-tab3" title="Ajouter au admin"><i class="fas fa-user-shield"></i></button>
+                        </div>
+                    </div>
+                    <div class="agent-card">
+                        <div class="agent-image">NO IMAGE AVAILABLE</div>
+                        <div class="agent-info">
+                            <span data-label="Matricule" data-value="E345"></span>
+                            <span data-label="Nom & Prénom" data-value="Taylor Tom"></span>
+                            <span data-label="Service" data-value="Informatique"></span>
+                            <span data-label="Direction" data-value="Technologie"></span>
+                            <span data-label="Email" data-value="tom.taylor@example.com"></span>
+                        </div>
+                        <div class="button-checkbox-container">
+                            <button class="add-button" data-toggle="modal" data-target="#confirmationModal4-tab3" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            <button class="admin-button" data-toggle="modal" data-target="#adminConfirmationModal4-tab3" title="Ajouter au admin"><i class="fas fa-user-shield"></i></button>
+                        </div>
+                    </div>
+                    <div class="agent-card">
+                        <div class="agent-image">NO IMAGE AVAILABLE</div>
+                        <div class="agent-info">
+                            <span data-label="Matricule" data-value="F678"></span>
+                            <span data-label="Nom & Prénom" data-value="Lee Sarah"></span>
+                            <span data-label="Service" data-value="Comptabilité"></span>
+                            <span data-label="Direction" data-value="Finance"></span>
+                            <span data-label="Email" data-value="sarah.lee@example.com"></span>
+                        </div>
+                        <div class="button-checkbox-container">
+                            <button class="add-button" data-toggle="modal" data-target="#confirmationModal5-tab3" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            <button class="admin-button" data-toggle="modal" data-target="#adminConfirmationModal5-tab3" title="Ajouter au admin"><i class="fas fa-user-shield"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmationModal0-tab3" tabindex="-1" aria-labelledby="confirmationModalLabel0-tab3" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel0-tab3">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Doe John (A123) au gestionnaire de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="adminConfirmationModal0-tab3" tabindex="-1" aria-labelledby="adminConfirmationModalLabel0-tab3" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminConfirmationModalLabel0-tab3">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Doe John (A123) au administrateur de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmationModal1-tab3" tabindex="-1" aria-labelledby="confirmationModalLabel1-tab3" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel1-tab3">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Smith Jane (B456) au gestionnaire de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="adminConfirmationModal1-tab3" tabindex="-1" aria-labelledby="adminConfirmationModalLabel1-tab3" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminConfirmationModalLabel1-tab3">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Smith Jane (B456) au administrateur de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmationModal2-tab3" tabindex="-1" aria-labelledby="confirmationModalLabel2-tab3" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel2-tab3">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Brown Mike (C789) au gestionnaire de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="adminConfirmationModal2-tab3" tabindex="-1" aria-labelledby="adminConfirmationModalLabel2-tab3" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminConfirmationModalLabel2-tab3">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Brown Mike (C789) au administrateur de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmationModal3-tab3" tabindex="-1" aria-labelledby="confirmationModalLabel3-tab3" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel3-tab3">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Wilson Emma (D012) au gestionnaire de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="adminConfirmationModal3-tab3" tabindex="-1" aria-labelledby="adminConfirmationModalLabel3-tab3" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminConfirmationModalLabel3-tab3">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Wilson Emma (D012) au administrateur de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmationModal4-tab3" tabindex="-1" aria-labelledby="confirmationModalLabel4-tab3" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel4-tab3">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Taylor Tom (E345) au gestionnaire de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="adminConfirmationModal4-tab3" tabindex="-1" aria-labelledby="adminConfirmationModalLabel4-tab3" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminConfirmationModalLabel4-tab3">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Taylor Tom (E345) au administrateur de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmationModal5-tab3" tabindex="-1" aria-labelledby="confirmationModalLabel5-tab3" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel5-tab3">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Lee Sarah (F678) au gestionnaire de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="adminConfirmationModal5-tab3" tabindex="-1" aria-labelledby="adminConfirmationModalLabel5-tab3" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content custom-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminConfirmationModalLabel5-tab3">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Voulez-vous vraiment ajouter Lee Sarah (F678) au administrateur de l'application de gestion du CCL ?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-grey" data-dismiss="modal" title="Annuler"><i class="fas fa-times"></i> Annuler</button>
+                            <button type="button" class="btn btn-blue" title="Oui"><i class="fas fa-check"></i> Oui</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

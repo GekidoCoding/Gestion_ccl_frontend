@@ -1,0 +1,173 @@
+<div class="main-content">
+    <app-loading [loading]="isLoading"></app-loading>
+    <div class="table-title">Gestion des Catégories</div>
+
+    <div class="list-container">
+        <div class="table-controls">
+            <div class="entries-select">
+                <label style="margin-top:10px ">Afficher</label>
+                <select [(ngModel)]="itemsPerPage" (ngModelChange)="changePage(1)">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                <span>entrée(s)</span>
+            </div>
+            <div class="action-buttons">
+                <button type="button" class="btn btn-add" (click)="openAddModal(addModal)" >
+                    <i class="fa fa-plus"></i> Ajouter une categorie d'infrastructure
+                </button>
+                <button type="button" class="btn btn-select" (click)="toggleSelectionMode()" >
+                    <i class="fa" [ngClass]="isSelectionMode ? 'fa-times' : 'fa-check-square'"></i> {{ isSelectionMode ? 'Quitter' : 'Sélectionner pour supprimer' }}
+                </button>
+                <button type="button" class="btn btn-delete" (click)="openDeleteModal(deleteModal)"  [disabled]="selectedCount === 0" *ngIf="isSelectionMode">
+                    <i class="fa fa-trash"></i>Supprimer
+                </button>
+                <button type="button" class="btn btn-search" (click)="toggleSearchForm()" >
+                    <i class="fa fa-search"></i> Cliquez pour rechercher
+                </button>
+            </div>
+        </div>
+
+        <div class="search-form slide-in-out" *ngIf="showSearchForm">
+            <form #searchForm="ngForm" (ngSubmit)="applySearch()">
+                <div class="form-row">
+                    <div class="form-group col-md-3 col-12">
+                        <label>Nom</label>
+                        <input type="text" placeholder="Ex : Hebergement" class="form-control" [(ngModel)]="searchCriteria.nom" name="nom" (input)="applySearchDebounced()" maxlength="255">
+                    </div>
+                    <div class="form-group col-md-3 col-12" style="margin-top: 1rem">
+                        <button type="button" class="btn btn-grey" (click)="toggleSearchForm()">Fermer</button>
+                        <button type="submit" class="btn btn-search"><i class="fas fa-search"></i>Rechercher</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-normal">
+                <thead>
+                <tr>
+                    <th *ngIf="isSelectionMode" class="checkbox-column">
+                        <input type="checkbox" [(ngModel)]="selectAll" (ngModelChange)="toggleSelectAll()">
+                    </th>
+
+                    <th class="sortable">
+                        Nom
+                    </th>
+                    <th class="action-column"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <ng-container *ngFor="let item of filteredItems; let i = index">
+                    <tr class="row-animation" [ngClass]="{'row-animation-delay': i > 0}" [attr.data-index]="i">
+                        <td *ngIf="isSelectionMode" class="checkbox-column">
+                            <input type="checkbox" [(ngModel)]="selectedIds[item.id]" (ngModelChange)="updateSelect(item.id)">
+                        </td>
+                        <td class="nom-column">{{item.nom}}</td>
+                        <td class="action-column action-buttons-cell">
+                            <button class="btn btn-update" (click)="openUpdateModal(updateModal, item)">
+                                <i class="fa fa-edit"></i>Modifier
+                            </button>
+                        </td>
+                    </tr>
+                </ng-container>
+                </tbody>
+            </table>
+            <div *ngIf="filteredItems.length === 0" class="no-results">Aucun résultat trouvé.</div>
+        </div>
+
+        <div class="pagination-controls">
+            <div class="pagination-container">
+                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage === 0" (click)="changePage(currentPage)">< precendent</button>
+                <div class="pagination-buttons">
+                    <span *ngFor="let page of pageNumbers" class="page-number btn btn-blue page-animation" [class.active]="page === currentPage + 1" (click)="changePage(page)">{{page}}</span>
+                </div>
+                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage + 1 === totalPages" (click)="changePage(currentPage + 2)" >suivant ></button>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #addModal let-modal>
+        <div class="modal-header">
+            <h5 class="modal-title">Ajouter une Nouvelle Catégorie</h5>
+            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form #addForm="ngForm" (ngSubmit)="addItem(); modal.close('Save click')">
+                <div class="form-row">
+                    <div class="form-group col-md-6 col-12">
+                        <label>Nom</label>
+                        <input type="text" class="form-control" [(ngModel)]="newItem.nom" name="nom" required maxlength="255">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-grey" (click)="modal.dismiss('Cancel click')">Annuler</button>
+                    <button type="submit" class="btn btn-blue"  [disabled]="addForm.invalid"><i class="fas fa-save"></i>Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </ng-template>
+
+    <ng-template #updateModal let-modal>
+        <div class="modal-header">
+            <h5 class="modal-title">Modifier une Catégorie</h5>
+            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form #updateForm="ngForm" (ngSubmit)="confirmUpdate(modal)">
+                <div class="form-row">
+                    <div class="form-group col-md-6 col-12">
+                        <label>Identifiant</label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedItem.id" name="id" readonly>
+                    </div>
+                    <div class="form-group col-md-6 col-12">
+                        <label>Nom</label>
+                        <input type="text" class="form-control" [(ngModel)]="selectedItem.nom" name="nom" required maxlength="255">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-grey" (click)="modal.dismiss('Cancel click')">Annuler</button>
+                    <button type="submit" class="btn btn-blue" [disabled]="updateForm.invalid"><i class="fas fa-save"></i>Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </ng-template>
+
+    <ng-template #deleteModal let-modal>
+        <div class="modal-header">
+            <h5 class="modal-title">Confirmation de Suppression</h5>
+            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>Voulez-vous vraiment supprimer cet(ces) <strong>{{ selectedCount }}</strong> élément(s) ?</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-grey" (click)="modal.dismiss('Cancel click')">Annuler</button>
+            <button type="button" class="btn btn-grey" (click)="deleteSelectedItems(modal)">Oui</button>
+        </div>
+    </ng-template>
+
+    <div class="toast-container" *ngIf="showConfirmation">
+        <div class="toast fade-animation">
+            {{confirmationMessage}}
+            <button class="toast-close" (click)="closeToast()">×</button>
+        </div>
+    </div>
+
+    <div class="toast-container" *ngIf="showError">
+        <div class="toast fade-animation">
+            {{errorMessage}}
+            <button class="toast-close" (click)="closeToast()">×</button>
+        </div>
+    </div>
+</div>

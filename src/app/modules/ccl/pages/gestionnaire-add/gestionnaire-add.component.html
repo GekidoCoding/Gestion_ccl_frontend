@@ -1,0 +1,121 @@
+<div class="main-content">
+    <div style="color: #FFFFFF" class="table-title">Ajout des Gestionnaires et des Administrateurs</div>
+    <ul class="nav nav-tabs" id="agentTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="tab1-tab" data-toggle="tab" href="#tab1" role="tab" aria-controls="tab1" aria-selected="true">Agents Non Gestionnaire</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="tab2-tab" data-toggle="tab" href="#tab2" role="tab" aria-controls="tab2" aria-selected="false">Gestionnaires</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="tab3-tab" data-toggle="tab" href="#tab3" role="tab" aria-controls="tab3" aria-selected="false">Administrateurs</a>
+        </li>
+    </ul>
+    <div class="tab-content" id="agentTabsContent">
+        <div class="tab-pane fade show active" id="tab1" role="tabpanel" aria-labelledby="tab1-tab">
+            <div class="total-elements">Nombre d'élément(s) trouvé(s) : {{totalItems}}</div>
+            <div class="pagination-controls">
+                <div class="pagination-container">
+                    <div class="entries-select">
+                        <label>Afficher</label>
+                        <select [(ngModel)]="itemsPerPage" (ngModelChange)="changePage(1)">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <span>éléments par page</span>
+                    </div>
+                    <div class="pagination-buttons">
+                        <button class="btn btn-arrow" [disabled]="currentPage === 0" (click)="changePage(currentPage)"><i class="fas fa-chevron-left"></i></button>
+                        <div class="page-numbers-wrapper">
+                            <span *ngFor="let page of pageNumbers" class="page-number btn btn-blue page-animation" [class.active]="page === currentPage + 1" (click)="changePage(page)">{{page}}</span>
+                        </div>
+                        <button class="btn btn-arrow" [disabled]="currentPage + 1 === totalPages" (click)="changePage(currentPage + 2)" title="Suivant"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <span class="page-info">5 de 100 éléments</span>
+                </div>
+            </div>
+            <div class="list-container">
+                <div class="search-form">
+                    <form>
+                        <div class="form-group">
+                            <label>Matricule</label>
+                            <input type="text" class="form-control" [(ngModel)]="criteriaAgent.matricule" placeholder="Entrez le matricule" name="matricule">
+                        </div>
+                        <div class="form-group">
+                            <label>Nom</label>
+                            <input type="text" class="form-control" [(ngModel)]="criteriaAgent.nom" name="nom" placeholder="Entrez le nom">
+                        </div>
+                        <div class="form-group">
+                            <label>Prénom(s)</label>
+                            <input type="text" class="form-control" [(ngModel)]="criteriaAgent.prenoms" name="prenoms" placeholder="Entrez les prénoms">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="text" class="form-control" [(ngModel)]="criteriaAgent.mail" name="mail" placeholder="Entrez l' Email">
+                        </div>
+                        <div class="form-group">
+                            <label>Direction</label>
+                            <input type="text" class="form-control" placeholder="Entrez le direction" name="direction"
+                                   [formControl]="directionCtrl" [matAutocomplete]="autoDirection">
+                            <mat-autocomplete #autoDirection="matAutocomplete" [displayWith]="displayDirectionFn">
+                                <mat-option *ngFor="let direction of filteredDirections" [value]="direction">
+                                    {{ direction.libelleDirection }}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </div>
+                        <div class="form-group">
+                            <label>Service</label>
+                            <input type="text" class="form-control" placeholder="Entrez le service" name="service"
+                                   [formControl]="serviceCtrl" [matAutocomplete]="autoService">
+                            <mat-autocomplete #autoService="matAutocomplete" [displayWith]="displayServiceFn">
+                                <mat-option *ngFor="let service of filteredServices" [value]="service">
+                                    {{ service.libelleService }}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-red" title="Effacer" (click)="clearSearch()">X</button>
+                            <button type="button" class="btn btn-blue" title="Rechercher" (click)="searchAgents()"><i class="fas fa-search"></i></button>
+                        </div>
+                    </form>
+                </div>
+                <div class="agent-list">
+                    <ng-container *ngIf="isLoading; else agentContent">
+                        <div class="agent-card-shimmer" *ngFor="let _ of [1, 2, 3, 4, 5, 6]"></div>
+                    </ng-container>
+                    <ng-template #agentContent>
+                        <div class="agent-card" *ngFor="let obj of agents; let i=index">
+                            <div class="agent-image">NO IMAGE AVAILABLE</div>
+                            <div class="agent-info">
+                                <span data-label="Matricule" [attr.data-value]="obj.matricule || 'N/A'"></span>
+                                <span data-label="Nom & Prénom" [attr.data-value]="(obj.nom || obj.prenoms) ? (obj.nom || 'N/A') + ' ' + (obj.prenoms || 'N/A') : 'N/A'"></span>
+                                <span data-label="Service" [attr.data-value]="obj.libelleService || 'N/A'"></span>
+                                <span data-label="Direction" [attr.data-value]="obj.libelleDirection || 'N/A'"></span>
+                                <span data-label="Email" [attr.data-value]="obj.mail || 'N/A'"></span>
+                            </div>
+                            <div class="button-checkbox-container">
+                                <button class="add-button" (click)="openAddModal(confirmationModal1); addAgentConfirmation(i)" title="Ajouter au gestionnaire"><i class="fas fa-user-plus"></i></button>
+                            </div>
+                        </div>
+                    </ng-template>
+                </div>
+            </div>
+            <!-- Modal -->
+            <ng-template #confirmationModal1 let-modal>
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmation d'Ajout</h5>
+                    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="modal-body">
+                    <p>Voulez-vous vraiment ajouter <strong>{{ agentAdd.nom }} {{ agentAdd.prenoms }} ({{ agentAdd.matricule }})</strong> au gestionnaire de l'application de gestion du CCL ?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-grey" (click)="annulerAgentConfirmation(modal)">Annuler</button>
+                    <button type="button" class="btn btn-grey" (click)="confirmAddAgentConfirmation(modal)">Oui</button>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</div>

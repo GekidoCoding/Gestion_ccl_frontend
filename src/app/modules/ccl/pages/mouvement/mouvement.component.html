@@ -1,0 +1,258 @@
+<div class="main-content">
+   <app-loading [loading]="isLoading"></app-loading>
+    <div  class="table-title">Mouvements de l'Infrastructure</div>
+    <div class="list-container">
+        <div class="results-count">Résultats trouvés : {{ totalItems }}</div>
+        <div class="statistics-section" *ngIf="infrastructure.id">
+            <h3  >Statistiques de l'Infrastructure</h3>
+            <div  class="form-row">
+                <div class="form-group col-md-2">
+                    <label>Nom</label>
+                    <p>{{ infrastructure.nom || 'N/A' }}</p>
+                </div>
+                <div class="form-group col-md-2">
+                    <label>Numero</label>
+                    <p>{{ infrastructure.numero || 'N/A' }}</p>
+                </div>
+                <div class="form-group col-md-2">
+                    <label>Modele</label>
+                    <p>{{ infrastructure.modeleInfra.nom || 'N/A' }}</p>
+                </div>
+                <div class="form-group col-md-2">
+                    <label>Total Mouvements</label>
+                    <p>{{ totalItems || 0 }}</p>
+                </div>
+                <div class="form-group col-md-2">
+                    <label>Dernier Mouvement</label>
+                    <p>{{ latestMovement || 'N/A' }}</p>
+                </div>
+
+            </div>
+            <div class="action-buttons">
+                <button type="button" style="font-size: 0.9rem" class="btn btn-eye" (click)="navigateToDetailInfra(infrastructure.id)">
+                    <i class="fas fa-info-circle"></i>Detail
+                </button>
+            </div>
+        </div>
+
+        <div class="statistics-section" *ngIf="client.id">
+            <h3  >Statistiques du client</h3>
+            <div  class="form-row">
+                <div class="form-group col-md-2">
+                    <label>Nom & prenom / Raison sociale </label>
+                    <p>
+                        {{
+                            (client.nom || client.prenom)
+                                ? (client.nom + ' ' + client.prenom)
+                                : (client.raisonSociale || 'N/A')
+                        }}
+                    </p>
+
+                </div>
+
+                <div class="form-group col-md-2">
+                    <label>Type du client</label>
+                    <p>{{ client.typeClient.typeClient|| 'N/A' }}</p>
+                </div>
+                <div class="form-group col-md-2">
+                    <label> Contact(s) </label>
+                    <p>{{ client.contacts|| 'N/A' }}</p>
+                </div>
+                <div class="form-group col-md-2">
+                    <label>Total Mouvements</label>
+                    <p>{{ totalItems || 0 }}</p>
+                </div>
+                <div class="form-group col-md-2">
+                    <label>Dernier Mouvement</label>
+                    <p>{{ latestMovement || 'N/A' }}</p>
+                </div>
+
+            </div>
+            <div class="action-buttons">
+                <button type="button" style="font-size: 0.9rem" class="btn btn-eye" (click)="navigateToDetailClient(client.id)">
+                    <i class="fas fa-info-circle"></i>
+                </button>
+            </div>
+        </div>
+
+
+        <div class="table-controls">
+            <div class="entries-select">
+                <label>Afficher</label>
+                <select [(ngModel)]="itemsPerPage" (ngModelChange)="changePage(1)">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                <span>entrée(s)</span>
+            </div>
+            <div class="action-buttons">
+                <button type="button" class="btn btn-add" (click)="openAddModal()">
+                    <i class="fa fa-plus"></i> Ajouter un Mouvement
+                </button>
+<!--                <button type="button" class="btn btn-search" (click)="toggleSearchForm()" >-->
+<!--                    <i class="fas fa-search"></i>Cliquez pour rechercher-->
+<!--                </button>-->
+            </div>
+        </div>
+
+        <div class="search-form slide-in-out" >
+            <form #searchForm="ngForm" (ngSubmit)="applySearch()">
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        <label>Type Mouvement</label>
+                        <select class="form-control" name="typeMouvement" required
+                                [(ngModel)]="searchCriteria.typeMouvement.id"
+                                [ngModel]="searchCriteria.typeMouvement.id??null"
+                        >
+                            <option [ngValue]="null" >-- Sélectionner le type de mouvement --</option>
+                            <option *ngFor="let type of typeMouvements" [value]="type.id">{{ type.nom }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label>Categorie d'infrastructure</label>
+                        <select class="form-control" name="catInfra" required
+                                [(ngModel)]="searchCriteria.infrastructure.modeleInfra.catInfra.id"
+                                [ngModel]="searchCriteria.infrastructure.modeleInfra.catInfra.id??null"
+                        >
+                            <option [ngValue]="null" > -- Sélectionner une catégorie -- </option>
+                            <option *ngFor="let category of categories" [value]="category.id">{{ category.nom }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label>Historique des mouvements entre</label>
+                        <input type="datetime-local" class="form-control" [(ngModel)]="periodeDebut" name="periodeDebut">
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label>Et</label>
+                        <input type="datetime-local" class="form-control" [(ngModel)]="periodeFin" name="periodeFin">
+                    </div>
+                    <div class="form-group col-md-2" style="margin-top: 15px">
+<!--                        <button type="button" class="btn btn-grey" (click)="toggleSearchForm()">Fermer</button>-->
+                        <button type="submit" class="btn btn-search">
+                            <i class="fas fa-search"></i>Rechercher
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-normal">
+                <thead>
+                <tr>
+                    <th class="sortable" >
+                        Date et Heure
+                    </th>
+                    <th class="sortable">
+                        Type Mouvement
+
+                    </th>
+                    <th *ngIf="infrastructure.id" class="sortable" >
+                        Client
+
+                    </th>
+                    <th *ngIf="client.id" class="sortable">
+                        Infrastucture
+
+                    </th>
+                    <ng-container *ngIf="!infrastructure?.id && !client?.id">
+                        <th class="sortable" >
+                            Client
+                        </th>
+                        <th class="sortable">
+                            Infrastucture
+                        </th>
+                    </ng-container>
+                    <th class="action-column"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <ng-container *ngFor="let item of filteredItems; let i = index">
+                    <tr class="row-animation" [ngClass]="{'row-animation-delay': i > 0}" [attr.data-index]="i">
+                        <td class="nom-column">{{ item.dhMouvement }}</td>
+                        <td class="nom-column">{{ item.typeMouvement.nom }}</td>
+
+                        <td class="nom-column-line" *ngIf="infrastructure?.id && !(client?.id)">
+                            <u (click)="navigateToDetailClient(item.client.id)">
+                                {{
+                                    item.client
+                                        ? (item.client.nom && item.client.prenom
+                                            ? item.client.nom + ' ' + item.client.prenom
+                                            : item.client.raisonSociale || 'N/A')
+                                        : 'N/A'
+                                }}
+                            </u>
+                        </td>
+
+                        <td class="nom-column-line" *ngIf="client?.id && !(infrastructure?.id)">
+                            <u (click)="navigateToDetailInfra(item.infrastructure.id)">
+                                {{ item.infrastructure.nom + " ● " + item.infrastructure.numero }}
+                            </u>
+                        </td>
+
+                        <ng-container *ngIf="!infrastructure?.id && !client?.id">
+                            <td class="nom-column-line">
+                                <u (click)="navigateToDetailClient(item.client.id)">
+                                    {{
+                                        item.client
+                                            ? (item.client.nom && item.client.prenom
+                                                ? item.client.nom + ' ' + item.client.prenom
+                                                : item.client.raisonSociale || 'N/A')
+                                            : 'N/A'
+                                    }}
+                                </u>
+                            </td>
+                            <td class="nom-column-line">
+                                <u (click)="navigateToDetailInfra(item.infrastructure.id)">
+                                    {{ item.infrastructure.nom + " ● " + item.infrastructure.numero }}
+                                </u>
+                            </td>
+                        </ng-container>
+
+                        <td class="action-column action-buttons-cell">
+                            <button class="btn btn-eye" (click)="openMouvementDetail(item.id)" >
+                                <i class="fas fa-info-circle"></i>Detail
+                            </button>
+                            <button class="btn btn-black" type="button" (click)="openHistoriquePopup(item.id)">
+                                <i class="fas fa-history"></i>historique
+                            </button>
+                        </td>
+                    </tr>
+                </ng-container>
+
+                </tbody>
+            </table>
+            <div *ngIf="filteredItems.length === 0" class="no-results">Aucun résultat trouvé.</div>
+        </div>
+
+        <div class="pagination-controls">
+            <div class="pagination-container">
+                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage === 0" (click)="changePage(currentPage)">< précédent</button>
+                <div class="pagination-buttons">
+                    <span *ngFor="let page of pageNumbers" class="page-number btn btn-blue page-animation" [class.active]="page === currentPage + 1" (click)="changePage(page)">{{page}}</span>
+                </div>
+                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage + 1 === totalPages" (click)="changePage(currentPage + 2)" >suivant></button>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #clientAddModal let-modal>
+        <div class="modal-header">
+            <h5 class="modal-title">Ajouter un Nouveau Client</h5>
+            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <app-client-add-form
+                    [isLoading]="isLoading"
+                    (formSubmit)="handleClientAdd($event); modal.close('Save click')"
+                    (formCancel)="modal.dismiss('Cancel click')"
+            ></app-client-add-form>
+        </div>
+    </ng-template>
+
+</div>

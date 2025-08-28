@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infrastructure Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="p-6 bg-gray-100">
+<div class="max-w-5xl mx-auto bg-white shadow rounded-lg p-6 relative">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-2xl font-semibold">Infrastructure</h1>
+        <button id="editToggle" class="text-blue-600 hover:text-blue-800">
+            <i class="fas fa-edit"></i> <span>Edit</span>
+        </button>
+    </div>
+
+    <!-- Localisation & Sous-type -->
+    <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+            <label for="location" class="block font-medium">Localisation</label>
+            <select id="location" class="form-select w-full border rounded p-2" disabled>
+                <option value="1">Antananarivo</option>
+                <option value="2">Fianarantsoa</option>
+                <option value="3">Toamasina</option>
+            </select>
+        </div>
+        <div>
+            <label for="subtype" class="block font-medium">Sous-type</label>
+            <select id="subtype" class="form-select w-full border rounded p-2" disabled>
+                <option value="a">École</option>
+                <option value="b">Clinique</option>
+                <option value="c">Bibliothèque</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Activités -->
+    <div class="mb-6">
+        <div class="flex justify-between items-center">
+            <h2 class="text-xl font-medium mb-2">Activités</h2>
+            <button class="text-green-600 hover:text-green-800" onclick="openPopup('activity')">+ Ajouter</button>
+        </div>
+        <div id="activityList" class="space-y-1">
+            <div class="flex items-center justify-between border p-2 rounded bg-gray-50">
+                <span class="activity-name">Formation</span>
+                <input type="checkbox" class="edit-only hidden">
+            </div>
+            <div class="flex items-center justify-between border p-2 rounded bg-gray-50">
+                <span class="activity-name">Sensibilisation</span>
+                <input type="checkbox" class="edit-only hidden">
+            </div>
+        </div>
+    </div>
+
+    <!-- Éléments -->
+    <div class="mb-6">
+        <div class="flex justify-between items-center">
+            <h2 class="text-xl font-medium mb-2">Éléments</h2>
+            <button class="text-green-600 hover:text-green-800" onclick="openPopup('element')">+ Ajouter</button>
+        </div>
+        <div id="elementList" class="space-y-1">
+            <div class="flex items-center justify-between border p-2 rounded bg-gray-50">
+                <span class="element-name">Projecteur</span>
+                <input type="checkbox" class="edit-only hidden">
+            </div>
+            <div class="flex items-center justify-between border p-2 rounded bg-gray-50">
+                <span class="element-name">Tablette</span>
+                <input type="checkbox" class="edit-only hidden">
+            </div>
+        </div>
+    </div>
+
+    <!-- Boutons d'action -->
+    <div class="flex justify-end space-x-4">
+        <button id="confirmEdit" class="hidden px-4 py-2 bg-blue-600 text-white rounded">Confirmer</button>
+        <button id="cancelEdit" class="hidden px-4 py-2 bg-gray-400 text-white rounded">Annuler</button>
+        <button onclick="confirmDelete()" class="px-4 py-2 bg-red-600 text-white rounded">Supprimer</button>
+    </div>
+</div>
+
+<!-- Pop-up ajout -->
+<div id="popup" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-lg p-6 w-96">
+        <h3 class="text-lg font-bold mb-4">Ajouter <span id="popupType"></span></h3>
+        <input id="popupInput" type="text" placeholder="Nom" class="w-full border p-2 rounded mb-4">
+        <div class="flex justify-end space-x-2">
+            <button onclick="closePopup()" class="px-4 py-1 bg-gray-400 text-white rounded">Annuler</button>
+            <button onclick="savePopup()" class="px-4 py-1 bg-green-600 text-white rounded">Ajouter</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-4 right-4 hidden bg-green-500 text-white px-4 py-2 rounded shadow"></div>
+
+<script>
+    const editBtn = document.getElementById('editToggle');
+    const confirmBtn = document.getElementById('confirmEdit');
+    const cancelBtn = document.getElementById('cancelEdit');
+    const selects = document.querySelectorAll('select');
+    const checkboxes = document.querySelectorAll('.edit-only');
+
+    editBtn.addEventListener('click', () => {
+        const isEditing = editBtn.querySelector('span').textContent === 'Edit';
+        selects.forEach(select => select.disabled = !isEditing);
+        checkboxes.forEach(cb => cb.classList.toggle('hidden'));
+        editBtn.querySelector('span').textContent = isEditing ? 'Confirmer' : 'Edit';
+        editBtn.classList.toggle('hidden');
+        confirmBtn.classList.toggle('hidden');
+        cancelBtn.classList.toggle('hidden');
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        location.reload();
+    });
+
+    confirmBtn.addEventListener('click', () => {
+        showToast('Modifications enregistrées avec succès');
+    });
+
+    function openPopup(type) {
+        document.getElementById('popup').classList.remove('hidden');
+        document.getElementById('popupType').textContent = type;
+        document.getElementById('popupInput').value = '';
+    }
+
+    function closePopup() {
+        document.getElementById('popup').classList.add('hidden');
+    }
+
+    function savePopup() {
+        const type = document.getElementById('popupType').textContent;
+        const name = document.getElementById('popupInput').value.trim();
+        if (!name) {
+            showToast("Le nom ne peut pas être vide", true);
+            return;
+        }
+        const list = document.getElementById(`${type}List`);
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between border p-2 rounded bg-gray-50';
+        div.innerHTML = `<span>${name}</span><input type="checkbox" class="edit-only">`;
+        list.appendChild(div);
+        closePopup();
+        showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} ajouté avec succès`);
+    }
+
+    function confirmDelete() {
+        if (confirm("Êtes-vous sûr de vouloir supprimer cette infrastructure ?")) {
+            showToast("Infrastructure supprimée", false);
+        }
+    }
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded shadow ${isError ? 'bg-red-500' : 'bg-green-500'} text-white`;
+        toast.classList.remove('hidden');
+        setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
+</script>
+</body>
+</html>

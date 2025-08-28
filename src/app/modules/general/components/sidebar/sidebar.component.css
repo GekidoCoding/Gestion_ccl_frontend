@@ -1,0 +1,215 @@
+/* sidebar.component.css */
+
+.logo-img:hover {
+    transform: scale(1.1) !important;
+    transition: transform .5s ease !important;
+}
+
+/* Supprime le fond blanc rond de l'icône */
+.li-no-bg {
+    background: none !important;
+    color: #fff !important;
+    position: relative;
+}
+
+.a-no-bg {
+    background: none !important;
+    color: #fff !important;
+}
+
+/* Styles pour les menus avec sous-éléments */
+.menu-link {
+    display: flex !important;
+    align-items: center !important;
+    padding: 12px 15px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.menu-link:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    transform: translateX(5px) !important;
+}
+
+.expandable-menu {
+    border: none !important;
+    text-decoration: none !important;
+}
+
+.arrow-icon {
+    font-size: 12px !important;
+    transition: transform 0.3s ease !important;
+}
+
+.arrow-icon.rotated {
+    transform: rotate(90deg) !important;
+}
+
+/* Styles pour les sous-menus */
+.submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.3s ease;
+    background-color: rgba(0, 0, 0, 0.2) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+}
+
+.submenu.expanded {
+    max-height: 800px;
+    padding: 5px 0 !important;
+}
+
+.submenu-item {
+    padding-left: 15px !important;
+    /* Suppression de la bordure gauche */
+}
+
+.submenu-link {
+    display: flex !important;
+    align-items: center !important;
+    padding: 8px 15px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    color: #CCCCCC !important;
+}
+
+.submenu-link:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #FFFFFF !important;
+    transform: translateX(3px) !important;
+}
+
+.submenu-link i {
+    font-size: 20px !important;
+    margin-right: 10px !important;
+    opacity: 0.8;
+}
+
+.submenu-link p {
+    margin: 0 !important;
+    font-size: 1em !important;
+}
+
+/* Animation pour l'ouverture/fermeture */
+.has-submenu {
+    transition: all 0.3s ease !important;
+}
+
+
+/* Styles pour sidebar fermée (hide-sidebar) */
+.hide-sidebar .submenu-item {
+
+    padding-left: 0 !important;
+}
+
+.hide-sidebar .submenu-link {
+    justify-content: center !important;
+    padding: 8px 5px !important;
+}
+
+.hide-sidebar .submenu-link p {
+    display: none !important;
+}
+
+.hide-sidebar .submenu-link i {
+    margin-right: 0 !important;
+    font-size: 16px !important;
+}
+
+.hide-sidebar .arrow-icon {
+    display: none !important;
+}
+
+.hide-sidebar .menu-link p {
+    display: none !important;
+}
+
+.hide-sidebar .menu-link {
+    justify-content: center !important;
+    padding: 12px 5px !important;
+}
+
+.hide-sidebar .menu-link i {
+    margin-right: 0 !important;
+}
+
+/* Tooltip pour sidebar fermée */
+.hide-sidebar .menu-link,
+.hide-sidebar .submenu-link {
+    position: relative;
+}
+
+.hide-sidebar .menu-link:hover::after,
+.hide-sidebar .submenu-link:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 1000;
+    font-size: 12px;
+    margin-left: 10px;
+}
+
+.hide-sidebar .menu-link:hover::before,
+.hide-sidebar .submenu-link:hover::before {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-right-color: rgba(0, 0, 0, 0.8);
+    margin-left: 5px;
+    z-index: 1000;
+}
+
+/* Ajustements pour les sous-menus en mode fermé */
+.hide-sidebar .submenu {
+    position: relative;
+    left: 0;
+}
+
+.hide-sidebar .submenu.expanded {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .menu-link,
+    .submenu-link {
+        padding: 10px 12px !important;
+    }
+
+    .submenu-item {
+        padding-left: 10px !important;
+    }
+
+    .hide-sidebar .menu-link,
+    .hide-sidebar .submenu-link {
+        padding: 10px 5px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .menu-link,
+    .submenu-link {
+        padding: 8px 10px !important;
+    }
+
+    .submenu-item {
+        padding-left: 8px !important;
+    }
+
+    .hide-sidebar .menu-link i,
+    .hide-sidebar .submenu-link i {
+        font-size: 14px !important;
+    }
+}

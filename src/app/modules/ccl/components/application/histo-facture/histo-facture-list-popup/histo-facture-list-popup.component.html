@@ -1,0 +1,64 @@
+<div class="modal-header">
+    <h5 class="modal-title">Historique de la facture</h5>
+    <button type="button" class="close" (click)="activeModal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
+</div>
+<div class="modal-body">
+    <div class="statistics-section" *ngIf="selected">
+        <h3>Statistiques de la facture </h3>
+        <div class="form-row">
+            <div class="form-group col-md-2">
+                <label>Client concerner </label>
+                <p>
+                    {{
+                        (selected?.mouvement?.client?.nom && selected?.mouvement?.client?.prenom)
+                            ? selected.mouvement.client.nom + ' ' + selected.mouvement.client.prenom
+                            : (selected?.mouvement?.client?.raisonSociale || 'N/A')
+                    }}
+                </p>
+
+            </div>
+            <div class="form-group col-md-2">
+                <label>Infrastructure concerner </label>
+                <p>{{ selected.mouvement.infrastructure.nom+' ● '+selected.mouvement.infrastructure.numero || 'N/A' }}</p>
+            </div>
+            <div class="form-group col-md-2">
+                <label>Montant total ( en Ariary)</label>
+                <p>{{ selected.montantTotal || 'N/A' }}</p>
+            </div>
+            <div class="form-group col-md-2">
+                <label>Remise ( en %) </label>
+                <p>{{ selected.remise || 'N/A' }}</p>
+            </div>
+            <div class="form-group col-md-2">
+                <label>Acompte verse ( en Ariary) </label>
+                <p>{{ selected.acompteVerse || 'N/A' }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive" >
+        <table class="table table-normal" >
+            <thead>
+            <tr>
+                <th>Date et Heure</th>
+                <th>etat</th>
+                <th>Reference</th>
+                <th>Montant total (en Ariary)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let item of items" class="row-animation">
+                <td  class="name-column">{{item.dhAction}}</td>
+                <td  class="name-column">{{item.etat.etat}}</td>
+                <td  class="name-column">{{item.refFacture||'N/A'}}</td>
+                <td class="name-column">{{item.montant}}</td>
+
+            </tr>
+            </tbody>
+        </table>
+        <div class="no-results" *ngIf="this.items.length==0">Pas d'historique pour ce mouvement</div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-grey" (click)="activeModal.dismiss('Close click')" title="Fermer">Fermer</button>
+</div>

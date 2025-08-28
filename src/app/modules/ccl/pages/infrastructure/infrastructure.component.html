@@ -1,0 +1,164 @@
+<div class="main-content">
+    <app-loading [loading]="isLoading"></app-loading>
+    <div class="table-title">Gestion des Infrastructures</div>
+
+    <div class="list-container">
+        <div class="table-controls">
+            <div class="entries-select">
+                <label style="margin-top: 10px;">Afficher</label>
+                <select [(ngModel)]="itemsPerPage" (ngModelChange)="changePage(1)">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                <span>entrée(s)</span>
+            </div>
+            <div class="action-buttons">
+                <button type="button" class="btn btn-add" (click)="openAddModal(addModal)"><i class="fa fa-plus"></i>Ajouter une nouvelle infrastructure</button>
+                <button type="button" class="btn btn-select" (click)="toggleSelectionMode()" title="{{ isSelectionMode ? 'Annuler la sélection' : 'Sélectionner des entrées' }}"><i class="fa" [ngClass]="isSelectionMode ? 'fa-times' : 'fa-check-square'"></i> {{ isSelectionMode ? 'Annuler' : 'Sélectionner pour supprimer' }}</button>
+                <button type="button" class="btn btn-delete" (click)="openDeleteModal(deleteModal)" title="Supprimer les entrées sélectionnées" [disabled]="selectedCount === 0" *ngIf="isSelectionMode"><i class="fa fa-trash"></i>Supprimer</button>
+<!--                <button type="button" class="btn btn-search" (click)="toggleSearchForm()"><i class="fa fa-search"></i>Cliquez pour rechercher</button>-->
+            </div>
+        </div>
+
+        <div class="search-form slide-in-out" >
+            <form #searchForm="ngForm" (ngSubmit)="applySearch()">
+                <div class="form-row">
+                    <div class="form-group col-md-2">
+                        <label>Designation</label>
+                        <input type="text" placeholder="Ex : Chambre d' Etoile" class="form-control" [(ngModel)]="searchCriteria.nom" name="nom">
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label>Numero</label>
+                        <input type="text" placeholder="Ex : 101 ou No.101" class="form-control" [(ngModel)]="searchCriteria.numero" name="numero">
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label>Catégorie</label>
+                        <select class="form-control"
+                                [(ngModel)]="searchCriteria.modeleInfra.catInfra.id"
+                                [ngModel]="searchCriteria.modeleInfra.catInfra.id ?? null"
+                                name="catInfra"
+                                (ngModelChange)="onCategoryChange($event.id)"
+                        >
+                            <option [ngValue]="null">Toutes</option>
+                            <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.nom }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label>Disponible Entre </label>
+                        <input type="datetime-local"  class="form-control" [(ngModel)]="debutSearch" name="debut">
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label>Et </label>
+                        <input type="datetime-local"  class="form-control" [(ngModel)]="finSearch" name="fin">
+                    </div>
+
+                    <div class="form-group col-md-3">
+                        <label>Localisations</label>
+                        <div class="checkbox-group">
+                            <div *ngFor="let localisation of localisations" class="checkbox-item">
+                                <input type="checkbox" [id]="'loc-' + localisation.id" [(ngModel)]="localisationSelectionned[localisation.id]" name="localisation-{{localisation.id}}" (ngModelChange)="updateLocalisationSelection(localisation.id)">
+                                <label [for]="'loc-' + localisation.id">{{ localisation.nom }}</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label>Modèles</label>
+                        <div class="checkbox-group">
+                            <div *ngFor="let modele of filteredModeles" class="checkbox-item">
+                                <input type="checkbox" [id]="'mod-' + modele.id" [(ngModel)]="modelesInfraSelectionned[modele.id]" name="modele-{{modele.id}}" (ngModelChange)="updateModeleSelection(modele.id)">
+                                <label [for]="'mod-' + modele.id">{{ modele.nom }}</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+<!--                        <button type="button" class="btn btn-grey" (click)="toggleSearchForm()">Fermer</button>-->
+                        <button type="submit" style="margin-top: 30px" class="btn btn-search">
+                            <i class="fas fa-search"></i>Rechercher
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-normal">
+                <thead>
+                <tr>
+                    <th *ngIf="isSelectionMode" class="checkbox-column">
+                        <input type="checkbox" [(ngModel)]="selectAll" (ngModelChange)="toggleSelectAll()">
+                    </th>
+                    <th class="sortable">Modèle Infra</th>
+                    <th class="sortable">Capacité</th>
+                    <th class="sortable" >Nom</th>
+                    <th class="sortable" >Tarif (Ariary) </th>
+                    <th class="sortable" >Localisation </th>
+                    <th class="action-column"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <ng-container *ngFor="let item of filteredItems; let i = index">
+                    <tr class="row-animation" [ngClass]="{'row-animation-delay': i > 0}" [attr.data-index]="i">
+                        <td *ngIf="isSelectionMode" class="checkbox-column">
+                            <input type="checkbox" [(ngModel)]="selectedIds[item.id]" (ngModelChange)="updateSelect(item.id)">
+                        </td>
+                        <td class="nom-column">{{item.modeleInfra.nom}}</td>
+                        <td class="nom-column">{{item.capacite}}</td>
+                        <td class="nom-column">{{item.nom}}</td>
+                        <td class="nom-column">{{item.prix}}</td>
+                        <td class="nom-column">{{item.localisation.nom}}</td>
+                        <td class="action-column action-buttons-cell">
+                            <button class="btn btn-eye" (click)="navigateToDetail(item.id)"><i class="fas fa-info-circle"></i>Detail</button>
+                            <button type="button" class="btn btn-black" (click)="navigateToMovements(item.id)"><i class="fas fa-exchange-alt"></i>Voir ses mouvements</button>
+                        </td>
+                    </tr>
+                </ng-container>
+                </tbody>
+            </table>
+            <div *ngIf="filteredItems.length === 0" class="no-results">Aucun résultat trouvé.</div>
+        </div>
+
+        <div class="pagination-controls">
+            <div class="pagination-container">
+                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage === 0" (click)="changePage(currentPage)">< precedent</button>
+                <div class="pagination-buttons">
+                    <span *ngFor="let page of pageNumbers" class="page-number btn btn-blue page-animation" [class.active]="page === currentPage + 1" (click)="changePage(page)">{{page}}</span>
+                </div>
+                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage + 1 === totalPages" (click)="changePage(currentPage + 2)" >suivant > </button>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #deleteModal let-modal>
+        <div class="modal-header">
+            <h5 class="modal-title">Confirmation de Suppression</h5>
+            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
+        </div>
+        <div class="modal-body">
+            <p>Voulez-vous vraiment rendre inactif cet(ces) <strong>{{ selectedCount }}</strong> infrastructure(s) ?</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-grey" (click)="modal.dismiss('Cancel click')">Annuler</button>
+            <button type="button" class="btn btn-grey" (click)="deleteSelectedItems(modal)">Oui</button>
+        </div>
+    </ng-template>
+
+    <ng-template #addModal let-modal>
+        <div class="modal-header">
+            <h5 class="modal-title">Ajouter une Nouvelle Infrastructure</h5>
+            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
+        </div>
+        <app-infrastructure-add-form
+                [newItem]="newItem"
+                [localisations]="localisations"
+                [etats]="etats"
+                [categories]="categories"
+                [filteredModeles]="filteredModeles"
+                (submitForm)="addItem($event); modal.close('Save click')"
+                (cancel)="modal.dismiss('Cancel click')"
+                (categoryChange)="onCategoryChange($event)">
+        </app-infrastructure-add-form>
+    </ng-template>
+</div>

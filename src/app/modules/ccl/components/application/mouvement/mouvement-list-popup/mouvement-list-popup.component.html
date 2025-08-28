@@ -1,0 +1,47 @@
+
+<div class="modal-header">
+    <h5 class="modal-title">Liste Des Mouvements</h5>
+    <button type="button" class="close" (click)="activeModal.dismiss('Cross Click')" aria-label="Close">
+        <span aria-hidden="true">×</span>
+    </button>
+</div>
+<div class="modal-body">
+    <div class="action-buttons">
+        <button type="button" class="btn btn-add" (click)="openAddModal()"  title="Ajouter un nouveau mouvement">
+            <i class="fa fa-plus"></i> Ajouter mouvement
+        </button>
+    </div>
+    <div class="table-controls">
+        <div class="table-responsive">
+            <table class="table table-normal" *ngIf="items.length > 0">
+                <thead>
+                <tr>
+                    <th>infrastructure</th>
+                    <th>Client</th>
+                    <th>periode de debut</th>
+                    <th>periode de fin</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of items" class="row-animation">
+                        <td class="name-column">{{item.infrastructure.nom}} </td>
+                        <td class="name-column">{{item.client.nom}}</td>
+                        <td class="name-column">{{item.periodeDebut}}</td>
+                        <td class="name-column">{{item.periodeDebut}}</td>
+                        <td class="action-column action-buttons-cell">
+                            <button class="btn btn-eye" (click)="openDetailModal(item.id)">
+                                <i class="fa fa-info-circle"></i>
+                            </button>
+                            <button class="btn btn-green" (click)="selectionned(item.id)">
+                                <i class="fa fa-check"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+            <div *ngIf="items.length === 0" class="no-results">Aucun mouvement trouvé.</div>
+        </div>
+    </div>
+</div>
