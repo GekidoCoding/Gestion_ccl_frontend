@@ -86,8 +86,8 @@ export class MouvementService {
     );
   }
 
-  update(id: string, modeleInfra: Mouvement): Observable<Mouvement> {
-    return this.http.put<Mouvement>(`${this.apiUrl}/update/${id}`, modeleInfra).pipe(
+  update(id: string, mouvement: Mouvement): Observable<Mouvement> {
+    return this.http.put<Mouvement>(`${this.apiUrl}/update/${id}`, mouvement).pipe(
         catchError(this.handleError)
     );
   }

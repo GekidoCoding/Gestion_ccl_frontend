@@ -1,11 +1,14 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import {NgbActiveModal, NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import {HistoriqueMvt} from "../../../model/historique-mvt/historique-mvt";
 import {HistoriqueMvtService} from "../../../services/historique-mvt/historique-mvt.service";
 import {MouvementService} from "../../../services/mouvement/mouvement.service";
 import {Mouvement} from "../../../model/mouvement/mouvement";
 import {ComponentUtil} from "../../../util/component-util";
+import {
+  MouvementInfrasPopupComponent
+} from "../mouvement-infras-popup/mouvement-infras-popup/mouvement-infras-popup.component";
 
 
 @Component({
@@ -24,7 +27,8 @@ export class HistoriqueMvtPopupComponent implements OnInit {
       public activeModal: NgbActiveModal,
       private historiqueMvtService: HistoriqueMvtService,
       private mouvementService: MouvementService,
-      private toastr: ToastrService
+      private toastr: ToastrService ,
+      public modalService: NgbModal,
   ) {}
 
   ngOnInit() {
@@ -57,6 +61,12 @@ export class HistoriqueMvtPopupComponent implements OnInit {
         this.toastr.error('Error lors du chargements des mouvements');
       }
     })
+  }
+
+  openInfrasPopup(mouvement: Mouvement) {
+    const modal = this.modalService.open(MouvementInfrasPopupComponent, { size: 'lg', centered: true, backdrop: 'static' });
+    modal.componentInstance.mouvementInfras = mouvement.mouvementInfras || [];
+    modal.componentInstance.mouvementId = mouvement.id;
   }
 
 }

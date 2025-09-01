@@ -104,6 +104,6 @@ registerLocaleData(localeFr);
     { provide: LOCALE_ID, useValue: 'fr' } ,
     { provide: CalendarDateFormatter, useClass: CustomDateFormatter }
   ],
-  exports: [FooterComponent, NavbarComponent, SidebarComponent],
+    exports: [FooterComponent, NavbarComponent, SidebarComponent, LoadingComponent],
 })
 export class GeneralModule {}

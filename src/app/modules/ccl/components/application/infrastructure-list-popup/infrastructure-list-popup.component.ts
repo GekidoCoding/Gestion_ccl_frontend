@@ -1,5 +1,5 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {NgbActiveModal, NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { Infrastructure } from "../../../model/infrastructure/infrastructure";
 import { Localisation } from "../../../model/localisation/localisation";
@@ -20,6 +20,8 @@ import { DetailInfrastructureComponent } from "../detail-infrastructure/detail-i
 })
 export class InfrastructureListPopupComponent implements OnInit {
   @Output() infrastructureSelected = new EventEmitter<Infrastructure>();
+  @Input() infrastructureNotInSelections: Infrastructure[]=[];
+
   items: Infrastructure[] = [];
   filteredItems: Infrastructure[] = [];
   localisations: Localisation[] = [];
@@ -27,7 +29,7 @@ export class InfrastructureListPopupComponent implements OnInit {
   categories: CategorieInfra[] = [];
   filteredModeles: ModeleInfra[] = [];
   modeles: ModeleInfra[] = [];
-  newItem: Partial<Infrastructure> = this.initializeNewItem();
+  newItem: Infrastructure = new Infrastructure();
   isLoading = true;
   showConfirmation = false;
   showError = false;
@@ -39,8 +41,8 @@ export class InfrastructureListPopupComponent implements OnInit {
   modelesInfraSelectionned: { [key: string]: boolean } = {};
   localisationIds: string[] = [];
   modelesIds: string[] = [];
-  debutSearch: string = '2025-01-01T00:00';
-  finSearch: string = '2025-01-02T00:00';
+  debutSearch: string = '';
+  finSearch: string = '';
 
   constructor(
       private modalService: NgbModal,
@@ -49,7 +51,9 @@ export class InfrastructureListPopupComponent implements OnInit {
       private etatService: EtatService,
       private catInfraService: CategorieInfraService,
       private modeleInfraService: ModeleInfraService,
-      private toastr: ToastrService
+      private toastr: ToastrService ,
+      public activeModal: NgbActiveModal ,
+      public modal:NgbModal,
   ) {}
 
   ngOnInit() {
@@ -65,7 +69,10 @@ export class InfrastructureListPopupComponent implements OnInit {
     this.infrastructureService.getAll().subscribe({
       next: (infrastructures) => {
         this.items = infrastructures;
-        this.filteredItems = [...this.items]; // Initialiser les éléments filtrés
+        // Filter out infrastructures that are in infrastructureNotInSelections
+        this.filteredItems = this.items.filter(
+            item => !this.infrastructureNotInSelections.some(notSelected => notSelected.id === item.id)
+        );
         this.isLoading = false;
       },
       error: (error) => {
@@ -133,7 +140,7 @@ export class InfrastructureListPopupComponent implements OnInit {
       next: () => {
         this.loadInfrastructures();
         this.showSuccessMessage('Infrastructure ajoutée avec succès !');
-        this.newItem = this.initializeNewItem();
+        this.newItem =new Infrastructure();
       },
       error: (error) => {
         console.error('Error adding infrastructure:', error);
@@ -150,16 +157,6 @@ export class InfrastructureListPopupComponent implements OnInit {
     }
   }
 
-  onCategoryChange(categoryId: string) {
-    if (categoryId) {
-      this.filteredModeles = this.modeles.filter(m => m.catInfra.id === categoryId);
-    } else {
-      this.filteredModeles = [...this.modeles];
-    }
-    this.modelesInfraSelectionned = {};
-    this.modelesIds = [];
-    this.newItem.modeleInfra = { id: '', nom: '', catInfra: { id: '', nom: '' } };
-  }
 
   toggleSearchForm() {
     this.showSearchForm = !this.showSearchForm;
@@ -192,7 +189,10 @@ export class InfrastructureListPopupComponent implements OnInit {
     ).subscribe({
       next: (page) => {
         this.items = page.content;
-        this.filteredItems = [...this.items];
+        // Filter out infrastructures that are in infrastructureNotInSelections
+        this.filteredItems = this.items.filter(
+            item => !this.infrastructureNotInSelections.some(notSelected => notSelected.id === item.id)
+        );
         this.isLoading = false;
       },
       error: (error) => {
@@ -247,5 +247,16 @@ export class InfrastructureListPopupComponent implements OnInit {
     modal.componentInstance.loadData.subscribe(() => {
       this.loadInfrastructures();
     });
+  }
+
+  onCategoryChange(categoryId: string) {
+    if (categoryId) {
+      this.filteredModeles = this.modeles.filter(m => m.catInfra.id === categoryId);
+    } else {
+      this.filteredModeles = [...this.modeles];
+    }
+    this.modelesInfraSelectionned = {};
+    this.modelesIds = [];
+    this.newItem.modeleInfra = { id: '', nom: '', catInfra: { id: '', nom: '' } };
   }
 }

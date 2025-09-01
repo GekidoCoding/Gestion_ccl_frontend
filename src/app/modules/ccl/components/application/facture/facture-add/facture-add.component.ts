@@ -36,8 +36,7 @@ export class FactureAddComponent implements OnInit {
       this.factureService.getRemise().subscribe({
         next: res=>{
           this.newItem.remise=res;
-          this.newItem.acompteVerse= (this.mouvementSelected.infrastructure.prix) * (res / 100);
-          this.newItem.montantTotal=this.mouvementSelected.infrastructure.prix;
+
         }
       });
     }

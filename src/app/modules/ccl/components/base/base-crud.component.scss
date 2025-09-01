@@ -6,9 +6,9 @@ $colors: (
         soft-white: #fafafa,
         light-grey: #f5f6f8,
         border-grey: #ececec,
-        text-color: #000427 ,
+        text-color: #000427,
         yellow: rgb(181, 157, 5),
-        black: #000000,
+        black: #000000
 );
 
 $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -24,7 +24,7 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
     background-color: $hover-bg;
     border-color: $hover-border;
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 clamp(0.2vw, 4px, 0.3vw) clamp(0.6vw, 12px, 0.8vw) rgba(0, 0, 0, 0.15);
   }
 
   &:active {
@@ -39,7 +39,7 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
 }
 
 @mixin responsive-text($base-size: 0.9rem) {
-  font-size: $base-size;
+  font-size: clamp(0.7vw, $base-size, 1.2vw);
   color: map-get($colors, text-color);
 
   &:hover {
@@ -47,38 +47,40 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
   }
 
   @media (max-width: 768px) {
-    font-size: $base-size * 0.9;
+    font-size: clamp(0.6vw, $base-size * 0.9, 1.1vw);
   }
 
   @media (max-width: 576px) {
-    font-size: $base-size * 0.8;
+    font-size: clamp(0.5vw, $base-size * 0.8, 1vw);
   }
 }
 
 @mixin card-3d-effect {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 clamp(0.2vw, 4px, 0.3vw) clamp(0.4vw, 8px, 0.6vw) rgba(0, 0, 0, 0.1),
+  0 clamp(0.3vw, 6px, 0.5vw) clamp(0.8vw, 20px, 1vw) rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1);
+    transform: translateY(clamp(-0.2vw, -5px, -0.3vw));
+    box-shadow: 0 clamp(0.3vw, 6px, 0.4vw) clamp(0.6vw, 12px, 0.8vw) rgba(0, 0, 0, 0.15),
+    0 clamp(0.4vw, 8px, 0.6vw) clamp(0.9vw, 24px, 1.2vw) rgba(0, 0, 0, 0.1);
   }
 }
 
 // Layout
 .main-content {
-  padding: 2rem 0.5rem;
+  padding: clamp(1vw, 2rem, 1.5vw) clamp(0.3vw, 0.5rem, 0.8vw);
   background-color: map-get($colors, light-grey);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin-top: 60px;
+  margin-top: clamp(2vw, 60px, 3vw);
 
   @media (max-width: 768px) {
-    padding: 1rem 0.25rem;
-    width: 200%; // Apply 200% width for non-desktop devices
+    padding: clamp(0.6vw, 1rem, 1vw) clamp(0.15vw, 0.25rem, 0.4vw);
+    width: 100%;
   }
 }
 
@@ -97,49 +99,65 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
 }
 
 .spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1);
+  border: clamp(0.15vw, 4px, 0.25vw) solid rgba(0, 0, 0, 0.1);
   border-left-color: #000b88;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: clamp(1.5vw, 40px, 2.5vw);
+  height: clamp(1.5vw, 40px, 2.5vw);
   animation: spin 1s linear infinite;
+
+  @media (max-width: 768px) {
+    width: clamp(3vw, 48px, 5vw);
+    height: clamp(3vw, 48px, 5vw);
+    border-width: clamp(0.3vw, 6px, 0.5vw);
+  }
 }
 
 .loading-overlay p {
-  margin-top: 10px;
-  font-size: 16px;
+  margin-top: clamp(0.5vw, 10px, 0.8vw);
+  font-size: clamp(0.8vw, 16px, 1.2vw);
   color: #333;
+
+  @media (max-width: 768px) {
+    font-size: clamp(1.5vw, 20px, 2.5vw);
+  }
 }
 
 .list-container {
-  margin-top: 50px;
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
+  margin-top: clamp(1.5vw, 50px, 2.5vw);
+  margin-left: clamp(0.3vw, 0.5rem, 0.8vw);
+  margin-right: clamp(0.3vw, 0.5rem, 0.8vw);
   width: 95%;
   max-width: none;
   @include card-3d-effect;
   background-color: map-get($colors, soft-white);
-  border-radius: 0.5rem;
-  padding: 2rem;
+  border-radius: clamp(0.3vw, 0.5rem, 0.8vw);
+  padding: clamp(1vw, 2rem, 1.5vw);
   text-align: center;
 
   @media (max-width: 768px) {
-    margin-left: 0.25rem;
-    margin-right: 0.25rem;
+    margin-left: clamp(0.15vw, 0.25rem, 0.4vw);
+    margin-right: clamp(0.15vw, 0.25rem, 0.4vw);
     width: 100%;
-    padding: 1rem;
+    padding: clamp(0.6vw, 1rem, 1vw);
+    border-radius: clamp(0.5vw, 0.75rem, 1vw);
   }
 }
 
 .table-title {
   background-color: map-get($colors, blue);
-  padding: 0.75rem 1rem;
+  padding: clamp(0.4vw, 0.75rem, 0.6vw) clamp(0.6vw, 1rem, 1vw);
   text-align: center;
-  font-size: 1.2rem;
+  font-size: clamp(0.8vw, 1.2rem, 1.5vw);
   font-weight: 600;
   color: #ffffff;
-  border-radius: 0.25rem;
+  border-radius: clamp(0.15vw, 0.25rem, 0.4vw);
   width: 95%;
+
+  @media (max-width: 768px) {
+    font-size: clamp(1.5vw, 1.5rem, 2vw);
+    padding: clamp(0.8vw, 1rem, 1.2vw) clamp(1.5vw, 1.5rem, 2vw);
+  }
 }
 
 // Components
@@ -147,30 +165,35 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: clamp(0.8vw, 1.5rem, 1.2vw);
   width: 100%;
   flex-wrap: wrap;
 
   .entries-select {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-
+    gap: clamp(0.4vw, 0.75rem, 0.6vw);
+    font-size: clamp(0.7vw, 0.8rem, 1.2vw);
     label,
     span {
       @include responsive-text(0.8rem);
     }
 
     select {
-      padding: 0.4rem 0.75rem;
-      border: 1px solid map-get($colors, border-grey);
-      border-radius: 0.3rem;
-      font-size: 0.8rem;
+      padding: clamp(0.2vw, 0.4rem, 0.5vw) clamp(0.4vw, 0.75rem, 0.8vw);
+      border: clamp(0.05vw, 1px, 0.1vw) solid map-get($colors, border-grey);
+      border-radius: clamp(0.15vw, 0.3rem, 0.4vw);
+      font-size: clamp(0.6vw, 0.8rem, 1vw);
       transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+      @media (max-width: 768px) {
+        font-size: clamp(1.2vw, 1rem, 1.5vw);
+        padding: clamp(0.6vw, 0.6rem, 0.8vw) clamp(1vw, 1rem, 1.5vw);
+      }
 
       &:focus {
         border-color: map-get($colors, blue);
-        box-shadow: 0 0 5px rgba(map-get($colors, blue), 0.3);
+        box-shadow: 0 0 clamp(0.2vw, 5px, 0.3vw) rgba(map-get($colors, blue), 0.3);
       }
     }
   }
@@ -179,17 +202,17 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
     display: flex;
     justify-content: flex-start;
     align-items: self-start;
-    gap: 0.5rem;
+    gap: clamp(0.3vw, 0.5rem, 0.6vw);
     flex-wrap: wrap;
   }
 }
 
 .search-form {
   background-color: map-get($colors, soft-white);
-  padding: 1.5rem;
-  border: 1px solid map-get($colors, border-grey);
-  border-radius: 0.5rem;
-  margin-bottom: 1.5rem;
+  padding: clamp(0.8vw, 1.5rem, 1.2vw);
+  border: clamp(0.05vw, 1px, 0.1vw) solid map-get($colors, border-grey);
+  border-radius: clamp(0.3vw, 0.5rem, 0.8vw);
+  margin-bottom: clamp(0.8vw, 1.5rem, 1.2vw);
 
   &.slide-in-out {
     animation: slideInOut 0.5s ease-in-out forwards;
@@ -200,14 +223,26 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
     }
   }
 }
-
 .no-results {
   text-align: center;
-  padding: 1.5rem;
+  padding: clamp(0.8vw, 1.2rem, 1.5vw);
   color: map-get($colors, text-color);
-  font-size: 1rem;
+  font-size: clamp(0.8vw, 1rem, 1.2vw);
   @include responsive-text(1rem);
-  //animation: pulse 1.5s infinite;
+  line-height: 1.5;
+  margin: 0 auto;
+  width: 100%;
+  max-width: clamp(50vw, 600px, 80vw);
+
+  @media (max-width: 768px) {
+    font-size: clamp(1.2vw, 1.1rem, 1.5vw);
+    padding: clamp(1vw, 1.5rem, 1.8vw);
+  }
+
+  @media (max-width: 576px) {
+    font-size: clamp(1.5vw, 1rem, 2vw);
+    padding: clamp(1.2vw, 1.2rem, 2vw);
+  }
 }
 
 .table-responsive {
@@ -226,27 +261,35 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
     th {
       white-space: nowrap;
       text-align: center;
-      padding: 1rem 0.75rem;
-      font-size: 0.9rem;
+      padding: clamp(0.6vw, 1rem, 1vw) clamp(0.4vw, 0.75rem, 0.8vw);
+      font-size: clamp(0.6vw, 0.9rem, 1vw);
+
+      @media (max-width: 768px) {
+        font-size: clamp(1.2vw, 1.1rem, 1.5vw);
+        padding: clamp(1vw, 1.2rem, 1.5vw) clamp(0.8vw, 1rem, 1.2vw);
+      }
 
       &:first-child {
-        padding-left: 1rem;
+        padding-left: clamp(0.6vw, 1rem, 1vw);
       }
 
       &:last-child {
-        padding-right: 1rem;
+        padding-right: clamp(0.6vw, 1rem, 1vw);
       }
     }
 
     td {
-      padding: 1rem;
+      padding: clamp(0.6vw, 1rem, 1vw);
       vertical-align: middle;
-      border-bottom: 1px solid map-get($colors, border-grey);
-      font-size: 0.9rem;
+      border-bottom: clamp(0.05vw, 1px, 0.1vw) solid map-get($colors, border-grey);
+      font-size: clamp(0.6vw, 0.9rem, 1vw);
+
+      @media (max-width: 768px) {
+        font-size: clamp(1.2vw, 1.1rem, 1.5vw);
+        padding: clamp(1vw, 1.2rem, 1.5vw);
+      }
     }
- //&:hover {
- //   background-color: darken(map-get($colors, grey), 5%);
- //}
+
     thead th {
       background-color: map-get($colors, grey);
       color: #3e3e3e;
@@ -258,17 +301,17 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
       vertical-align: middle;
 
       &:first-child {
-        padding-left: 1rem;
+        padding-left: clamp(0.6vw, 1rem, 1vw);
       }
 
       &:last-child {
-        padding-right: 1rem;
+        padding-right: clamp(0.6vw, 1rem, 1vw);
       }
 
       &.sortable {
         cursor: pointer;
         align-items: center;
-        gap: 0.5rem;
+        gap: clamp(0.3vw, 0.5rem, 0.6vw);
         justify-content: flex-start;
 
         &:hover {
@@ -276,15 +319,19 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
         }
 
         .fas {
-          font-size: 0.8rem;
-          margin-left: 0.25rem;
+          font-size: clamp(0.5vw, 0.8rem, 0.9vw);
+          margin-left: clamp(0.15vw, 0.25rem, 0.4vw);
+
+          @media (max-width: 768px) {
+            font-size: clamp(1vw, 1rem, 1.2vw);
+          }
         }
       }
 
       &.checkbox-column {
-        width: 50px;
+        width: clamp(2vw, 50px, 3vw);
         text-align: center;
-        padding: 0.5rem;
+        padding: clamp(0.3vw, 0.5rem, 0.6vw);
       }
     }
 
@@ -310,25 +357,26 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
       }
 
       td.checkbox-column {
-        width: 50px;
+        width: clamp(2vw, 50px, 3vw);
         text-align: center;
-        padding: 0.5rem;
+        padding: clamp(0.3vw, 0.5rem, 0.6vw);
       }
     }
   }
 }
+
 .checkbox-group {
-  max-height: 150px;
+  max-height: clamp(8vw, 150px, 10vw);
   overflow-y: auto;
-  border: 1px solid map-get($colors, border-grey);
-  border-radius: 0.3rem;
-  padding: 0.5rem;
+  border: clamp(0.05vw, 1px, 0.1vw) solid map-get($colors, border-grey);
+  border-radius: clamp(0.15vw, 0.3rem, 0.4vw);
+  padding: clamp(0.3vw, 0.5rem, 0.6vw);
   background-color: #ffffff;
   scrollbar-width: thin;
   scrollbar-color: map-get($colors, blue) map-get($colors, soft-white);
 
   &::-webkit-scrollbar {
-    width: 6px;
+    width: clamp(0.3vw, 6px, 0.5vw);
   }
 
   &::-webkit-scrollbar-track {
@@ -337,29 +385,34 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
 
   &::-webkit-scrollbar-thumb {
     background: map-get($colors, blue);
-    border-radius: 3px;
+    border-radius: clamp(0.15vw, 3px, 0.3vw);
   }
 
   .checkbox-item {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.3rem 0;
+    gap: clamp(0.3vw, 0.5rem, 0.6vw);
+    padding: clamp(0.15vw, 0.3rem, 0.4vw) 0;
     @include responsive-text(0.85rem);
 
     input[type="checkbox"] {
-      width: 1rem;
-      height: 1rem;
+      width: clamp(0.7vw, 1rem, 1vw);
+      height: clamp(0.7vw, 1rem, 1vw);
       cursor: pointer;
       accent-color: map-get($colors, blue);
 
+      @media (max-width: 768px) {
+        width: clamp(1.5vw, 1.2rem, 2vw);
+        height: clamp(1.5vw, 1.2rem, 2vw);
+      }
+
       &:hover {
-        outline: 1px solid lighten(map-get($colors, blue), 20%);
+        outline: clamp(0.05vw, 1px, 0.1vw) solid lighten(map-get($colors, blue), 20%);
       }
 
       &:focus {
-        outline: 2px solid map-get($colors, blue);
-        outline-offset: 2px;
+        outline: clamp(0.1vw, 2px, 0.15vw) solid map-get($colors, blue);
+        outline-offset: clamp(0.1vw, 2px, 0.15vw);
       }
     }
 
@@ -377,13 +430,18 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
 }
 
 .form-group select.form-control {
-  padding: 0.6rem;
-  font-size: 0.85rem;
+  padding: clamp(0.3vw, 0.6rem, 0.8vw);
+  font-size: clamp(0.6vw, 0.85rem, 1vw);
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+  @media (max-width: 768px) {
+    font-size: clamp(1.2vw, 1rem, 1.5vw);
+    padding: clamp(0.8vw, 0.8rem, 1vw) clamp(1vw, 1rem, 1.5vw);
+  }
 
   &:focus {
     border-color: map-get($colors, blue);
-    box-shadow: 0 0 5px rgba(map-get($colors, blue), 0.3);
+    box-shadow: 0 0 clamp(0.2vw, 5px, 0.3vw) rgba(map-get($colors, blue), 0.3);
     outline: 0;
   }
 
@@ -395,12 +453,13 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
 .button-group {
   display: flex;
   align-items: flex-end;
-  gap: 0.5rem;
-  margin-top: 1.8rem;
+  gap: clamp(0.3vw, 0.5rem, 0.6vw);
+  margin-top: clamp(1vw, 1.8rem, 1.5vw);
 
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: stretch;
+    gap: clamp(0.5vw, 0.8rem, 1vw);
   }
 
   .btn {
@@ -413,92 +472,118 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
 
   .form-group {
     flex: 1;
-    min-width: 150px;
+    font-size: clamp(0.7vw, 1rem, 1.2vw);
+    min-width: clamp(8vw, 150px, 10vw);
 
     @media (max-width: 768px) {
       width: 100%;
+      min-width: 100%;
     }
   }
 }
+
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-weight: 500;
-  border-radius: 0.3rem;
+  border-radius: clamp(0.15vw, 0.3rem, 0.4vw);
   font-family: $font-family-base;
   cursor: pointer;
-  padding: 0.6rem 1rem;
-  gap: 0.3rem;
+  padding: clamp(0.3vw, 0.6rem, 0.8vw) clamp(0.6vw, 1rem, 1.2vw);
+  gap: clamp(0.15vw, 0.3rem, 0.4vw);
   position: relative;
+
+  @media (max-width: 768px) {
+    padding: clamp(0.8vw, 0.8rem, 1vw) clamp(1.5vw, 1.5rem, 2vw);
+    border-radius: clamp(0.5vw, 0.5rem, 0.8vw);
+  }
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(map-get($colors, blue), 0.3);
+    box-shadow: 0 0 0 clamp(0.1vw, 3px, 0.2vw) rgba(map-get($colors, blue), 0.3);
   }
 
   &[title]:hover:after {
     content: attr(title);
     position: absolute;
-    top: -2rem;
+    top: clamp(-1.5vw, -2rem, -2vw);
     background-color: map-get($colors, text-color);
     color: #ffffff;
-    padding: 0.3rem 0.6rem;
-    border-radius: 0.3rem;
-    font-size: 0.7rem;
+    padding: clamp(0.15vw, 0.3rem, 0.4vw) clamp(0.3vw, 0.6rem, 0.8vw);
+    border-radius: clamp(0.15vw, 0.3rem, 0.4vw);
+    font-size: clamp(0.5vw, 0.7rem, 0.9vw);
     white-space: nowrap;
     z-index: 1000;
+
+    @media (max-width: 768px) {
+      font-size: clamp(1vw, 0.9rem, 1.2vw);
+      top: clamp(-2vw, -2.5rem, -2.5vw);
+    }
   }
 
   &.btn-blue {
     @include button-variant(map-get($colors, blue));
-    font-size: 1em;
+    font-size: clamp(0.7vw, 1rem, 1.2vw);
   }
+
   &.btn-green {
-    background-color: #1a8a33;
-    font-size: 1em;
+    @include button-variant(#1a8a33);
+    font-size: clamp(0.7vw, 1rem, 1.2vw);
   }
+
   &.btn-black {
-    @include button-variant(map-get($colors, blue));
-    font-size: 1em;
+    @include button-variant(map-get($colors, black));
+    font-size: clamp(0.7vw, 1rem, 1.2vw);
   }
 
   &.btn-grey {
     @include button-variant(map-get($colors, border-grey), map-get($colors, border-grey), darken(map-get($colors, border-grey), 10%), darken(map-get($colors, border-grey), 10%));
-    color: map-get($colors, text-color);
+    color: #FFFFFF;
+    font-size: clamp(0.7vw, 1rem, 1.2vw);
+    background-color: #3C4858;
   }
 
   &.btn-add {
     @include button-variant(#107212);
-    font-size: 0.9rem;
+    font-size: clamp(0.6vw, 0.9rem, 1vw);
   }
 
   &.btn-select {
     @include button-variant(#6c757d);
-    font-size: 0.9rem;
+    font-size: clamp(0.6vw, 0.9rem, 1vw);
   }
 
   &.btn-search {
     @include button-variant(map-get($colors, blue));
-    font-size: 0.9rem;
+    font-size: clamp(0.6vw, 0.9rem, 1vw);
   }
 
   &.btn-eye {
-    @include button-variant(map-get($colors, #ffff00));
-    font-size: 1em;
+    @include button-variant(map-get($colors, yellow));
+    font-size: clamp(0.7vw, 1rem, 1.2vw);
   }
+
   &.btn-movement {
-    @include button-variant(map-get($colors,black));
-    font-size: 1em;
-    margin-left: 10px;
+    @include button-variant(map-get($colors, black));
+    font-size: clamp(0.7vw, 1rem, 1.2vw);
+    margin-left: clamp(0.6vw, 10px, 1vw);
+
+    @media (max-width: 768px) {
+      margin-left: clamp(1vw, 12px, 1.5vw);
+    }
   }
 
   &.btn-update {
     background: none;
     border: none;
     color: #033f71;
-    font-size: 1rem;
+    font-size: clamp(0.7vw, 1rem, 1.2vw);
     transition: color 0.3s ease, transform 0.3s ease;
+
+    @media (max-width: 768px) {
+      font-size: clamp(1.5vw, 1.2rem, 2vw);
+    }
 
     &:hover {
       color: darken(map-get($colors, green), 15%);
@@ -514,9 +599,14 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
     background: none;
     border: none;
     color: map-get($colors, red);
-    font-size: 1rem;
-    padding: 0.3rem;
+    font-size: clamp(0.7vw, 1rem, 1.2vw);
+    padding: clamp(0.15vw, 0.3rem, 0.4vw);
     transition: color 0.3s ease, transform 0.3s ease;
+
+    @media (max-width: 768px) {
+      font-size: clamp(1.5vw, 1.2rem, 2vw);
+      padding: clamp(0.5vw, 0.5rem, 0.8vw);
+    }
 
     &:hover {
       color: darken(map-get($colors, red), 15%);
@@ -533,28 +623,35 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
     }
   }
 
-  &.btn-green {
-    background-color: #015a16;
-    font-size: 0.9rem;
-  }
-
   &.btn-red {
     @include button-variant(map-get($colors, red));
-    font-size: 0.9rem;
+    font-size: clamp(0.6vw, 0.9rem, 1vw);
   }
 
   &.btn-sm {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.85rem;
+    padding: clamp(0.2vw, 0.4rem, 0.5vw) clamp(0.4vw, 0.75rem, 0.8vw);
+    font-size: clamp(0.5vw, 0.85rem, 0.9vw);
+
+    @media (max-width: 768px) {
+      font-size: clamp(1vw, 1rem, 1.2vw);
+      padding: clamp(0.6vw, 0.6rem, 0.8vw) clamp(1vw, 1rem, 1.5vw);
+    }
   }
 
   &.btn-arrow {
-    padding: 0.6rem;
-    font-size: 1rem;
-    min-width: 2.5rem;
+    padding: clamp(0.3vw, 0.6rem, 0.8vw);
+    font-size: clamp(0.7vw, 1rem, 1.2vw);
+    min-width: clamp(1.5vw, 2.5rem, 2vw);
     flex-shrink: 0;
+
+    @media (max-width: 768px) {
+      font-size: clamp(1.5vw, 1.2rem, 2vw);
+      min-width: clamp(3vw, 3rem, 4vw);
+      padding: clamp(0.8vw, 0.8rem, 1vw);
+    }
   }
 }
+
 .bg-success {
   background-color: #ffffff;
   color: #1a8a33;
@@ -568,41 +665,52 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
 .form-row {
   display: flex;
   flex-wrap: wrap;
-  margin-right: -0.5rem;
-  margin-left: -0.5rem;
-  gap: 1rem;
-
+  margin-right: clamp(-0.3vw, -0.5rem, -0.5vw);
+  margin-left: clamp(-0.3vw, -0.5rem, -0.5vw);
+  gap: clamp(0.6vw, 1rem, 1vw);
+  font-size: clamp(0.7vw, 1rem, 1.2vw);
   @media (max-width: 768px) {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: clamp(0.3vw, 0.5rem, 0.8vw);
+    margin-right: clamp(-1vw, -1rem, -1.5vw);
+    margin-left: clamp(-1vw, -1rem, -1.5vw);
   }
 }
 
 .form-group {
-  margin-bottom: 1.2rem;
-
-  padding: 0 0.5rem;
+  margin-bottom: clamp(0.8vw, 1.2rem, 1.2vw);
+  padding: 0 clamp(0.3vw, 0.5rem, 0.6vw);
+  font-size: clamp(0.7vw, 1rem, 1.2vw);
+  @media (max-width: 768px) {
+    padding: 0 clamp(0.8vw, 1rem, 1.2vw);
+  }
 
   label {
     display: block;
-    margin-bottom: 0.4rem;
+    margin-bottom: clamp(0.2vw, 0.4rem, 0.5vw);
     color: map-get($colors, text-color);
     @include responsive-text(0.85rem);
     font-weight: 500;
+
   }
 
   .form-control {
     width: 100%;
-    padding: 0.6rem;
-    border: 1px solid map-get($colors, border-grey);
-    border-radius: 0.3rem;
+    padding: clamp(0.3vw, 0.6rem, 0.8vw);
+    border: clamp(0.05vw, 1px, 0.1vw) solid map-get($colors, border-grey);
+    border-radius: clamp(0.15vw, 0.3rem, 0.4vw);
     background-color: #ffffff;
-    font-size: 0.85rem;
+    font-size: clamp(0.6vw, 0.85rem, 1vw);
     transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+
+    @media (max-width: 768px) {
+      font-size: clamp(1.2vw, 1rem, 1.5vw);
+      padding: clamp(0.8vw, 0.8rem, 1vw);
+    }
 
     &:focus {
       border-color: map-get($colors, blue);
-      box-shadow: 0 0 5px rgba(map-get($colors, blue), 0.3);
+      box-shadow: 0 0 clamp(0.2vw, 5px, 0.3vw) rgba(map-get($colors, blue), 0.3);
       outline: 0;
       transform: scale(1.02);
     }
@@ -624,7 +732,7 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
   }
 
   textarea.form-control {
-    min-height: 100px;
+    min-height: clamp(5vw, 100px, 8vw);
     resize: vertical;
   }
 
@@ -637,7 +745,7 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
 
 .input-group {
   display: flex;
-  gap: 0.5rem;
+  gap: clamp(0.3vw, 0.5rem, 0.6vw);
   align-items: center;
 
   .form-control {
@@ -651,6 +759,7 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
   @media (max-width: 576px) {
     flex-direction: column;
     align-items: stretch;
+    gap: clamp(0.5vw, 0.8rem, 1vw);
 
     .btn {
       width: 100%;
@@ -660,47 +769,56 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
 
 .modal-content {
   background-color: map-get($colors, soft-white);
-  border: 1px solid map-get($colors, border-grey);
-  border-radius: 0.5rem;
+  border: clamp(0.05vw, 1px, 0.1vw) solid map-get($colors, border-grey);
+  border-radius: clamp(0.3vw, 0.5rem, 0.8vw);
   @include card-3d-effect;
-  padding: 1.5rem;
+  padding: clamp(0.8vw, 1.5rem, 1.2vw);
   animation: modalPop 0.3s ease-out forwards;
   z-index: 1050;
-  width: 100%;
-  max-width: 1400px;
+  width: 90%;
+  max-width: clamp(50vw, 1400px, 70vw);
   margin: 0 auto;
   box-sizing: border-box;
 
   @media (max-width: 768px) {
-    width: 90%;
-    padding: 1rem;
+    width: 95%;
+    padding: clamp(0.6vw, 1rem, 1vw);
   }
 
   @media (max-width: 576px) {
-    width: 95%;
-    padding: 0.75rem;
+    width: 98%;
+    padding: clamp(0.4vw, 0.75rem, 1vw);
   }
 }
 
 .modal-header {
   background-color: map-get($colors, blue);
   color: #ffffff;
-  padding: 1rem;
+  padding: clamp(0.6vw, 1rem, 1vw);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  //width: 50%;
 
   .modal-title {
-    @include responsive-text(1.1rem);
+    font-size: clamp(0.8vw, 1.3rem, 1.2vw);
     font-weight: 600;
     color: #ffffff;
+
+    @media (max-width: 768px) {
+      font-size: clamp(1.5vw, 1.3rem, 2vw);
+    }
   }
 
   .close {
     color: #ffffff;
     opacity: 0.8;
-    font-size: 1.3rem;
+    font-size: clamp(0.8vw, 1.3rem, 1.2vw);
     transition: transform 0.2s ease, opacity 0.2s ease;
+
+    @media (max-width: 768px) {
+      font-size: clamp(1.5vw, 1.5rem, 2vw);
+    }
 
     &:hover {
       opacity: 1;
@@ -710,22 +828,23 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
 
   .btn {
     margin-left: auto;
-    margin-right: 0.5rem;
+    margin-right: clamp(0.3vw, 0.5rem, 0.6vw);
   }
 }
 
 .modal-body {
-  padding: 2rem;
+  padding: clamp(1vw, 2rem, 1.5vw);
   overflow-y: auto;
   scroll-behavior: smooth;
+  //width: 50%;
   @media (max-width: 768px) {
-    padding: 1rem;
+    padding: clamp(0.6vw, 1rem, 1vw);
   }
 }
 
 .form-left {
   width: 50%;
-  padding-right: 1.5rem;
+  padding-right: clamp(0.8vw, 1.5rem, 1.2vw);
 
   @media (max-width: 768px) {
     width: 100%;
@@ -735,27 +854,27 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
 
 .form-right {
   width: 47%;
-  padding-left: 1.5rem;
-  max-height: 500px;
+  padding-left: clamp(0.8vw, 1.5rem, 1.2vw);
+  max-height: clamp(20vw, 500px, 30vw);
   overflow-y: auto;
 
   @media (max-width: 768px) {
     width: 100%;
     padding-left: 0;
-    margin-top: 1rem;
+    margin-top: clamp(0.6vw, 1rem, 1vw);
     max-height: none;
   }
 }
 
 .modal-footer {
-  padding: 1.2rem;
-  border-top: 1px solid map-get($colors, border-grey);
+  padding: clamp(0.6vw, 1.2rem, 1vw);
+  border-top: clamp(0.05vw, 1px, 0.1vw) solid map-get($colors, border-grey);
   justify-content: flex-end;
-  gap: 1rem;
+  gap: clamp(0.6vw, 1rem, 1.2vw);
 
   @media (max-width: 576px) {
-    padding: 0.8rem;
-    gap: 0.5rem;
+    padding: clamp(0.4vw, 0.8rem, 0.8vw);
+    gap: clamp(0.3vw, 0.5rem, 0.6vw);
   }
 }
 
@@ -763,41 +882,55 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 2rem;
+  margin-top: clamp(1vw, 2rem, 1.5vw);
   color: map-get($colors, text-color);
   width: 100%;
+  padding: 0 clamp(0.3vw, 0.5rem, 0.6vw);
 
   @media (max-width: 768px) {
-    gap: 0.5rem;
+    gap: clamp(0.4vw, 0.6rem, 0.8vw);
+    margin-top: clamp(0.8vw, 1.5rem, 1.2vw);
+  }
+
+  @media (max-width: 576px) {
+    gap: clamp(0.5vw, 0.8rem, 1vw);
+    padding: 0 clamp(0.5vw, 0.8rem, 1vw);
   }
 }
 
 .pagination-container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   width: 100%;
-  max-width: 100%;
-  gap: 0.5rem;
+  max-width: clamp(50vw, 800px, 90vw);
+  gap: clamp(0.4vw, 0.6rem, 0.8vw);
+  flex-wrap: nowrap;
 
   @media (max-width: 768px) {
-    gap: 0.3rem;
+    gap: clamp(0.3vw, 0.5rem, 0.6vw);
+    max-width: 95%;
+  }
+
+  @media (max-width: 576px) {
+    gap: clamp(0.2vw, 0.4rem, 0.5vw);
+    max-width: 98%;
   }
 }
 
 .pagination-buttons {
   display: flex;
-  gap: 0.5rem;
+  gap: clamp(0.3vw, 0.5rem, 0.6vw);
   align-items: center;
   flex-wrap: nowrap;
-  max-width: 70%;
+  max-width: clamp(30vw, 70%, 50vw);
   overflow-x: auto;
-  padding: 0 0.5rem;
+  padding: 0 clamp(0.3vw, 0.5rem, 0.6vw);
   scrollbar-width: thin;
   scrollbar-color: map-get($colors, blue) map-get($colors, soft-white);
 
   &::-webkit-scrollbar {
-    height: 6px;
+    height: clamp(0.2vw, 6px, 0.3vw);
   }
 
   &::-webkit-scrollbar-track {
@@ -806,22 +939,34 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
 
   &::-webkit-scrollbar-thumb {
     background: map-get($colors, blue);
-    border-radius: 3px;
+    border-radius: clamp(0.1vw, 3px, 0.2vw);
   }
 
   .page-number {
-    padding: 0.6rem 1rem;
+    padding: clamp(0.3vw, 0.6rem, 0.8vw) clamp(0.6vw, 1rem, 1.2vw);
     text-align: center;
     cursor: pointer;
-    border: 1px solid map-get($colors, border-grey);
-    border-radius: 0.3rem;
+    border: clamp(0.05vw, 1px, 0.1vw) solid map-get($colors, border-grey);
+    border-radius: clamp(0.15vw, 0.3rem, 0.4vw);
     background-color: map-get($colors, soft-white);
     transition: all 0.3s ease;
-    min-width: 2.5rem;
-    font-size: 0.9rem;
+    min-width: clamp(2vw, 2.5rem, 3vw);
+    font-size: clamp(0.7vw, 0.9rem, 1vw);
     white-space: nowrap;
     @include responsive-text(0.9rem);
     flex-shrink: 0;
+
+    @media (max-width: 768px) {
+      font-size: clamp(1vw, 0.8rem, 1.2vw);
+      padding: clamp(0.3vw, 0.5rem, 0.7vw) clamp(0.5vw, 0.8rem, 1vw);
+      min-width: clamp(1.8vw, 2.2rem, 2.5vw);
+    }
+
+    @media (max-width: 576px) {
+      font-size: clamp(1.2vw, 0.85rem, 1.5vw);
+      padding: clamp(0.2vw, 0.4rem, 0.6vw) clamp(0.4vw, 0.6rem, 0.8vw);
+      min-width: clamp(1.5vw, 2rem, 2.2vw);
+    }
 
     &.active {
       background-color: map-get($colors, blue);
@@ -841,30 +986,22 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
       animation: pageAnimation 0.3s ease-in-out forwards;
     }
   }
-
-  @media (max-width: 768px) {
-    max-width: 60%;
-    gap: 0.3rem;
-    padding: 0 0.3rem;
-
-    .page-number {
-      padding: 0.4rem 0.6rem;
-      font-size: 0.8rem;
-      min-width: 2rem;
-    }
-  }
 }
 
 .confirmation-message {
   color: map-get($colors, blue);
   font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: 0.3rem;
+  padding: clamp(0.3vw, 0.5rem, 0.6vw) clamp(0.6vw, 1rem, 1.2vw);
+  border-radius: clamp(0.15vw, 0.3rem, 0.4vw);
   background-color: rgba(map-get($colors, blue), 0.15);
-  margin-top: 1rem;
+  margin-top: clamp(0.6vw, 1rem, 1vw);
   width: 100%;
   text-align: center;
-  font-size: 0.9rem;
+  font-size: clamp(0.6vw, 0.9rem, 1vw);
+
+  @media (max-width: 768px) {
+    font-size: clamp(1.2vw, 1.1rem, 1.5vw);
+  }
 
   &.fade-animation {
     animation: fadeAnimation 0.5s ease-in-out forwards;
@@ -874,7 +1011,7 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
 // Animations
 @keyframes slideInOut {
   0% {
-    transform: translateY(-20px);
+    transform: translateY(clamp(-0.8vw, -20px, -1vw));
     opacity: 0;
   }
   100% {
@@ -889,14 +1026,14 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
     opacity: 1;
   }
   100% {
-    transform: translateY(-20px);
+    transform: translateY(clamp(-0.8vw, -20px, -1vw));
     opacity: 0;
   }
 }
 
 @keyframes rowAnimation {
   0% {
-    transform: translateY(20px);
+    transform: translateY(clamp(0.8vw, 20px, 1vw));
     opacity: 0;
   }
   100% {
@@ -908,7 +1045,7 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
 @keyframes pageAnimation {
   0% {
     opacity: 0;
-    transform: translateX(10px);
+    transform: translateX(clamp(0.3vw, 10px, 0.5vw));
   }
   100% {
     opacity: 1;
@@ -948,42 +1085,62 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
   }
 }
 
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 // Action Buttons Cell
 .action-buttons-cell {
   display: flex;
-  gap: 1rem;
+  gap: clamp(0.6vw, 1rem, 1vw);
   justify-content: center;
 
   @media (max-width: 768px) {
-    flex-direction: row;
-    gap: 0.75rem;
+    gap: clamp(0.4vw, 0.75rem, 0.8vw);
   }
 }
 
 // Toast Styles
 .toast-container {
   position: fixed;
-  bottom: 1rem;
-  right: 1rem;
+  bottom: clamp(0.6vw, 1rem, 1vw);
+  right: clamp(0.6vw, 1rem, 1vw);
   display: flex;
-  gap: 0.5rem;
+  gap: clamp(0.3vw, 0.5rem, 0.6vw);
   opacity: 0.87;
+
+  @media (max-width: 768px) {
+    bottom: clamp(1vw, 1.5rem, 1.5vw);
+    right: clamp(1vw, 1.5rem, 1.5vw);
+  }
 }
 
 .toast {
   display: flex;
   align-items: center;
   color: #ffffff;
-  padding: 0.5rem 1rem;
-  border-radius: 0.3rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  font-size: 1rem;
+  padding: clamp(0.3vw, 0.5rem, 0.6vw) clamp(0.6vw, 1rem, 1.2vw);
+  border-radius: clamp(0.15vw, 0.3rem, 0.4vw);
+  box-shadow: 0 clamp(0.1vw, 2px, 0.2vw) clamp(0.3vw, 8px, 0.5vw) rgba(0, 0, 0, 0.2);
+  font-size: clamp(0.7vw, 1rem, 1.2vw);
   font-weight: 500;
-  width: 150px;
-  height: 60px;
+  width: clamp(8vw, 150px, 12vw);
+  height: clamp(3vw, 60px, 5vw);
   animation: toastSlideIn 0.3s ease-out forwards;
   transition: opacity 0.3s ease, transform 0.3s ease;
   margin-left: auto;
+
+  @media (max-width: 768px) {
+    font-size: clamp(1.5vw, 1.2rem, 2vw);
+    width: clamp(15vw, 200px, 20vw);
+    height: clamp(4vw, 70px, 6vw);
+    padding: clamp(0.8vw, 0.8rem, 1vw) clamp(1.5vw, 1.5rem, 2vw);
+  }
 
   &.fade-animation {
     animation: toastFadeIn 0.3s ease-in-out forwards;
@@ -994,11 +1151,16 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
   background: none;
   border: none;
   color: #ffffff;
-  font-size: 1rem;
+  font-size: clamp(0.7vw, 1rem, 1.2vw);
   cursor: pointer;
-  padding: 0 0.3rem;
+  padding: 0 clamp(0.15vw, 0.3rem, 0.4vw);
   transition: transform 0.2s ease, opacity 0.2s ease;
   margin-left: auto;
+
+  @media (max-width: 768px) {
+    font-size: clamp(1.5vw, 1.2rem, 2vw);
+    padding: 0 clamp(0.5vw, 0.5rem, 0.8vw);
+  }
 
   &:hover {
     opacity: 0.8;

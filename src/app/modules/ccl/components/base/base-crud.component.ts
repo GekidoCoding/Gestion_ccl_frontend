@@ -3,6 +3,7 @@ import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { debounceTime } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
+import {InfrastructureAddFormComponent} from "../application/infrastructure-add-form/infrastructure-add-form.component";
 
 // Interface pour la réponse paginée de l'API
 export interface Page<T> {
@@ -140,6 +141,7 @@ export abstract class BaseCrudComponent<T> implements OnInit {
     const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
     this.modalService.open(content, options);
   }
+
 
   openDeleteModal(content: any) {
     if (Object.keys(this.selectedIds).length === 0) return;

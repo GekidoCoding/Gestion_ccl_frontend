@@ -2,8 +2,9 @@
 .nom-column-line{
   color: #0b5cad;
 }
+
 .results-count {
-  font-size: 1.1rem;
+  font-size: clamp(1vw, 1rem, 2vw);
   font-weight: 500;
   color: #555;
   margin-bottom: 15px;

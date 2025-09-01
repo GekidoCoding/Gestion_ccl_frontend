@@ -1,0 +1,57 @@
+<div class="modal-header">
+    <h5 class="modal-title">Infrastructures Concernées</h5>
+    <button type="button" class="close" (click)="activeModal.dismiss('Cross click')" aria-label="Close">
+        <span aria-hidden="true">×</span>
+    </button>
+</div>
+<app-loading [loading]="isLoading"></app-loading>
+<div class="modal-body">
+    <div class="action-buttons mb-3">
+        <button type="button" class="btn btn-add" (click)="openAddInfrastructureModal()">
+            <i class="fas fa-plus"></i> Ajouter une Infrastructure
+        </button>
+    </div>
+    <div class="table-responsive" *ngIf="mouvementInfras.length > 0">
+        <table class="table table-normal">
+            <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Numéro</th>
+                <th>Modèle</th>
+                <th>Catégorie</th>
+                <th>Capacité</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let mvt of mouvementInfras">
+                <td>{{ mvt.infrastructure.nom || 'N/A' }}</td>
+                <td>{{ mvt.infrastructure.numero || 'N/A' }}</td>
+                <td>{{ mvt.infrastructure.modeleInfra?.nom || 'N/A' }}</td>
+                <td>{{ mvt.infrastructure.modeleInfra?.catInfra?.nom || 'N/A' }}</td>
+                <td>{{ mvt.infrastructure.capacite || 'N/A' }}</td>
+                <td>
+                    <button type="button" class="btn btn-delete" (click)="confirmDelete(mvt.id)" title="Supprimer">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="no-results" *ngIf="mouvementInfras.length === 0">
+        Aucune infrastructure associée
+    </div>
+    <div class="confirmation-dialog" *ngIf="showConfirmation">
+        <div class="confirmation-content">
+            <p>Êtes-vous sûr de vouloir supprimer cette infrastructure ?</p>
+            <div class="confirmation-buttons">
+                <button type="button" class="btn btn-danger" (click)="deleteInfrastructure()">Oui, supprimer</button>
+                <button type="button" class="btn btn-grey" (click)="cancelDelete()">Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-grey" (click)="activeModal.dismiss('Cross click')">Fermer</button>
+</div>
