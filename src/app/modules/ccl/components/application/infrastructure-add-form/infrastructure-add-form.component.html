@@ -1,3 +1,8 @@
+<div class="modal-header">
+    <h5 class="modal-title">Ajouter une Nouvelle Infrastructure</h5>
+    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
+</div>
+
 <div class="modal-body">
     <form #addForm="ngForm" (ngSubmit)="onSubmit(addForm)">
         <div class="form-row">
@@ -18,54 +23,80 @@
                     <label>Éléments</label>
                     <textarea class="form-control" placeholder="Ex : 1 douche interieure , 2 WC exterieures , 1 chaufaud" [(ngModel)]="newItem.elements" name="elements"></textarea>
                 </div>
-                <div class="form-group col-md-6 col-lg-10">
-                    <label>Prix (Ariary)</label>
-                    <input type="number" class="form-control" placeholder="10000" [(ngModel)]="newItem.prix" name="prix" step="0.01">
-                </div>
-                <div class="form-group col-md-6 col-lg-10">
-                    <label>État</label>
-                    <select class="form-control" [ngModel]="newItem.etat?.id ?? null" name="etat" (ngModelChange)="newItem.etat!.id = $event" required>
-                        <option [ngValue]="null" >-- Sélectionnez état --</option>
-                        <option *ngFor="let etat of etats" [value]="etat.id">{{ etat.etat }}</option>
-                    </select>
-                </div>
+
             </div>
             <div class="form-right">
                 <div class="form-group">
                     <label>Localisation</label>
                     <div class="input-group">
                         <select class="form-control" [ngModel]="newItem.localisation?.id ?? null" name="localisation" (ngModelChange)="newItem.localisation!.id = $event" required>
-                            <option [ngValue]="null" >-- Sélectionnez localisation --</option>
+                            <option [ngValue]="null">-- Sélectionnez localisation --</option>
                             <option *ngFor="let localisation of localisations" [value]="localisation.id">{{ localisation.nom }}</option>
                         </select>
-                        <button type="button" class="btn btn-add" (click)="openLocalisationModal(localisationModal)" title="Ajouter une localisation">+</button>
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Catégorie d'Infra</label>
                     <div class="input-group">
                         <select class="form-control" [ngModel]="newItem.modeleInfra?.catInfra?.id ?? null" name="catInfra" (ngModelChange)="onCategoryChange($event); newItem.modeleInfra!.catInfra.id = $event">
-                            <option [ngValue]="null" >-- Sélectionnez catégorie --</option>
+                            <option [ngValue]="null">-- Sélectionnez catégorie --</option>
                             <option *ngFor="let category of categories" [value]="category.id">{{ category.nom }}</option>
                         </select>
-                        <button type="button" class="btn btn-add" (click)="openCategoryModal(categoryModal)" title="Ajouter une catégorie">+</button>
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Modèle d'Infra</label>
                     <div class="input-group">
                         <select class="form-control" [ngModel]="newItem.modeleInfra?.id ?? null" name="modeleInfra" (ngModelChange)="newItem.modeleInfra!.id = $event" required>
-                            <option [ngValue]="null" >-- Sélectionnez modèle --</option>
+                            <option [ngValue]="null">-- Sélectionnez modèle --</option>
                             <option *ngFor="let modele of filteredModeles" [value]="modele.id">{{ modele.nom }}</option>
                         </select>
-                        <button type="button" class="btn btn-add" (click)="openModeleModal(modeleModal)" title="Ajouter un modèle">+</button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-12">
+                <label>Tarifs par Fréquence</label>
+                <div class="input-group">
+                    <select class="form-control" [(ngModel)]="selectedFrequenceId" name="frequence" (ngModelChange)="onFrequenceChange($event)">
+                        <option [ngValue]="null">-- Sélectionnez fréquence --</option>
+                        <option *ngFor="let frequence of availableFrequences" [value]="frequence.id">{{ frequence.libelle }}</option>
+                    </select>
+                    <input type="number" class="form-control" placeholder="Tarif" [(ngModel)]="newTarif" name="tarif" min="0" step="0.01">
+                    <button type="button" class="btn btn-add" (click)="addTarif()" [disabled]="!selectedFrequenceId || !newTarif || newTarif <= 0" title="Ajouter tarif">+</button>
+                </div>
+            </div>
+        </div>
+        <div class="form-row" *ngIf="newItem.infraTarifs && newItem.infraTarifs.length > 0">
+            <div class="form-group col-md-12">
+                <table class="table table-normal">
+                    <thead>
+                    <tr>
+                        <th>Fréquence</th>
+                        <th>Tarif</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let tarif of newItem.infraTarifs; let i = index">
+                        <td>{{ tarif.frequence.libelle }}</td>
+                        <td>{{ tarif.tarifInfra }}</td>
+                        <td>
+                            <button type="button" class="btn btn-delete" (click)="removeTarif(i)" title="Supprimer tarif">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="modal-footer">
             <button type="button" class="btn btn-grey" (click)="onCancel()">Annuler</button>
-            <button type="submit" class="btn btn-blue" [disabled]="addForm.invalid"><i class="fas fa-save"></i>Enregistrer</button>
+            <button type="submit" class="btn btn-blue" [disabled]="addForm.invalid"><i class="fas fa-save"></i> Enregistrer</button>
         </div>
     </form>
 </div>
@@ -127,7 +158,7 @@
                 <div class="form-group col-md-6 col-lg-10">
                     <label>Catégorie du Modèle</label>
                     <select class="form-control" [ngModel]="newModele.catInfra?.id ?? null" name="modeleCategorie" (ngModelChange)="newModele.catInfra.id = $event" required>
-                        <option [ngValue]="null" >-- Sélectionnez catégorie --</option>
+                        <option [ngValue]="null">-- Sélectionnez catégorie --</option>
                         <option *ngFor="let category of categories" [value]="category.id">{{ category.nom }}</option>
                     </select>
                 </div>

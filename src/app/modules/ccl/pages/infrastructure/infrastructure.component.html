@@ -16,10 +16,9 @@
                 <span>entrée(s)</span>
             </div>
             <div class="action-buttons">
-                <button type="button" class="btn btn-add" (click)="openAddModal(addModal)"><i class="fa fa-plus"></i>Ajouter une nouvelle infrastructure</button>
+                <button type="button" class="btn btn-add" (click)="openAddModalPopup()"><i class="fa fa-plus"></i>Ajouter une nouvelle infrastructure</button>
                 <button type="button" class="btn btn-select" (click)="toggleSelectionMode()" title="{{ isSelectionMode ? 'Annuler la sélection' : 'Sélectionner des entrées' }}"><i class="fa" [ngClass]="isSelectionMode ? 'fa-times' : 'fa-check-square'"></i> {{ isSelectionMode ? 'Annuler' : 'Sélectionner pour supprimer' }}</button>
                 <button type="button" class="btn btn-delete" (click)="openDeleteModal(deleteModal)" title="Supprimer les entrées sélectionnées" [disabled]="selectedCount === 0" *ngIf="isSelectionMode"><i class="fa fa-trash"></i>Supprimer</button>
-<!--                <button type="button" class="btn btn-search" (click)="toggleSearchForm()"><i class="fa fa-search"></i>Cliquez pour rechercher</button>-->
             </div>
         </div>
 
@@ -90,10 +89,10 @@
                     <th *ngIf="isSelectionMode" class="checkbox-column">
                         <input type="checkbox" [(ngModel)]="selectAll" (ngModelChange)="toggleSelectAll()">
                     </th>
+                    <th class="sortable">Categorie</th>
                     <th class="sortable">Modèle Infra</th>
                     <th class="sortable">Capacité</th>
                     <th class="sortable" >Nom</th>
-                    <th class="sortable" >Tarif (Ariary) </th>
                     <th class="sortable" >Localisation </th>
                     <th class="action-column"></th>
                 </tr>
@@ -104,14 +103,15 @@
                         <td *ngIf="isSelectionMode" class="checkbox-column">
                             <input type="checkbox" [(ngModel)]="selectedIds[item.id]" (ngModelChange)="updateSelect(item.id)">
                         </td>
+                        <td class="nom-column">{{item.modeleInfra.catInfra.nom}}</td>
                         <td class="nom-column">{{item.modeleInfra.nom}}</td>
                         <td class="nom-column">{{item.capacite}}</td>
                         <td class="nom-column">{{item.nom}}</td>
-                        <td class="nom-column">{{item.prix}}</td>
                         <td class="nom-column">{{item.localisation.nom}}</td>
                         <td class="action-column action-buttons-cell">
                             <button class="btn btn-eye" (click)="navigateToDetail(item.id)"><i class="fas fa-info-circle"></i>Detail</button>
-                            <button type="button" class="btn btn-black" (click)="navigateToMovements(item.id)"><i class="fas fa-exchange-alt"></i>Voir ses mouvements</button>
+                            <button type="button" class="btn btn-black" (click)="navigateToMovements(item.id)"><i class="fas fa-exchange-alt"></i>ses mouvements</button>
+                            <button class="btn btn-blue" (click)="openTarifsComponent(item.id)"><i class="fas fa-dollar-sign"></i>voir tarif(s)</button>
                         </td>
                     </tr>
                 </ng-container>
@@ -126,7 +126,7 @@
                 <div class="pagination-buttons">
                     <span *ngFor="let page of pageNumbers" class="page-number btn btn-blue page-animation" [class.active]="page === currentPage + 1" (click)="changePage(page)">{{page}}</span>
                 </div>
-                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage + 1 === totalPages" (click)="changePage(currentPage + 2)" >suivant > </button>
+                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage + 1 === totalPages || totalPages===0" (click)="changePage(currentPage + 2)" >suivant > </button>
             </div>
         </div>
     </div>
@@ -145,20 +145,5 @@
         </div>
     </ng-template>
 
-    <ng-template #addModal let-modal>
-        <div class="modal-header">
-            <h5 class="modal-title">Ajouter une Nouvelle Infrastructure</h5>
-            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
-        </div>
-        <app-infrastructure-add-form
-                [newItem]="newItem"
-                [localisations]="localisations"
-                [etats]="etats"
-                [categories]="categories"
-                [filteredModeles]="filteredModeles"
-                (submitForm)="addItem($event); modal.close('Save click')"
-                (cancel)="modal.dismiss('Cancel click')"
-                (categoryChange)="onCategoryChange($event)">
-        </app-infrastructure-add-form>
-    </ng-template>
+
 </div>

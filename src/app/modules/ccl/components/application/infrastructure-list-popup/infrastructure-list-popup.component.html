@@ -1,12 +1,10 @@
-<div class="modal-content">
-    <app-loading [loading]="isLoading"></app-loading>
 
+    <app-loading [loading]="isLoading"></app-loading>
     <div class="modal-body">
         <div class="action-buttons">
             <button type="button" class="btn btn-add" (click)="openAddModal(addModal)">
                 <i class="fa fa-plus"></i> Ajouter Infrastructure
             </button>
-
         </div>
 
         <div class="table-controls">
@@ -24,7 +22,7 @@
                                     [(ngModel)]="searchCriteria.modeleInfra.catInfra.id"
                                     [ngModel]="searchCriteria.modeleInfra.catInfra.id ?? null"
                                     name="catInfra"
-                                    (ngModelChange)="onCategoryChange($event)"
+                                    (ngModelChange)="onCategoryChange(searchCriteria.modeleInfra.catInfra.id)"
                             >
                                 <option [ngValue]="null">Toutes</option>
                                 <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.nom }}</option>
@@ -117,7 +115,6 @@
                     [filteredModeles]="filteredModeles"
                     (submitForm)="handleAddFormSubmit($event); modal.close('Save click')"
                     (cancel)="modal.dismiss('Cancel click')"
-                    (categoryChange)="onCategoryChange($event)"
             ></app-infrastructure-add-form>
         </div>
     </ng-template>
@@ -135,4 +132,3 @@
             <button class="toast-close" (click)="closeToast()">×</button>
         </div>
     </div>
-</div>

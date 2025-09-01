@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbModalOptions} from '@ng-bootstrap/ng-bootstrap';
 import { Router } from '@angular/router';
 import { BaseCrudComponent, Page } from '../../components/base/base-crud.component';
 import { Infrastructure } from '../../model/infrastructure/infrastructure';
@@ -14,6 +14,12 @@ import { CategorieInfra } from '../../model/categorie-infra/categorie-infra';
 import { CategorieInfraService } from '../../services/categorie-infra/categorie-infra.service';
 import { ToastrService } from 'ngx-toastr';
 import { DetailInfrastructureComponent } from '../../components/application/detail-infrastructure/detail-infrastructure.component';
+import {
+  InfrastructureAddFormComponent
+} from "../../components/application/infrastructure-add-form/infrastructure-add-form.component";
+import {
+  InfraTarifListpopupComponent
+} from "../../components/application/infra-tarif-listpopup/infra-tarif-listpopup.component";
 
 @Component({
   selector: 'app-infra-crud',
@@ -200,8 +206,33 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
     });
   }
 
+  openAddModalPopup() {
+    this.newItem = this.initializeNewItem();
+    const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
+    const modalComponent = this.modalService.open(InfrastructureAddFormComponent, options);
+    modalComponent.componentInstance.newItem = this.newItem;
+    modalComponent.componentInstance.localisations = this.localisations;
+    modalComponent.componentInstance.etats = this.etats;
+    modalComponent.componentInstance.categories = this.categories;
+    modalComponent.componentInstance.filteredModeles = this.filteredModeles;
+    modalComponent.componentInstance.submitForm.subscribe((event: any) => {
+      this.addItem(event);
+      modalComponent.close('Save click');
+    });
+    modalComponent.componentInstance.cancel.subscribe(() => {
+      modalComponent.dismiss('Cancel click');
+    });
+    // modalComponent.componentInstance.categoryChange.subscribe((event: any) => {
+    //   this.onCategoryChange(event);
+    // });
+  }
+
   navigateToDetail(id: string) {
     const modalRef = this.modalService.open(DetailInfrastructureComponent, { size: 'lg', centered: true, backdrop: 'static' });
+    modalRef.componentInstance.infrastructureId = id;
+  }
+  openTarifsComponent(id: string) {
+    const modalRef = this.modalService.open(InfraTarifListpopupComponent, { size: 'lg', centered: true, backdrop: 'static' });
     modalRef.componentInstance.infrastructureId = id;
   }
 

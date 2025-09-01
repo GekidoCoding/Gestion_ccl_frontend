@@ -16,7 +16,6 @@
             <table class="table table-normal" *ngIf="items.length > 0">
                 <thead>
                 <tr>
-                    <th>infrastructure</th>
                     <th>Client</th>
                     <th>periode de debut</th>
                     <th>periode de fin</th>
@@ -25,7 +24,6 @@
                 </thead>
                 <tbody>
                     <tr *ngFor="let item of items" class="row-animation">
-                        <td class="name-column">{{item.infrastructure.nom}} </td>
                         <td class="name-column">{{item.client.nom}}</td>
                         <td class="name-column">{{item.periodeDebut}}</td>
                         <td class="name-column">{{item.periodeDebut}}</td>

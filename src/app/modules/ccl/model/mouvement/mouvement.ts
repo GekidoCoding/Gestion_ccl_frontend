@@ -3,6 +3,7 @@ import {Infrastructure} from "../infrastructure/infrastructure";
 import {Gestionnaire} from "../gestionnaire/gestionnaire";
 import {Etat} from "../etat/etat";
 import {TypeMouvement} from "../type-mouvement/type-mouvement";
+import {MouvementInfra} from "../mouvement-infra/mouvement-infra";
 
 export class Mouvement {
     id!: string;
@@ -13,6 +14,7 @@ export class Mouvement {
     periodeFin!: string;
     dhMouvement!: string;
     nombre!:number;
+    mouvementInfras!:MouvementInfra[];
 
     constructor() {
         this.typeMouvement = new TypeMouvement();

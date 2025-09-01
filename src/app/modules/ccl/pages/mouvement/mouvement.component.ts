@@ -4,7 +4,6 @@ import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { BaseCrudComponent } from '../../components/base/base-crud.component';
 import { Mouvement } from '../../model/mouvement/mouvement';
-import { Infrastructure } from '../../model/infrastructure/infrastructure';
 import { MouvementService } from '../../services/mouvement/mouvement.service';
 import { InfrastructureService } from '../../services/infrastructure/infrastructure.service';
 import { TypeMouvement } from '../../model/type-mouvement/type-mouvement';
@@ -20,11 +19,12 @@ import { Page } from '../../interface/page.interface';
 import { TypeMouvementService } from '../../services/type-mouvement/type-mouvement.service';
 import { DetailInfrastructureComponent } from '../../components/application/detail-infrastructure/detail-infrastructure.component';
 import { HistoriqueMvtPopupComponent } from '../../components/application/historique-mvt-popup/historique-mvt-popup.component';
-import {MouvementDetailComponent} from "../../components/application/mouvement-detail/mouvement-detail.component";
-import {ClientDetailComponent} from "../../components/application/client-detail/client-detail.component";
-import {CategorieInfraService} from "../../services/categorie-infra/categorie-infra.service";
-import {CategorieInfra} from "../../model/categorie-infra/categorie-infra";
-import {MouvementAddComponent} from "../../components/application/mouvement-add/mouvement-add.component";
+import { MouvementDetailComponent } from '../../components/application/mouvement-detail/mouvement-detail.component';
+import { ClientDetailComponent } from '../../components/application/client-detail/client-detail.component';
+import { CategorieInfraService } from '../../services/categorie-infra/categorie-infra.service';
+import { CategorieInfra } from '../../model/categorie-infra/categorie-infra';
+import { MouvementAddComponent } from '../../components/application/mouvement-add/mouvement-add.component';
+import {MouvementInfrasPopupComponent} from "../../components/application/mouvement-infras-popup/mouvement-infras-popup/mouvement-infras-popup.component";
 
 @Component({
   selector: 'app-mouvement',
@@ -32,21 +32,20 @@ import {MouvementAddComponent} from "../../components/application/mouvement-add/
   styleUrls: ['./mouvement.component.scss']
 })
 export class MouvementComponent extends BaseCrudComponent<Mouvement> implements OnInit {
-  infrastructure: Infrastructure = new Infrastructure();
   client: Client = new Client();
   typeMouvements: TypeMouvement[] = [];
   clients: Client[] = [];
   typeClients: TypeClient[] = [];
   gestionnaires: Gestionnaire[] = [];
   etats: Etat[] = [];
-  type:string ='all';
-  id:string ='';
+  type: string = 'all';
+  id: string = '';
   newItem: Mouvement = new Mouvement();
   latestMovement: string | null = null;
   categories: CategorieInfra[] = [];
-  searchCriteria:Mouvement = new Mouvement();
-  periodeDebut:string='';
-  periodeFin:string='';
+  searchCriteria: Mouvement = new Mouvement();
+  periodeDebut: string = '';
+  periodeFin: string = '';
 
   constructor(
       private route: ActivatedRoute,
@@ -60,16 +59,14 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
       private etatService: EtatService,
       private typeClientService: TypeClientService,
       private catInfraService: CategorieInfraService,
-
       protected toastr: ToastrService
   ) {
     super(modalService, toastr);
   }
 
   ngOnInit() {
-    this.type= this.route.snapshot.paramMap.get('type') || '';
-    this.id = this.route.snapshot.paramMap.get('id')|| '';
-
+    this.type = this.route.snapshot.paramMap.get('type') || '';
+    this.id = this.route.snapshot.paramMap.get('id') || '';
     this.loadMain();
     this.loadTypeMouvements();
     this.loadClients();
@@ -78,19 +75,16 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
     this.loadGestionnaires();
     this.loadEtats();
     this.loadData();
-
   }
-  loadMain(){
-    if(this.type==='infrastructure'){
-      this.loadInfrastructure(this.id);
-    }
-    if(this.type==='client'){
-      console.log("client ... :"+this.id);
+
+  loadMain() {
+    if (this.type === 'client') {
+      console.log("client ... :" + this.id);
       this.loadClient(this.id);
     }
   }
 
-  loadClient( id:string) {
+  loadClient(id: string) {
     if (id) {
       this.clientService.getById(id).subscribe({
         next: (data) => {
@@ -99,22 +93,7 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
         },
         error: (error) => {
           console.error('Error loading client:', error);
-          this.toastr.error('Erreur lors du chargement du client ');
-        }
-      });
-    }
-  }
-
-  loadInfrastructure( id:string) {
-    if (id) {
-      this.infrastructureService.getById(id).subscribe({
-        next: (data) => {
-          this.infrastructure = data;
-          this.newItem.infrastructure = this.infrastructure;
-        },
-        error: (error) => {
-          console.error('Error loading infrastructure:', error);
-          this.toastr.error('Erreur lors du chargement de l\'infrastructure');
+          this.toastr.error('Erreur lors du chargement du client');
         }
       });
     }
@@ -193,98 +172,71 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
       }
     });
   }
-  loadAll(){
-    this.loadMain();
-    // this.loadTypeMouvements();
-    this.loadClients();
-    // this.loadCategories();
-    // this.loadTypeClients();
-    // this.loadGestionnaires();
-    // this.loadEtats();
-    this.loadData();
 
+  loadAll() {
+    this.loadMain();
+    this.loadClients();
+    this.loadData();
   }
+
   loadData() {
     this.isLoading = true;
-      if(this.type==='infrastructure'){
-        this.mouvementService.getByInfrastructurePaginated(this.id, this.currentPage, this.itemsPerPage).subscribe({
-          next: (page: Page<Mouvement>) => {
-            this.items = page.content;
-            this.totalPages = page.totalPages;
-            this.totalItems = page.totalElements;
-            this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-            this.latestMovement = (this.items.length > 0 ? this.items[0].dhMouvement.replace("T" , " ") : null);
-
-            this.isLoading = false;
-          },
-          error: (error) => {
-            console.error('Error loading movements:', error);
-            this.toastr.error('Erreur lors du chargement des mouvements');
-            this.isLoading = false;
-          }
-        });
-      }
-      else if(this.type==='client'){
-        console.log("client loading ... ");
-        this.mouvementService.getByClientPaginated(this.id, this.currentPage, this.itemsPerPage).subscribe({
-          next: (page: Page<Mouvement>) => {
-            this.items = page.content;
-            this.totalPages = page.totalPages;
-            this.totalItems = page.totalElements;
-            this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-            this.latestMovement = (this.items.length > 0 ? this.items[0].dhMouvement.replace("T" , " ") : null);
-
-            this.isLoading = false;
-          },
-          error: (error) => {
-            console.error('Error loading mouvements:', error);
-            this.toastr.error('Erreur lors du chargement des mouvements');
-            this.isLoading = false;
-          }
-        });
-      }
-      else {
-        console.log("here ... ");
-        this.mouvementService.getPaginated(this.currentPage, this.itemsPerPage).subscribe({
-          next: (page: Page<Mouvement>) => {
-            this.items = page.content;
-            this.totalPages = page.totalPages;
-            this.totalItems = page.totalElements;
-            this.pageNumbers = Array.from({length: this.totalPages}, (_, i) => i + 1);
-            this.latestMovement = (this.items.length > 0 ? this.items[0].dhMouvement.replace("T", " ") : null);
-            this.isLoading = false;
-          },
-          error: (error) => {
-            console.error('Error loading mouvements:', error);
-            this.toastr.error('Erreur lors du chargement des mouvements');
-            this.isLoading = false;
-          }
-        });
-      }
+    if (this.type === 'client') {
+      console.log("client loading ... ");
+      this.mouvementService.getByClientPaginated(this.id, this.currentPage, this.itemsPerPage).subscribe({
+        next: (page: Page<Mouvement>) => {
+          this.items = page.content;
+          this.totalPages = page.totalPages;
+          this.totalItems = page.totalElements;
+          this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+          this.latestMovement = (this.items.length > 0 ? this.items[0].dhMouvement.replace("T", " ") : null);
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading mouvements:', error);
+          this.toastr.error('Erreur lors du chargement des mouvements');
+          this.isLoading = false;
+        }
+      });
+    } else {
+      console.log("here ... ");
+      this.mouvementService.getPaginated(this.currentPage, this.itemsPerPage).subscribe({
+        next: (page: Page<Mouvement>) => {
+          this.items = page.content;
+          this.totalPages = page.totalPages;
+          this.totalItems = page.totalElements;
+          this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+          this.latestMovement = (this.items.length > 0 ? this.items[0].dhMouvement.replace("T", " ") : null);
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading mouvements:', error);
+          this.toastr.error('Erreur lors du chargement des mouvements');
+          this.isLoading = false;
+        }
+      });
+    }
   }
 
   public applySearch(): void {
-    this.searchCriteria.periodeDebut=this.periodeDebut;
-    this.searchCriteria.periodeFin=this.periodeFin;
-    this.mouvementService.getCriteria(this.currentPage , this.itemsPerPage, this.searchCriteria ).subscribe({
-      next:(page: Page<Mouvement>)=>{
-        this.items=page.content;
+    this.searchCriteria.periodeDebut = this.periodeDebut;
+    this.searchCriteria.periodeFin = this.periodeFin;
+    this.mouvementService.getCriteria(this.currentPage, this.itemsPerPage, this.searchCriteria).subscribe({
+      next: (page: Page<Mouvement>) => {
+        this.items = page.content;
         this.totalPages = page.totalPages;
         this.totalItems = page.totalElements;
-        this.pageNumbers = Array.from({length: this.totalPages}, (_, i) => i + 1);
+        this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
         this.latestMovement = (this.items.length > 0 ? this.items[0].dhMouvement.replace("T", " ") : null);
         this.isLoading = false;
-
-      } ,
+      },
       error: (error) => {
         console.error('Error loading mouvements:', error);
         this.toastr.error('Erreur lors du chargement des mouvements');
         this.isLoading = false;
       }
-    })
-    // console.log("Searching ... ");
+    });
   }
-
 
   initializeNewItem(): Partial<Mouvement> {
     return new Mouvement();
@@ -308,33 +260,39 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
 
   openAddModal() {
     const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
-    const component= this.modalService.open(MouvementAddComponent, options);
-    component.componentInstance.infrastructure=this.infrastructure;
-    component.componentInstance.client=this.client;
-    component.componentInstance.afterAdd.subscribe(()=>this.loadAll());
+    const component = this.modalService.open(MouvementAddComponent, options);
+    component.componentInstance.client = this.client;
+    component.componentInstance.afterAdd.subscribe(() => this.loadAll());
   }
 
   openMouvementDetail(mouvementId: string) {
     const modal = this.modalService.open(MouvementDetailComponent, { size: 'lg', centered: true, backdrop: 'static' });
     modal.componentInstance.mouvementId = mouvementId;
-    modal.componentInstance.afterAction.subscribe(()=> {
+    modal.componentInstance.afterAction.subscribe(() => {
       this.loadAll();
     });
+  }
+
+  openInfrasPopup(mouvement: Mouvement) {
+    const modal = this.modalService.open(MouvementInfrasPopupComponent, { size: 'lg', centered: true, backdrop: 'static' });
+    modal.componentInstance.mouvementInfras = mouvement.mouvementInfras || [];
+    modal.componentInstance.mouvementId = mouvement.id;
+    modal.componentInstance.afterEmit.subscribe(() => {
+      this.loadAll();
+    })
   }
 
   navigateToDetailInfra(id: string) {
     const modal = this.modalService.open(DetailInfrastructureComponent, { size: 'lg', centered: true, backdrop: 'static' });
     modal.componentInstance.infrastructureId = id;
-    modal.componentInstance.loadData.subscribe( ()=>{
+    modal.componentInstance.loadData.subscribe(() => {
       this.loadData();
-      this.loadInfrastructure(id);
-    }) ;
+    });
   }
 
-
   navigateToDetailClient(id: string) {
-    const options :NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
-    const component =  this.modalService.open(ClientDetailComponent, options);
+    const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
+    const component = this.modalService.open(ClientDetailComponent, options);
     component.componentInstance.clientId = id;
     component.componentInstance.loadData.subscribe(() => {
       this.loadData();
@@ -342,9 +300,7 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
     });
   }
 
-  openDetailModal(item:Client) {
-
-  }
+  openDetailModal(item: Client) {}
 
   openClientAddModal(content: any) {
     const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
@@ -352,7 +308,7 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
   }
 
   handleAddMouvement(mouvement: Mouvement) {
-    console.log("mouvement in handle :"+ JSON.stringify(mouvement));
+    console.log("mouvement in handle :" + JSON.stringify(mouvement));
     this.mouvementService.create(mouvement).subscribe({
       next: (created) => {
         this.loadData();
@@ -368,7 +324,7 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
   handleClientAdd(client: Client) {
     this.clientService.create(client).subscribe({
       next: (created) => {
-        this.loadClients(); // Refresh client list
+        this.loadClients();
         this.toastr.success('Client ajouté avec succès !');
       },
       error: (error) => {
@@ -390,6 +346,4 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
     const modal = this.modalService.open(HistoriqueMvtPopupComponent, { size: 'lg', centered: true, backdrop: 'static' });
     modal.componentInstance.mouvementId = mouvementId;
   }
-
-
 }

@@ -125,7 +125,7 @@
                 <div class="pagination-buttons">
                     <span *ngFor="let page of pageNumbers" class="page-number btn btn-blue page-animation" [class.active]="page === currentPage + 1" (click)="changePage(page)">{{page}}</span>
                 </div>
-                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage + 1 === totalPages" (click)="changePage(currentPage + 2)" title="Page suivante">></button>
+                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage + 1 === totalPages  || totalPages===0" (click)="changePage(currentPage + 2)" title="Page suivante">></button>
             </div>
         </div>
     </div>

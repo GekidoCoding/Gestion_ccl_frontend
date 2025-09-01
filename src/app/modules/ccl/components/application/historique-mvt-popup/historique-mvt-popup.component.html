@@ -15,13 +15,13 @@
                     <label>Type</label>
                     <p>{{ selectedMouvement.typeMouvement.nom || 'N/A' }}</p>
                 </div>
-                <div class="form-group col-md-2">
-                    <label>Infrastructure</label>
-                    <p>{{ selectedMouvement.infrastructure.nom || 'N/A' }}</p>
-                </div>
+
                 <div class="form-group col-md-2">
                     <label>Client</label>
                     <p>{{ componentUtil.getClientName(selectedMouvement.client) }}</p>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-green" (click)="openInfrasPopup(selectedMouvement)" >Voir Infrastructures Concernées</button>
                 </div>
             </div>
         </div>

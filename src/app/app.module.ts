@@ -9,26 +9,31 @@ import { GeneralModule } from './modules/general/general.module';
 import { ToastrModule } from 'ngx-toastr';
 import { ApiInterceptor } from './modules/general/interceptors/api.interceptor';
 import { NgxSpinnerModule } from 'ngx-spinner';
+import { FrequenceComponent } from './modules/ccl/pages/frequence/frequence/frequence.component';
+import {FormsModule} from "@angular/forms";
+import { InfraTarifListpopupComponent } from './modules/ccl/components/application/infra-tarif-listpopup/infra-tarif-listpopup.component';
+import { MouvementInfrasPopupComponent } from './modules/ccl/components/application/mouvement-infras-popup/mouvement-infras-popup/mouvement-infras-popup.component';
 
 
 @NgModule({
-  declarations: [AppComponent],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    HttpClientModule,
-    GeneralModule,
-    NgxSpinnerModule,
+  declarations: [AppComponent, FrequenceComponent, InfraTarifListpopupComponent, MouvementInfrasPopupComponent],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        HttpClientModule,
+        GeneralModule,
+        NgxSpinnerModule,
 
-    ToastrModule.forRoot({
-      timeOut: 7000,
-      closeButton: true,
-      enableHtml: true,
-      toastClass: 'alert',
-      positionClass: 'toast-bottom-right',
-    }),
-  ],
+        ToastrModule.forRoot({
+            timeOut: 7000,
+            closeButton: true,
+            enableHtml: true,
+            toastClass: 'alert',
+            positionClass: 'toast-bottom-right',
+        }),
+        FormsModule,
+    ],
   providers: [
     {
       provide: HTTP_INTERCEPTORS,

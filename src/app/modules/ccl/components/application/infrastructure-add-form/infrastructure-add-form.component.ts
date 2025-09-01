@@ -1,23 +1,26 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { Infrastructure } from '../../../model/infrastructure/infrastructure';
 import { Localisation } from '../../../model/localisation/localisation';
 import { Etat } from '../../../model/etat/etat';
 import { CategorieInfra } from '../../../model/categorie-infra/categorie-infra';
 import { ModeleInfra } from '../../../model/modele-infra/modele-infra';
+import { InfraTarif } from '../../../model/infra-tarif/infra-tarif';
+import { Frequence } from '../../../model/frequence/frequence';
 import { LocalisationService } from '../../../services/localisation/localisation.service';
 import { CategorieInfraService } from '../../../services/categorie-infra/categorie-infra.service';
 import { ModeleInfraService } from '../../../services/modele-infra/modele-infra.service';
+import { FrequenceService } from '../../../services/frequence/frequence.service';
 
 @Component({
   selector: 'app-infrastructure-add-form',
   templateUrl: './infrastructure-add-form.component.html',
   styleUrls: ['./infrastructure-add-form.component.scss']
 })
-export class InfrastructureAddFormComponent {
-  @Input() newItem: Partial<Infrastructure> = new Infrastructure();
+export class InfrastructureAddFormComponent implements OnInit {
+  @Input() newItem: Infrastructure = new Infrastructure();
   @Input() localisations: Localisation[] = [];
   @Input() etats: Etat[] = [];
   @Input() categories: CategorieInfra[] = [];
@@ -28,32 +31,86 @@ export class InfrastructureAddFormComponent {
   newLocalisation: Localisation = new Localisation();
   newCategory: CategorieInfra = new CategorieInfra();
   newModele: ModeleInfra = new ModeleInfra();
-
-
+  frequences: Frequence[] = [];
+  availableFrequences: Frequence[] = [];
+  selectedFrequenceId: string | null = null;
+  newTarif: number | null = null;
+  allModeles: ModeleInfra[] = [];
   constructor(
       private modalService: NgbModal,
+      public modal: NgbActiveModal,
       private localisationService: LocalisationService,
       private catInfraService: CategorieInfraService,
       private modeleInfraService: ModeleInfraService,
+      private frequenceService: FrequenceService,
       private toastr: ToastrService
   ) {
     this.newModele.catInfra = new CategorieInfra();
+    this.newItem.infraTarifs = [];
+  }
+
+  ngOnInit() {
+    this.loadFrequences();
+    this.allModeles = [...this.filteredModeles];
+  }
+
+  loadFrequences() {
+    this.frequenceService.getAll().subscribe({
+      next: (frequences) => {
+        this.frequences = frequences;
+        this.updateAvailableFrequences();
+      },
+      error: (error) => {
+        console.error('Error loading frequences:', error);
+        this.toastr.error('Erreur lors du chargement des fréquences');
+      }
+    });
+  }
+
+  updateAvailableFrequences() {
+    const usedFrequenceIds = new Set(this.newItem.infraTarifs?.map(tarif => tarif.frequence.id) || []);
+    this.availableFrequences = this.frequences.filter(frequence => !usedFrequenceIds.has(frequence.id));
+  }
+
+
+  addTarif() {
+    if (this.selectedFrequenceId && this.newTarif && this.newTarif > 0) {
+      const frequence = this.frequences.find(f => f.id === this.selectedFrequenceId);
+      if (frequence) {
+        const infraTarif = new InfraTarif();
+        infraTarif.frequence = frequence;
+        infraTarif.tarifInfra = this.newTarif;
+        infraTarif.infrastructure = new Infrastructure(); // Will be set by backend
+        this.newItem.infraTarifs!.push(infraTarif);
+        this.updateAvailableFrequences();
+        this.selectedFrequenceId = null;
+        this.newTarif = null;
+        console.log("tarif ajouter :"+ JSON.stringify( this.newItem.infraTarifs));
+        // this.toastr.success('Tarif ajouté à la liste');
+      }
+    } else {
+      this.toastr.error('Veuillez sélectionner une fréquence et entrer un tarif valide');
+    }
+  }
+
+  removeTarif(index: number) {
+    this.newItem.infraTarifs!.splice(index, 1);
+    this.updateAvailableFrequences();
+    this.toastr.success('Tarif supprimé de la liste');
+  }
+
+  onFrequenceChange(frequenceId: string) {
+    this.selectedFrequenceId = frequenceId;
   }
 
   onSubmit(form: NgForm) {
     if (form.valid) {
-      const obj: Infrastructure = new Infrastructure();
-      obj.nom = this.newItem.nom!;
-      obj.numero = this.newItem.numero!;
-      obj.capacite = this.newItem.capacite!;
-      obj.localisation = this.localisations.find(loc => loc.id === this.newItem.localisation!.id)!;
-      obj.elements = this.newItem.elements!;
-      obj.prix = this.newItem.prix!;
-      obj.etat = this.etats.find(et => et.id === this.newItem.etat!.id)!;
-      obj.modeleInfra = this.filteredModeles.find(m => m.id === this.newItem.modeleInfra!.id)!;
+      const obj: Infrastructure = this.newItem ;
+      console.log("infra envoyer :", JSON.stringify(obj));
       this.submitForm.emit(obj);
     }
   }
+
 
   onCancel() {
     this.cancel.emit();
@@ -130,6 +187,15 @@ export class InfrastructureAddFormComponent {
   }
 
   onCategoryChange(categoryId: string) {
+    if (categoryId) {
+      this.filteredModeles = this.allModeles.filter(m => m.catInfra.id === categoryId);
+    } else {
+      this.filteredModeles = [...this.allModeles];
+    }
+
+    this.newItem.modeleInfra = { id: '', nom: '', catInfra: { id: '', nom: '' } };
+
     this.categoryChange.emit(categoryId);
   }
+
 }
