@@ -6,6 +6,9 @@ import {FactureService} from "../../../../services/facture/facture.service";
 import {FactureAddComponent} from "../facture-add/facture-add.component";
 import {ComponentUtil} from "../../../../util/component-util";
 import {FactureDetailComponent} from "../facture-detail/facture-detail.component";
+import {
+  MouvementInfrasPopupComponent
+} from "../../mouvement-infras-popup/mouvement-infras-popup/mouvement-infras-popup.component";
 
 @Component({
   selector: 'app-facture-list-popup',
@@ -33,6 +36,12 @@ export class FactureListPopupComponent implements OnInit {
         }
       })
     }
+  }
+
+  openInfrasPopup(mouvement: Mouvement) {
+    const modal = this.modalService.open(MouvementInfrasPopupComponent, { size: 'lg', centered: true, backdrop: 'static' });
+    modal.componentInstance.mouvementInfras = mouvement.mouvementInfras || [];
+    modal.componentInstance.mouvementId = mouvement.id;
   }
   openAddFacture() {
     const options:NgbModalOptions= {size:'lg' , centered:true};

@@ -1,19 +1,16 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable, throwError} from 'rxjs';
+import {environment} from "../../../../../environments/environment";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConfigService {
-  private apiUrl = 'http://localhost:8080/cnaps/gestion/ccl/config';
+  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/config';
 
   constructor(private http: HttpClient) {}
 
-  private handleError(error: any): Observable<never> {
-    console.error('API error:', error);
-    return throwError(() => new Error('Une erreur s\'est produite.'));
-  }
 
   getReservationId(): Observable<string> {
     return this.http.get(`${this.apiUrl}/type_reservation/id`, { responseType: 'text' });

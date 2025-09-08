@@ -1,4 +1,5 @@
 @import "../../../components/base/base-crud.component";
+
 .main-content-dashboard {
   position: relative;
   padding: 20px;
@@ -16,67 +17,102 @@
   }
 }
 
+/* === FILTRES + RESULT COUNT === */
 .filter-form-container {
-  //position: fixed;
-
-  background: white;
+  background: #fff;
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  margin-bottom: 25px;
+}
+
+.results-count {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #444;
+  background: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 4px solid #28a745;
 }
 
 .filter-form-container form {
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 20px;
   align-items: flex-end;
 }
 
+/* === FORM INPUTS === */
 .form-group {
   flex: 1;
-  min-width: 200px;
+  min-width: 220px;
 }
 
 .form-group label {
   display: block;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: #333;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 
 .form-control {
   width: 100%;
-  padding: 8px;
+  padding: 8px 10px;
   border: 1px solid #ddd;
-  border-radius: 5px;
+  border-radius: 6px;
   font-size: 14px;
   color: #333;
+  transition: all 0.2s ease;
 }
 
 .form-control:focus {
   outline: none;
   border-color: #28a745;
-  box-shadow: 0 0 5px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 0 6px rgba(40, 167, 69, 0.25);
 }
 
+/* === CHECKBOXES GROUP === */
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  padding: 5px 0;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.checkbox-item input[type="checkbox"] {
+  accent-color: #28a745;
+  width: 16px;
+  height: 16px;
+}
+
+/* === BOUTON FILTRER === */
 .btn-primary-dashboard {
   background-color: #28a745;
   border: none;
-  padding: 10px 20px;
-  margin-bottom: 18px;
-  border-radius: 5px;
+  padding: 10px 24px;
+  border-radius: 6px;
   color: white;
   font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
-.btn-primary:hover {
+.btn-primary-dashboard:hover {
   background-color: #218838;
 }
 
+/* === STATS CARDS === */
 .stats-container {
   display: flex;
   flex-wrap: wrap;
@@ -87,7 +123,7 @@
   flex: 1;
   min-width: 200px;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   gap: 15px;
@@ -98,10 +134,11 @@
 .stat-card.card-green { background-color: #28a745; color: white; }
 .stat-card.card-red { background-color: #dc3545; color: white; }
 
-.stat-icon i { font-size: 24px; }
-.stat-content h3 { margin: 0; font-size: 24px; }
+.stat-icon i { font-size: 26px; }
+.stat-content h3 { margin: 0; font-size: 26px; }
 .stat-content p { margin: 5px 0 0; font-size: 14px; }
 
+/* === GRAPHIQUES === */
 .all-graph-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -112,9 +149,9 @@
 .chart-card {
   background: white;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 10px;
   min-height: 550px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .chart-card h3 {
@@ -130,12 +167,13 @@
   height: 450px;
 }
 
+/* === TABLE / ACTIVITES === */
 .list-container {
   margin-top: 20px;
   background: white;
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
 }
 
@@ -161,10 +199,10 @@
   border-bottom: 1px solid #eee;
 }
 
-.activity-text {margin-right: 10%; font-size: 14px; }
+.activity-text { margin-right: 10%; font-size: 14px; }
 .activity-date { font-size: 12px; color: #666; }
 
-/* Responsive adjustments */
+/* === RESPONSIVE === */
 @media (max-width: 768px) {
   .filter-form-container form {
     flex-direction: column;
@@ -175,7 +213,7 @@
     min-width: 100%;
   }
 
-  .btn-primary {
+  .btn-primary-dashboard {
     width: 100%;
   }
 }

@@ -249,6 +249,12 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
   overflow-x: auto;
   width: 100%;
 }
+.table-container {
+  width: 100%;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
 
 .table {
   width: 100%;
@@ -464,6 +470,7 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
 
   .btn {
     flex: 1;
+    margin-left: 10px;
   }
 }
 
@@ -482,6 +489,35 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
   }
 }
 
+.form-group-warning .form-control {
+  border-color: #f8f83f;
+  box-shadow: 0 0 8px #d5d520;
+}
+
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.9em;
+  margin-top: 5px;
+}
+
+.error-message i {
+  margin-right: 5px;
+}
+.warning-message {
+  color: #856404;
+  font-size: 0.9em;
+  margin-top: 5px;
+}
+
+.warning-message i {
+  margin-right: 5px;
+}
+
+.form-group-error .form-control {
+  border-color: #ff0000;
+  box-shadow: 0 0 8px #ff0000;
+}
 .btn {
   display: inline-flex;
   align-items: center;
@@ -529,6 +565,10 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
 
   &.btn-green {
     @include button-variant(#1a8a33);
+    font-size: clamp(0.7vw, 1rem, 1.2vw);
+  }
+  &.btn-none {
+    @include button-variant(rgba(26, 138, 51, 0.38));
     font-size: clamp(0.7vw, 1rem, 1.2vw);
   }
 

@@ -1,3 +1,4 @@
+<script src="mouvement-add.component.ts"></script>
 <div class="modal-header">
     <h5 class="modal-title">Ajouter un Mouvement</h5>
     <button type="button" class="close" (click)="activeModal.dismiss('Cross click')" aria-label="Close">
@@ -6,58 +7,86 @@
 </div>
 <div class="modal-body">
     <app-loading [loading]="isLoading"></app-loading>
-    <form (ngSubmit)="allActions()">
+    <form #mouvementForm="ngForm" (ngSubmit)="allActions()">
         <div class="form-row">
-            <div class="form-group col-md-12">
-                <label>Type de Mouvement</label>
-                <select class="form-control" [(ngModel)]="newItem.typeMouvement.id" name="typeMouvement" (change)="onTypeMouvementChange()">
-                    <option [ngValue]="null">--Sélectionnez le type de mouvement--</option>
+            <div class="form-group col-md-12" [ngClass]="{'form-group-error': typeMouvement.touched && !typeMouvement.valid}">
+                <label>Type de Mouvement <strong style="color: red">*</strong></label>
+                <select class="form-control" [(ngModel)]="newItem.typeMouvement.id" name="typeMouvement" [ngModel]="newItem.typeMouvement?.id??null"  #typeMouvement="ngModel" required (change)="onTypeMouvementChange()">
+                    <option [ngValue]="null">-- Sélectionnez le type de mouvement --</option>
                     <option *ngFor="let type of filteredTypeMouvements" [ngValue]="type.id">{{ type.nom }}</option>
                 </select>
+                <div class="error-message" *ngIf="typeMouvement.touched && !typeMouvement.valid">
+                    <i class="fas fa-exclamation-circle"></i> Le champ Type de Mouvement est requis.
+                </div>
             </div>
-            <div class="form-group col-md-12">
-                <label>Infrastructures Concernées :</label>
+            <div class="form-group col-md-12" [ngClass]="{'form-group-error': mouvementForm.submitted && (!mouvementInfrasValid || !frequencesValid)}">
+                <label>Infrastructures Concernées <strong style="color: red">*</strong>:</label>
                 <div class="input-group-append mb-3">
                     <button type="button" (click)="openPopup(infrastructureListModal)" class="btn btn-add">
                         <i class="fas fa-building"></i> Sélectionner une Infrastructure
                     </button>
+                </div>
+                <div class="error-message" *ngIf="mouvementForm.submitted && !mouvementInfrasValid">
+                    <i class="fas fa-exclamation-circle"></i> Veuillez sélectionner au moins une infrastructure.
                 </div>
                 <div class="table-responsive" *ngIf="newItem.mouvementInfras.length > 0">
                     <table class="table table-normal">
                         <thead>
                         <tr>
                             <th>Nom</th>
-                            <th>Numéro</th>
                             <th>Modèle</th>
-                            <th>Catégorie</th>
+                            <th>Capacité</th>
+                            <th>Fréquence</th>
                             <th>Action</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr *ngFor="let mvt of newItem.mouvementInfras; let i = index">
-                            <td>{{ mvt.infrastructure.nom || 'N/A' }}</td>
-                            <td>{{ mvt.infrastructure.numero || 'N/A' }}</td>
+                        <tr *ngFor="let mvt of newItem.mouvementInfras; let i = index; ">
+                            <td>{{ mvt.infrastructure.nom+" "+ mvt.infrastructure.numero || 'N/A' }}</td>
                             <td>{{ mvt.infrastructure.modeleInfra?.nom || 'N/A' }}</td>
-                            <td>{{ mvt.infrastructure.modeleInfra?.catInfra?.nom || 'N/A' }}</td>
+                            <td>{{ mvt.infrastructure.capacite || 'N/A' }}</td>
                             <td>
-                                <button type="button" class="btn btn-delete" (click)="removeInfrastructure(i)" title="Supprimer">
-                                    <i class="fas fa-trash"></i>
+                                <select
+                                        class="form-control"
+                                        [(ngModel)]="newItem.mouvementInfras[i].frequence.id"
+                                        name="frequence{{i}}"
+                                        #frequence="ngModel"
+                                        required
+                                        (ngModelChange)="onFrequenceChange()"
+                                        [ngClass]="{'form-group-error': frequence.touched && !frequence.valid}"
+                                >
+                                    <option [ngValue]="null">-- Sélectionnez la fréquence du tarif --</option>
+                                    <option *ngFor="let frequence of frequences" [ngValue]="frequence.id">{{ frequence.libelle }}</option>
+                                </select>
+                                <div class="error-message" *ngIf="frequence.touched && !frequence.valid">
+                                    <i class="fas fa-exclamation-circle"></i> La fréquence est requise.
+                                </div>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-delete" (click)="removeInfrastructure(i)">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                                <button class="btn btn-delete" style="color: #a1a100" (click)="openDetailModal(mvt.infrastructure.id)">
+                                    <i class="fa fa-info-circle"></i> Detail
                                 </button>
                             </td>
                         </tr>
                         </tbody>
                     </table>
-                </div>
-                <div class="no-results" *ngIf="newItem.mouvementInfras.length === 0">
-                    Aucune infrastructure sélectionnée
+                    <div class="error-message" *ngIf="mouvementForm.submitted && !frequencesValid">
+                        <i class="fas fa-exclamation-circle"></i> Toutes les fréquences des infrastructures concernées sont obligatoires.
+                    </div>
                 </div>
             </div>
-            <div class="form-group col-md-12">
-                <label>Client Concerné :</label>
+            <div class="form-group col-md-12" [ngClass]="{'form-group-error': mouvementForm.submitted && !clientValid}">
+                <label>Client Concerné <strong style="color: red">*</strong>:</label>
                 <div class="input-group-append mb-3">
-                    <button type="button" class="btn btn-add" (click)="openPopup(clientListModal)">
+                    <button type="button" (click)="openPopup(clientListModal)" class="btn btn-add">
                         <i class="fas fa-users"></i> Sélectionner un Client
                     </button>
+                </div>
+                <div class="error-message" *ngIf="mouvementForm.submitted && !clientValid">
+                    <i class="fas fa-exclamation-circle"></i> Veuillez sélectionner un client.
                 </div>
                 <div class="row" *ngIf="newItem?.client?.id">
                     <div class="col-md-6 mb-3">
@@ -70,10 +99,10 @@
                                 type="text"
                                 class="form-control"
                                 [value]="newItem.client?.typeClient?.typeClient === 'Entreprise'
-                            ? (newItem.client?.raisonSociale || 'N/A')
-                            : ((newItem.client?.nom && newItem.client?.prenom)
-                               ? newItem.client.nom + ' ' + newItem.client.prenom
-                               : 'N/A')"
+                                ? (newItem.client?.raisonSociale || 'N/A')
+                                : ((newItem.client?.nom && newItem.client?.prenom)
+                                   ? newItem.client.nom + ' ' + newItem.client.prenom
+                                   : 'N/A')"
                                 readonly
                         >
                     </div>
@@ -90,23 +119,42 @@
                         <input type="text" class="form-control" [value]="newItem.client.contacts || 'N/A'" readonly>
                     </div>
                 </div>
+
             </div>
-            <div class="form-group col-md-12" *ngIf="isReservation">
-                <label>Période de début de la réservation du client</label>
-                <input type="datetime-local" class="form-control" [(ngModel)]="newItem.periodeDebut" name="periodeDebut">
+            <div class="form-group col-md-12" *ngIf="isReservation" [ngClass]="{'form-group-error': periodeDebut.touched && (!periodeDebut.valid || !datesValid)}">
+                <label>Période de début de la réservation du client <strong style="color: red">*</strong></label>
+                <input type="datetime-local" class="form-control" [(ngModel)]="newItem.periodeDebut" name="periodeDebut" #periodeDebut="ngModel" required (change)="validateDates()">
+                <div class="error-message" *ngIf="periodeDebut.touched && !periodeDebut.valid">
+                    <i class="fas fa-exclamation-circle"></i> Le champ Période de début est requis.
+                </div>
+                <div class="error-message" *ngIf="periodeDebut.touched && periodeDebut.valid && !datesValid">
+                    <i class="fas fa-exclamation-circle"></i> La période de début ne peut pas être postérieure à la période de fin.
+                </div>
             </div>
-            <div class="form-group col-md-12" *ngIf="isReservation">
-                <label>Période fin de la réservation du client</label>
-                <input type="datetime-local" class="form-control" [(ngModel)]="newItem.periodeFin" name="periodeFin">
+            <div class="form-group col-md-12" *ngIf="isReservation" [ngClass]="{'form-group-error': periodeFin.touched && (!periodeFin.valid || !datesValid)}">
+                <label>Période fin de la réservation du client <strong style="color: red">*</strong></label>
+                <input type="datetime-local" class="form-control" [(ngModel)]="newItem.periodeFin" name="periodeFin" #periodeFin="ngModel" required (change)="validateDates()">
+                <div class="error-message" *ngIf="periodeFin.touched && !periodeFin.valid">
+                    <i class="fas fa-exclamation-circle"></i> Le champ Période de fin est requis.
+                </div>
+                <div class="error-message" *ngIf="periodeFin.touched && periodeFin.valid && !datesValid">
+                    <i class="fas fa-exclamation-circle"></i> La période de fin doit être postérieure à la période de début.
+                </div>
             </div>
-            <div class="form-group col-md-12" *ngIf="isReservation">
+            <div class="form-group col-md-12" *ngIf="isReservation" [ngClass]="{'form-group-warning': !capacityValid}">
                 <label>Nombre de Personnes</label>
-                <input type="number" class="form-control" [(ngModel)]="newItem.nombre" name="nombre">
+                <input type="number" class="form-control" [(ngModel)]="newItem.nombre" name="nombre" (ngModelChange)="validateCapacity()">
+                <div class="warning-message" *ngIf="!capacityValid">
+                    <i class="fas fa-exclamation-triangle"></i> Le nombre de personnes dépasse la capacité totale des infrastructures ({{ totalCapacity }}).
+                </div>
+            </div>
+            <div class="error-message" *ngIf="mouvementForm.submitted && (mouvementForm.invalid || !mouvementInfrasValid || !clientValid || !datesValid)">
+                <i class="fas fa-exclamation-circle"></i> Veuillez corriger les erreurs dans le formulaire avant de soumettre.
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-grey" (click)="activeModal.dismiss('Cross click')">Annuler</button>
-            <button type="submit" class="btn btn-blue" [disabled]="isLoading" title="Enregistrer">
+            <button type="button" class="btn btn-red" (click)="activeModal.dismiss('Cross click')"><i class="fas fa-times"></i> Annuler</button>
+            <button type="submit" class="btn btn-green" [disabled]="mouvementForm.invalid || !mouvementInfrasValid || !clientValid || !datesValid">
                 <i class="fas fa-save"></i> Enregistrer
             </button>
         </div>
@@ -133,6 +181,5 @@
                 (infrastructureSelected)="handleInfrastructureSelected($event, modal)"
                 [infrastructureNotInSelections]="infrastructuresNotInSelections"
         ></app-infrastructure-list-popup>
-
     </ng-template>
 </div>

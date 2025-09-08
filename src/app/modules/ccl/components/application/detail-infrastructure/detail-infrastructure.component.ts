@@ -1,5 +1,6 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {NgbActiveModal, NgbModal, NgbModalOptions} from '@ng-bootstrap/ng-bootstrap';
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
+import { NgbActiveModal, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { Infrastructure } from '../../../model/infrastructure/infrastructure';
 import { InfrastructureService } from '../../../services/infrastructure/infrastructure.service';
@@ -11,8 +12,12 @@ import { ModeleInfra } from '../../../model/modele-infra/modele-infra';
 import { ModeleInfraService } from '../../../services/modele-infra/modele-infra.service';
 import { CategorieInfra } from '../../../model/categorie-infra/categorie-infra';
 import { CategorieInfraService } from '../../../services/categorie-infra/categorie-infra.service';
-import {Router} from "@angular/router";
-import {MouvementAddComponent} from "../mouvement-add/mouvement-add.component";
+import { Router } from '@angular/router';
+import { MouvementAddComponent } from '../mouvement-add/mouvement-add.component';
+import { Frequence } from '../../../model/frequence/frequence';
+import { FrequenceService } from '../../../services/frequence/frequence.service';
+import { InfraTarif } from '../../../model/infra-tarif/infra-tarif';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-detail-infrastructure',
@@ -21,6 +26,9 @@ import {MouvementAddComponent} from "../mouvement-add/mouvement-add.component";
 })
 export class DetailInfrastructureComponent implements OnInit {
   @Input() infrastructureId!: string;
+  @Output() loadData = new EventEmitter<void>();
+  @ViewChild('detailForm') detailForm!: NgForm;
+
   selectedItem: Infrastructure | null = null;
   localisations: Localisation[] = [];
   etats: Etat[] = [];
@@ -30,168 +38,137 @@ export class DetailInfrastructureComponent implements OnInit {
   newLocalisation: Localisation = new Localisation();
   newModele: ModeleInfra = new ModeleInfra();
   newCategory: CategorieInfra = new CategorieInfra();
+  frequences: Frequence[] = [];
+  availableFrequences: Frequence[] = [];
+  selectedFrequenceId: string | null = null;
+  newTarif: number | null = null;
+  allModeles: ModeleInfra[] = [];
   isEditing = false;
   isLoading = true;
-  @Output() loadData = new EventEmitter<void>();
-
+  tarifsValid: boolean = true;
+  elementsValid: boolean = true;
+  capaciteValid: boolean = true;
 
   constructor(
       public activeModal: NgbActiveModal,
       private router: Router,
-      private modalService: NgbModal, // Added NgbModal
+      private modalService: NgbModal,
       private service: InfrastructureService,
       private localisationService: LocalisationService,
       private etatService: EtatService,
       private modeleInfraService: ModeleInfraService,
       private catInfraService: CategorieInfraService,
+      private frequenceService: FrequenceService,
       private toastr: ToastrService
-  ) {}
+  ) {
+    this.newModele.catInfra = new CategorieInfra();
+  }
 
   ngOnInit() {
-    this.loadLocalisations();
-    this.loadEtats();
-    this.loadCategories();
-    this.loadModeles();
-    this.loadInfrastructure();
+    this.isLoading = true;
+    forkJoin({
+      localisations: this.localisationService.getAll(),
+      etats: this.etatService.getEtatAutre(),
+      categories: this.catInfraService.getAll(),
+      modeles: this.modeleInfraService.getAll(),
+      frequences: this.frequenceService.getAll(),
+      infrastructure: this.service.getById(this.infrastructureId),
+      // frequenceDefaultId:this.frequenceService.findDefaultFrequence(),
+    }).subscribe({
+      next: ({ localisations, etats, categories, modeles, frequences, infrastructure }) => {
+        this.localisations = localisations;
+        this.etats = etats;
+        this.categories = categories.map(cat => ({ ...cat, id: String(cat.id) })); // Normalize id to string
+        this.modeles = modeles.map(mod => ({ ...mod, id: String(mod.id), catInfra: { ...mod.catInfra, id: String(mod.catInfra.id) } })); // Normalize ids
+        this.allModeles = [...this.modeles];
+        this.frequences = frequences;
+        // this.selectedFrequenceId=frequenceDefaultId;
+        this.selectedItem = {
+          ...infrastructure,
+          localisation: { ...infrastructure.localisation, id: String(infrastructure.localisation.id) },
+          etat: { ...infrastructure.etat, id: String(infrastructure.etat.id) },
+          modeleInfra: {
+            ...infrastructure.modeleInfra,
+            id: String(infrastructure.modeleInfra.id),
+            catInfra: { ...infrastructure.modeleInfra.catInfra, id: String(infrastructure.modeleInfra.catInfra.id) }
+          },
+          infraTarifs: infrastructure.infraTarifs ? [...infrastructure.infraTarifs] : []
+        };
+        this.filteredModeles = this.allModeles.filter(m => m.catInfra.id === this.selectedItem?.modeleInfra?.catInfra?.id);
+        this.validateTarifs();
+        this.validateElements();
+        this.validateCapacite();
+        this.updateAvailableFrequences();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading data:', error);
+        this.toastr.error('Erreur lors du chargement des données');
+        this.isLoading = false;
+      }
+    });
   }
 
-  loadInfrastructure() {
-    if (this.infrastructureId) {
-      this.service.getById(this.infrastructureId).subscribe({
-        next: (data) => {
-          this.selectedItem = { ...data, localisation: { ...data.localisation }, etat: { ...data.etat }, modeleInfra: { ...data.modeleInfra } };
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error loading infrastructure details:', error);
-          this.toastr.error('Erreur lors du chargement des détails de l\'infrastructure');
-          this.isLoading = false;
-        }
-      });
+  updateAvailableFrequences() {
+    const usedFrequenceIds = new Set(this.selectedItem?.infraTarifs?.map(tarif => tarif.frequence.id) || []);
+    this.availableFrequences = this.frequences.filter(frequence => !usedFrequenceIds.has(frequence.id));
+  }
+
+  validateTarifs() {
+    this.tarifsValid = (this.selectedItem?.infraTarifs && this.selectedItem.infraTarifs.length > 0) ?? false;
+  }
+
+  validateElements() {
+    this.elementsValid = !!this.selectedItem?.elements && this.selectedItem.elements.trim().length > 0;
+  }
+
+  validateCapacite() {
+    this.capaciteValid = !this.selectedItem?.capacite || this.selectedItem.capacite > 0;
+  }
+
+  addTarif() {
+    if (this.selectedFrequenceId && this.newTarif && this.newTarif > 0 && this.selectedItem) {
+      const frequence = this.frequences.find(f => f.id === this.selectedFrequenceId);
+      if (frequence) {
+        const infraTarif = new InfraTarif();
+        infraTarif.frequence = frequence;
+        infraTarif.tarifInfra = this.newTarif;
+        infraTarif.infrastructure = new Infrastructure();
+        this.selectedItem.infraTarifs = this.selectedItem.infraTarifs || [];
+        this.selectedItem.infraTarifs.push(infraTarif);
+        this.updateAvailableFrequences();
+        this.selectedFrequenceId = null;
+        this.newTarif = null;
+        this.validateTarifs();
+        this.toastr.success('Tarif ajouté à la liste');
+      }
     }
   }
 
-  loadLocalisations() {
-    this.localisationService.getAll().subscribe({
-      next: (localisations) => this.localisations = localisations,
-      error: (error) => {
-        console.error('Error loading localisations:', error);
-        this.toastr.error('Erreur lors du chargement des localisations');
-      }
-    });
-  }
-
-  loadEtats() {
-    this.etatService.getAll().subscribe({
-      next: (etats) => this.etats = etats,
-      error: (error) => {
-        console.error('Error loading etats:', error);
-        this.toastr.error('Erreur lors du chargement des états');
-      }
-    });
-  }
-
-  loadCategories() {
-    this.catInfraService.getAll().subscribe({
-      next: (categories) => this.categories = categories,
-      error: (error) => {
-        console.error('Error loading categories:', error);
-        this.toastr.error('Erreur lors du chargement des catégories');
-      }
-    });
-  }
-
-  loadModeles() {
-    this.modeleInfraService.getAll().subscribe({
-      next: (modeles) => {
-        this.modeles = modeles;
-        this.filteredModeles = [...modeles];
-      },
-      error: (error) => {
-        console.error('Error loading modeles:', error);
-        this.toastr.error('Erreur lors du chargement des modèles');
-      }
-    });
-  }
-
-  openLocalisationModal(content: any) {
-    const options:NgbModalOptions = { size: 'sm', centered: true, backdrop: 'static' };
-    this.modalService.open(content, options);
-  }
-
-  openCategoryModal(content: any) {
-    const options:NgbModalOptions = { size: 'sm', centered: true, backdrop: 'static' };
-    this.modalService.open(content, options);
-  }
-
-  openModeleModal(content: any) {
-    const options:NgbModalOptions = { size: 'sm', centered: true, backdrop: 'static' };
-    this.modalService.open(content, options);
-  }
-
-  addLocalisation() {
-    this.localisationService.create(this.newLocalisation).subscribe({
-      next: (localisation) => {
-        this.localisations.push(localisation);
-        if (this.selectedItem) this.selectedItem.localisation!.id = localisation.id;
-        this.newLocalisation = new Localisation();
-        this.toastr.success('Localisation ajoutée avec succès !');
-      },
-      error: (error) => {
-        console.error('Error adding localisation:', error);
-        this.toastr.error('Erreur lors de l\'ajout de la localisation');
-      }
-    });
-  }
-
-  addCategory() {
-    this.catInfraService.create(this.newCategory).subscribe({
-      next: (category) => {
-        this.categories.push(category);
-        if (this.selectedItem) this.selectedItem.modeleInfra!.catInfra.id = category.id;
-        this.newCategory = new CategorieInfra();
-        this.toastr.success('Catégorie ajoutée avec succès !');
-        this.onCategoryChange(category.id);
-      },
-      error: (error) => {
-        console.error('Error adding category:', error);
-        this.toastr.error('Erreur lors de l\'ajout de la catégorie');
-      }
-    });
-  }
-
-  addModele() {
-    if (!this.newModele.catInfra || !this.newModele.catInfra.id) {
-      this.newModele.catInfra = this.categories.find(cat => cat.id === this.newModele.catInfra!.id) || { id: '', nom: '' };
+  removeTarif(index: number) {
+    if (this.selectedItem && this.selectedItem.infraTarifs) {
+      this.selectedItem.infraTarifs.splice(index, 1);
+      this.updateAvailableFrequences();
+      this.validateTarifs();
+      this.toastr.success('Tarif supprimé de la liste');
     }
-    if (!this.newModele.catInfra.id) {
-      this.toastr.error('Veuillez sélectionner une catégorie valide.');
-      return;
-    }
-
-    this.modeleInfraService.create(this.newModele).subscribe({
-      next: (modele) => {
-        this.modeles.push(modele);
-        this.filteredModeles = [...this.modeles];
-        if (this.selectedItem) this.selectedItem.modeleInfra!.id = modele.id;
-        this.newModele = new ModeleInfra();
-        this.newModele.catInfra = { id: '', nom: '' };
-        this.toastr.success('Modèle ajouté avec succès !');
-      },
-      error: (error) => {
-        console.error('Error adding modele:', error);
-        this.toastr.error('Erreur lors de l\'ajout du modèle');
-      }
-    });
   }
+
+  onFrequenceChange(frequenceId: string) {
+    this.selectedFrequenceId = frequenceId;
+  }
+
 
   onCategoryChange(categoryId: string) {
-    if (categoryId) {
-      this.filteredModeles = this.modeles.filter(m => m.catInfra.id === categoryId);
+    if (this.selectedItem) {
+      this.filteredModeles = this.allModeles.filter(m => m.catInfra.id === categoryId);
+      const currentModele = this.allModeles.find(m => m.id === this.selectedItem!.modeleInfra!.id);
+      if (!categoryId || (currentModele && currentModele.catInfra.id !== categoryId)) {
+        this.selectedItem.modeleInfra!.id = '';
+      }
     } else {
-      this.filteredModeles = [...this.modeles];
+      this.filteredModeles = [...this.allModeles];
     }
-    if (this.selectedItem) this.selectedItem.modeleInfra = { id: '', nom: '', catInfra: { id: '', nom: '' } };
   }
 
   toggleEditMode() {
@@ -199,23 +176,28 @@ export class DetailInfrastructureComponent implements OnInit {
   }
 
   cancelEdit() {
-    if (this.selectedItem) {
-      this.service.getById(this.selectedItem.id).subscribe({
-        next: (data) => {
-          this.selectedItem = { ...data, localisation: { ...data.localisation }, etat: { ...data.etat }, modeleInfra: { ...data.modeleInfra } };
-          this.isEditing = false;
-        },
-        error: (error) => {
-          console.error('Error reloading infrastructure details:', error);
-          this.toastr.error('Erreur lors du rechargement des détails');
-        }
-      });
-    }
+    this.ngOnInit();
+    this.isEditing = false;
   }
 
   update() {
-    if (this.selectedItem) {
-      this.service.update(this.selectedItem.id, this.selectedItem).subscribe({
+    this.detailForm.control.markAllAsTouched();
+    this.validateTarifs();
+    this.validateElements();
+    this.validateCapacite();
+
+    if (this.selectedItem && this.detailForm.valid && this.tarifsValid) {
+      const updatedInfrastructure: Infrastructure = {
+        ...this.selectedItem,
+        localisation: this.localisations.find(loc => loc.id === this.selectedItem!.localisation!.id) || new Localisation(),
+        etat: this.etats.find(e => e.id === this.selectedItem!.etat!.id) || new Etat(),
+        modeleInfra: {
+          ...this.selectedItem.modeleInfra,
+          catInfra: this.categories.find(cat => cat.id === this.selectedItem!.modeleInfra!.catInfra.id) || new CategorieInfra()
+        },
+        infraTarifs: this.selectedItem.infraTarifs || []
+      };
+      this.service.update(this.selectedItem.id, updatedInfrastructure).subscribe({
         next: () => {
           this.isEditing = false;
           this.loadData.emit();
@@ -229,19 +211,10 @@ export class DetailInfrastructureComponent implements OnInit {
     }
   }
 
-  navigateToMovements(id: string ) {
-    this.modalService.dismissAll();
-    this.router.navigate([`/general/mouvement/infrastructure/${id}`]);
-  }
-
-  openMovementModal(content: any) {
-    const options:NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
-    this.modalService.open(content, options);
-  }
-  addMouvementInfra(){
-      const options:NgbModalOptions = {size:'lg' , centered:true , backdrop:'static'};
-      const component  = this.modalService.open(MouvementAddComponent , options) ;
-      component.componentInstance.infrastructure=this.selectedItem;
-      component.componentInstance.newItem.infrastructure = this.selectedItem;
+  addMouvementInfra() {
+    const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
+    const component = this.modalService.open(MouvementAddComponent, options);
+    component.componentInstance.infrastructure = this.selectedItem;
+    component.componentInstance.newItem.infrastructure = this.selectedItem;
   }
 }

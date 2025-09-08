@@ -6,33 +6,49 @@
 </div>
 <app-loading [loading]="isLoading"></app-loading>
 <div class="modal-body">
-    <div class="action-buttons mb-3">
-        <button type="button" class="btn btn-add" (click)="openAddInfrastructureModal()">
-            <i class="fas fa-plus"></i> Ajouter une Infrastructure
-        </button>
-    </div>
+<!--    <div class="action-buttons mb-3">-->
+<!--        <button type="button" class="btn btn-add" (click)="openAddInfrastructureModal()">-->
+<!--            <i class="fas fa-plus"></i> Ajouter une Infrastructure-->
+<!--        </button>-->
+<!--    </div>-->
     <div class="table-responsive" *ngIf="mouvementInfras.length > 0">
         <table class="table table-normal">
             <thead>
             <tr>
-                <th>Nom</th>
-                <th>Numéro</th>
+                <th>Nom & Numero</th>
                 <th>Modèle</th>
-                <th>Catégorie</th>
                 <th>Capacité</th>
+                <th>Fréquence</th>
                 <th>Action</th>
             </tr>
             </thead>
             <tbody>
-            <tr *ngFor="let mvt of mouvementInfras">
-                <td>{{ mvt.infrastructure.nom || 'N/A' }}</td>
-                <td>{{ mvt.infrastructure.numero || 'N/A' }}</td>
+            <tr *ngFor="let mvt of mouvementInfras; let i = index">
+                <td>{{ mvt.infrastructure.nom || 'N/A' }} {{ mvt.infrastructure.numero || 'N/A' }}</td>
                 <td>{{ mvt.infrastructure.modeleInfra?.nom || 'N/A' }}</td>
-                <td>{{ mvt.infrastructure.modeleInfra?.catInfra?.nom || 'N/A' }}</td>
                 <td>{{ mvt.infrastructure.capacite || 'N/A' }}</td>
                 <td>
-                    <button type="button" class="btn btn-delete" (click)="confirmDelete(mvt.id)" title="Supprimer">
-                        <i class="fas fa-trash"></i>
+                    <select
+                            class="form-control"
+                            [(ngModel)]="mouvementInfras[i].frequence.id"
+                            name="frequence{{i}}"
+                            #frequence="ngModel"
+                            required
+                            (ngModelChange)="onFrequenceChange(i)"
+                    >
+                        <option [ngValue]="null">-- Sélectionnez la fréquence du tarif --</option>
+                        <option *ngFor="let frequence of frequences" [ngValue]="frequence.id">{{ frequence.libelle }}</option>
+                    </select>
+                    <div class="error-message" *ngIf="frequence.touched && !frequence.valid">
+                        <i class="fas fa-exclamation-circle"></i> La fréquence est requise.
+                    </div>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-delete" (click)="openDeleteModal(deleteModal, mvt.id, mvt.infrastructure.nom, mvt.infrastructure.numero)">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </button>
+                    <button class="btn btn-delete" style="color: #a1a100" (click)="openDetailModal(mvt.infrastructure.id)">
+                        <i class="fa fa-info-circle"></i> Detail
                     </button>
                 </td>
             </tr>
@@ -42,16 +58,23 @@
     <div class="no-results" *ngIf="mouvementInfras.length === 0">
         Aucune infrastructure associée
     </div>
-    <div class="confirmation-dialog" *ngIf="showConfirmation">
-        <div class="confirmation-content">
-            <p>Êtes-vous sûr de vouloir supprimer cette infrastructure ?</p>
-            <div class="confirmation-buttons">
-                <button type="button" class="btn btn-danger" (click)="deleteInfrastructure()">Oui, supprimer</button>
-                <button type="button" class="btn btn-grey" (click)="cancelDelete()">Annuler</button>
-            </div>
-        </div>
-    </div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-grey" (click)="activeModal.dismiss('Cross click')">Fermer</button>
+    <button type="button" class="btn btn-red" (click)="activeModal.dismiss('Cross click')"><i class="fas fa-times"></i>Fermer</button>
 </div>
+
+<ng-template #deleteModal let-modal>
+    <div class="modal-header">
+        <h5 class="modal-title">Confirmation de Suppression</h5>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+            <span aria-hidden="true">×</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <p>Voulez-vous vraiment supprimer l'infrastructure "<strong>{{ selectedNom }}</strong>" (Numéro: <strong>{{ selectedNumero }}</strong>) ?</p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-red" (click)="modal.dismiss('Cancel click')"><i class="fas fa-times"></i>Annuler</button>
+        <button type="button" class="btn btn-green" (click)="deleteInfrastructure(selectedInfraId); modal.close('Save click')"><i class="fas fa-check"></i>Oui</button>
+    </div>
+</ng-template>

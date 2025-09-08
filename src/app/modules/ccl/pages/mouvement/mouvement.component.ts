@@ -25,6 +25,7 @@ import { CategorieInfraService } from '../../services/categorie-infra/categorie-
 import { CategorieInfra } from '../../model/categorie-infra/categorie-infra';
 import { MouvementAddComponent } from '../../components/application/mouvement-add/mouvement-add.component';
 import {MouvementInfrasPopupComponent} from "../../components/application/mouvement-infras-popup/mouvement-infras-popup/mouvement-infras-popup.component";
+import {Infrastructure} from "../../model/infrastructure/infrastructure";
 
 @Component({
   selector: 'app-mouvement',
@@ -33,6 +34,7 @@ import {MouvementInfrasPopupComponent} from "../../components/application/mouvem
 })
 export class MouvementComponent extends BaseCrudComponent<Mouvement> implements OnInit {
   client: Client = new Client();
+  infrastructure: Infrastructure = new Infrastructure();
   typeMouvements: TypeMouvement[] = [];
   clients: Client[] = [];
   typeClients: TypeClient[] = [];
@@ -82,6 +84,10 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
       console.log("client ... :" + this.id);
       this.loadClient(this.id);
     }
+    if (this.type === 'infrastructure') {
+      console.log("infra ... :" + this.id);
+      this.loadInfrastrcuture(this.id);
+    }
   }
 
   loadClient(id: string) {
@@ -99,6 +105,21 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
     }
   }
 
+
+  loadInfrastrcuture(id: string) {
+    if (id) {
+      this.infrastructureService.getById(id).subscribe({
+        next: (data) => {
+          this.infrastructure = data;
+          this.newItem.infrastructure = this.infrastructure;
+        },
+        error: (error) => {
+          console.error('Error loading infrastrcuture:', error);
+          this.toastr.error('Erreur lors du chargement de l\'infrastrcuture');
+        }
+      });
+    }
+  }
   loadTypeMouvements() {
     this.typeMouvementService.getAll().subscribe({
       next: (types) => {
@@ -198,7 +219,26 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
           this.isLoading = false;
         }
       });
-    } else {
+    }
+    if (this.type === 'infrastructure') {
+      console.log("infra loading ... ");
+      this.mouvementService.getByInfrastructurePaginated(this.id, this.currentPage, this.itemsPerPage).subscribe({
+        next: (page: Page<Mouvement>) => {
+          this.items = page.content;
+          this.totalPages = page.totalPages;
+          this.totalItems = page.totalElements;
+          this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+          this.latestMovement = (this.items.length > 0 ? this.items[0].dhMouvement.replace("T", " ") : null);
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading mouvements:', error);
+          this.toastr.error('Erreur lors du chargement des mouvements');
+          this.isLoading = false;
+        }
+      });
+    }
+    else {
       console.log("here ... ");
       this.mouvementService.getPaginated(this.currentPage, this.itemsPerPage).subscribe({
         next: (page: Page<Mouvement>) => {
@@ -243,7 +283,14 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
   }
 
   resetSearchCriteria(): Partial<Mouvement> {
+
     return new Mouvement();
+  }
+  resetSearchFormCriteria(): void {
+    this.searchCriteria=new Mouvement();
+    this.periodeDebut = '';
+    this.periodeFin = '';
+    this.loadAll();
   }
 
   getTypeMouvement(): TypeMouvement {

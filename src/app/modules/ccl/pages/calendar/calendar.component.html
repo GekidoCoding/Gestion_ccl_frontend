@@ -17,41 +17,52 @@
         <button (click)="goToToday()">Aujourd'hui</button>
         <button (click)="goToNext()"><i class="fas fa-arrow-circle-right"></i></button>
     </div>
-    <div class="form-group col-md-12">
-        <label>Infrastructure Concernée :</label>
-        <div class="input-group-append mb-3">
-            <button type="button" (click)="openPopup(infrastructureListModal)" class="btn btn-add">
-                <i class="fa fa-building"></i> Sélectionner une Infrastructure
-            </button>
-            <button type="button" style="margin-left: 20px ; background-color: #a80926" (click)="deleteInfrastructure()" class="btn btn-add">
-                <i class="fa fa-times"></i>
-            </button>
-        </div>
+    <div class="search-form slide-in-out" >
+        <form #searchForm="ngForm" (ngSubmit)="loadCalendarData()">
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <div class="input-group-append mb-3">
+                        <button type="button" (click)="openPopup(infrastructureListModal)" class="btn btn-add">
+                            <i class="fa fa-building"></i> Sélectionner une Infrastructure
+                        </button>
 
-        <div class="row" *ngIf="infrastructure?.id">
-            <div class="col-md-6 mb-3">
-                <label>Nom</label>
-                <input type="text" class="form-control" [value]="infrastructure.nom || 'N/A'" readonly>
+                    </div>
+                </div>
+                <div class="form-group col-md-12" *ngIf="infrastructure?.id">
+                    <label>Nom</label>
+                    <input type="text" class="form-control" [value]="infrastructure.nom || 'N/A'" readonly>
+                </div>
+                <div class="form-group col-md-12" *ngIf="infrastructure?.id">
+                    <label>Numéro</label>
+                    <input type="text" class="form-control" [value]="infrastructure.numero || 'N/A'" readonly>
+                </div>
+                <div class="form-group col-md-12">
+                    <label>Modèles</label>
+                    <div class="checkbox-group">
+                        <div *ngFor="let modele of filteredModeles" class="checkbox-item">
+                            <input type="checkbox" [id]="'mod-' + modele.id" [(ngModel)]="modelesInfraSelectionned[modele.id]" name="modele-{{modele.id}}" (ngModelChange)="updateModeleSelection(modele.id)">
+                            <label [for]="'mod-' + modele.id">{{ modele.nom }}</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-md-2">
+                    <button type="button" class="btn btn-red" (click)="deleteSearchForm()"> <i class="fas fa-times"></i>Effacer</button>
+                    <button type="submit" style="margin-top: 30px" class="btn btn-search">
+                        <i class="fas fa-search"></i>Rechercher
+                    </button>
+                </div>
             </div>
-            <div class="col-md-6 mb-3">
-                <label>Numéro</label>
-                <input type="text" class="form-control" [value]="infrastructure.numero || 'N/A'" readonly>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label>Modèle</label>
-                <input type="text" class="form-control" [value]="infrastructure.modeleInfra.nom || 'N/A'" readonly>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label>Catégorie</label>
-                <input type="text" class="form-control" [value]="infrastructure.modeleInfra.catInfra.nom || 'N/A'" readonly>
-            </div>
-        </div>
+        </form>
     </div>
+
+
     <mwl-calendar-month-view
             *ngIf="view === CalendarView.Month"
             [viewDate]="viewDate"
             [events]="events"
-            (dayClicked)="handleDayClick($event)">
+            (eventClicked)="handleEventClick($event)"
+            (dayClicked)="handleDayClick($event)"
+          >
     </mwl-calendar-month-view>
 
     <mwl-calendar-week-view
@@ -67,6 +78,7 @@
     </mwl-calendar-day-view>
 
 </div>
+
 <ng-template #infrastructureListModal let-modal>
     <div class="modal-header">
         <h5 class="modal-title">Liste Des Infrastructures</h5>
@@ -76,5 +88,6 @@
     </div>
     <app-infrastructure-list-popup
             (infrastructureSelected)="handleInfrastructureSelected($event, modal)"
+
     ></app-infrastructure-list-popup>
 </ng-template>

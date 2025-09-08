@@ -2,11 +2,11 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Infrastructure } from '../../../model/infrastructure/infrastructure';
 import { InfraTarif } from '../../../model/infra-tarif/infra-tarif';
 import { Frequence } from '../../../model/frequence/frequence';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { FrequenceService } from '../../../services/frequence/frequence.service';
 import { ToastrService } from 'ngx-toastr';
 import { InfrastructureService } from '../../../services/infrastructure/infrastructure.service';
-import {InfraTarifService} from "../../../services/infra-tarif/infra-tarif.service";
+import { InfraTarifService } from '../../../services/infra-tarif/infra-tarif.service';
 
 @Component({
   selector: 'app-infra-tarif-listpopup',
@@ -16,6 +16,7 @@ import {InfraTarifService} from "../../../services/infra-tarif/infra-tarif.servi
 export class InfraTarifListpopupComponent implements OnInit {
   @Input() infrastructureId: string = '';
   selectedInfrastructure: Infrastructure = new Infrastructure();
+  selectedTarifId: string = ''; // Store the ID of the tariff to be deleted
   isLoading = false;
   newInfraTarif: InfraTarif = new InfraTarif();
   frequences: Frequence[] = [];
@@ -23,10 +24,11 @@ export class InfraTarifListpopupComponent implements OnInit {
 
   constructor(
       public activeModal: NgbActiveModal,
+      private modalService: NgbModal,
       private frequenceService: FrequenceService,
       public toastr: ToastrService,
-      private infrastructureService: InfrastructureService ,
-      private infraTarifService: InfraTarifService,
+      private infrastructureService: InfrastructureService,
+      private infraTarifService: InfraTarifService
   ) {}
 
   ngOnInit(): void {
@@ -78,24 +80,31 @@ export class InfraTarifListpopupComponent implements OnInit {
       next: (data) => {
         this.newInfraTarif = new InfraTarif();
         this.ngOnInit();
-        this.toastr.success('Tarif de l\'infrastructure inséré et ajouté avec succès');
+        this.toastr.success("Tarif de l'infrastructure inséré et ajouté avec succès");
       },
       error: (error) => {
-        this.toastr.error("Erreur lors de l\'insertion de l'infrastructure");
-      }
-    })
+        this.toastr.error("Erreur lors de l'insertion de l'infrastructure");
+      },
+    });
+  }
+
+  openDeleteModal(modal: any, tarifId: string, nom: string, numero: string) {
+    this.selectedTarifId = tarifId; // Store the tariff ID
+    this.selectedInfrastructure.nom = nom; // Ensure nom is set
+    this.selectedInfrastructure.numero = numero; // Ensure numero is set
+    const options: NgbModalOptions = { centered: true, backdrop: 'static' };
+    this.modalService.open(modal, options);
   }
 
   deleteTarif(id: string) {
-      this.infraTarifService.delete(id).subscribe({
-        next: (data) => {
-          this.ngOnInit();
-          this.toastr.success("Suppression du Tarif de l ' infrastructure avec succes !")
-        },
-        error: (error) => {
-          this.toastr.error("Erreur lors de la suppression du tarif de l'infrastructure");
-        }
-
-      })
+    this.infraTarifService.delete(id).subscribe({
+      next: (data) => {
+        this.ngOnInit();
+        this.toastr.success("Suppression du Tarif de l'infrastructure avec succès !");
+      },
+      error: (error) => {
+        this.toastr.error("Erreur lors de la suppression du tarif de l'infrastructure");
+      },
+    });
   }
 }

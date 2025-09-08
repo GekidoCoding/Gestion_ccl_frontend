@@ -32,7 +32,7 @@
         </div>
 
         <div class="search-form slide-in-out">
-            <form #searchForm="ngForm" (ngSubmit)="applySearch()">
+            <form #searchForm="ngForm" (ngSubmit)="applySearches()">
                 <div class="form-row">
                     <div class="form-group col-md-2">
                         <label>Type Client</label>
@@ -58,8 +58,8 @@
                     </div>
 
                     <div class="form-group col-md-2" style="margin-top: 10px">
-<!--                        <button type="button" class="btn btn-grey" (click)="toggleSearchForm()">Fermer</button>-->
-                        <button type="submit" class="btn btn-search">
+                        <button type="button" class="btn btn-red" (click)="reserSearchForm()"><i class="fas fa-times"></i>Effacer</button>
+                        <button type="submit" style="margin-left: 10px" class="btn btn-search">
                             <i class="fas fa-search"></i>Rechercher
                         </button>
                     </div>
@@ -110,7 +110,7 @@
                             <button class="btn btn-eye" (click)="openDetailModal(item)">
                                 <i class="fa fa-info-circle"></i> Detail
                             </button>
-                            <button type="button" class="btn btn-black" (click)="navigateToMovements(item.id)" ><i class="fas fa-exchange-alt"></i>Voir ses mouvements</button>
+                            <button type="button" class="btn btn-black" (click)="navigateToMovements(item.id)" ><i class="fas fa-exchange-alt"></i>ses mouvements</button>
                         </td>
                     </tr>
                 </ng-container>
@@ -121,11 +121,11 @@
 
         <div class="pagination-controls">
             <div class="pagination-container">
-                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage === 0" (click)="changePage(currentPage)" title="Page précédente"><</button>
+                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage === 0" (click)="changePage(currentPage)" title=""><i class="fas fa-arrow-left"></i></button>
                 <div class="pagination-buttons">
                     <span *ngFor="let page of pageNumbers" class="page-number btn btn-blue page-animation" [class.active]="page === currentPage + 1" (click)="changePage(page)">{{page}}</span>
                 </div>
-                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage + 1 === totalPages  || totalPages===0" (click)="changePage(currentPage + 2)" title="Page suivante">></button>
+                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage + 1 === totalPages  || totalPages===0" (click)="changePage(currentPage + 2)" title=""><i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
     </div>

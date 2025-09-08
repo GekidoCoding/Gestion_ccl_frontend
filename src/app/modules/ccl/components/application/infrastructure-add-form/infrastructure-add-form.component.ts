@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { NgbActiveModal, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -28,6 +28,7 @@ export class InfrastructureAddFormComponent implements OnInit {
   @Output() submitForm = new EventEmitter<Infrastructure>();
   @Output() cancel = new EventEmitter<void>();
   @Output() categoryChange = new EventEmitter<string>();
+  @ViewChild('addForm') addForm!: NgForm;
   newLocalisation: Localisation = new Localisation();
   newCategory: CategorieInfra = new CategorieInfra();
   newModele: ModeleInfra = new ModeleInfra();
@@ -36,6 +37,9 @@ export class InfrastructureAddFormComponent implements OnInit {
   selectedFrequenceId: string | null = null;
   newTarif: number | null = null;
   allModeles: ModeleInfra[] = [];
+  tarifsValid: boolean = true;
+  elementsValid: boolean = true;
+
   constructor(
       private modalService: NgbModal,
       public modal: NgbActiveModal,
@@ -51,7 +55,22 @@ export class InfrastructureAddFormComponent implements OnInit {
 
   ngOnInit() {
     this.loadFrequences();
+    this.loadFrequenceDefault();
     this.allModeles = [...this.filteredModeles];
+    this.validateTarifs();
+    this.validateElements();
+  }
+
+  loadFrequenceDefault() {
+    this.frequenceService.findDefaultFrequence().subscribe({
+      next: (data) => {
+        this.selectedFrequenceId = data.id;
+      },
+      error: (error) => {
+        console.error('Error loading default frequence:', error);
+        this.toastr.error('Erreur lors du chargement de la fréquence par défaut');
+      }
+    });
   }
 
   loadFrequences() {
@@ -72,6 +91,13 @@ export class InfrastructureAddFormComponent implements OnInit {
     this.availableFrequences = this.frequences.filter(frequence => !usedFrequenceIds.has(frequence.id));
   }
 
+  validateTarifs() {
+    this.tarifsValid = this.newItem.infraTarifs && this.newItem.infraTarifs.length > 0;
+  }
+
+  validateElements() {
+    this.elementsValid = !!this.newItem.elements && this.newItem.elements.trim().length > 0;
+  }
 
   addTarif() {
     if (this.selectedFrequenceId && this.newTarif && this.newTarif > 0) {
@@ -80,22 +106,21 @@ export class InfrastructureAddFormComponent implements OnInit {
         const infraTarif = new InfraTarif();
         infraTarif.frequence = frequence;
         infraTarif.tarifInfra = this.newTarif;
-        infraTarif.infrastructure = new Infrastructure(); // Will be set by backend
+        infraTarif.infrastructure = new Infrastructure();
         this.newItem.infraTarifs!.push(infraTarif);
         this.updateAvailableFrequences();
         this.selectedFrequenceId = null;
         this.newTarif = null;
-        console.log("tarif ajouter :"+ JSON.stringify( this.newItem.infraTarifs));
-        // this.toastr.success('Tarif ajouté à la liste');
+        this.validateTarifs();
+        this.toastr.success('Tarif ajouté à la liste');
       }
-    } else {
-      this.toastr.error('Veuillez sélectionner une fréquence et entrer un tarif valide');
     }
   }
 
   removeTarif(index: number) {
     this.newItem.infraTarifs!.splice(index, 1);
     this.updateAvailableFrequences();
+    this.validateTarifs();
     this.toastr.success('Tarif supprimé de la liste');
   }
 
@@ -104,13 +129,15 @@ export class InfrastructureAddFormComponent implements OnInit {
   }
 
   onSubmit(form: NgForm) {
-    if (form.valid) {
-      const obj: Infrastructure = this.newItem ;
-      console.log("infra envoyer :", JSON.stringify(obj));
+    this.addForm.control.markAllAsTouched();
+    this.validateTarifs();
+    this.validateElements();
+
+    if (form.valid && this.tarifsValid) {
+      const obj: Infrastructure = this.newItem;
       this.submitForm.emit(obj);
     }
   }
-
 
   onCancel() {
     this.cancel.emit();
@@ -194,8 +221,6 @@ export class InfrastructureAddFormComponent implements OnInit {
     }
 
     this.newItem.modeleInfra = { id: '', nom: '', catInfra: { id: '', nom: '' } };
-
     this.categoryChange.emit(categoryId);
   }
-
 }

@@ -6,6 +6,12 @@ import {Mouvement} from '../../model/mouvement/mouvement';
 import {MouvementService} from "../../services/mouvement/mouvement.service";
 import {Infrastructure} from "../../model/infrastructure/infrastructure";
 import {NgbModal, NgbModalOptions} from "@ng-bootstrap/ng-bootstrap";
+import {ClientDetailComponent} from "../../components/application/client-detail/client-detail.component";
+import {MouvementAddComponent} from "../../components/application/mouvement-add/mouvement-add.component";
+import {TypeMouvementService} from "../../services/type-mouvement/type-mouvement.service";
+import {ModeleInfra} from "../../model/modele-infra/modele-infra";
+import {ModeleInfraService} from "../../services/modele-infra/modele-infra.service";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'app-calendar',
@@ -24,24 +30,49 @@ export class CalendarComponent implements OnInit {
   viewDateString: string = format(new Date(), 'yyyy-MM-dd');
   events: CalendarEvent[] = [];
   titleMonth: string = '';
-
+  newMouvement: Mouvement = new Mouvement();
+  public filteredModeles: ModeleInfra[] = [];
+  public modelesIds:string[]=[];
+  public modelesInfraSelectionned: { [key: string]: boolean } = {};
   constructor(
       private mouvementService: MouvementService ,
       private modalService: NgbModal,
+      private typeMouvementService: TypeMouvementService ,
+      private modeleInfraService: ModeleInfraService,
+      public toastr: ToastrService,
+
   ) {}
 
   ngOnInit(): void {
     this.loadCalendarData();
+    this.loadModeles();
     this.titleMonth = Monthutil.toMonthString(this.viewDate);
+  }
+
+  loadModeles() {
+    this.modeleInfraService.getAll().subscribe({
+      next: (modeles) => {
+        this.filteredModeles = modeles;
+      },
+      error: (error) => {
+        console.error('Error loading modeles:', error);
+        this.toastr.error('Error loading modeles:', error);
+      }
+    });
+  }
+  deleteSearchForm(){
+    this.deleteInfrastructure();
+    // this.modelesIds=[];
   }
 
   loadCalendarData(): void {
     this.isLoading = true;
-    if(!this.infrastructure.id){
+    if(!this.infrastructure.id && this.modelesIds.length<=0 ){
       this.mouvementService.getCalendarData().subscribe({
         next: (mouvements: Mouvement[]) => {
           this.events = mouvements.map(mouvement => ({
-            title: `${mouvement.infrastructure.nom || 'Événement'} - ${mouvement.typeMouvement.nom}`,
+            title: `${mouvement.infrastructure.nom || 'Événement'} \n 
+             ${mouvement.typeMouvement.nom} de ${mouvement.client.nom}`,
             start: parseISO(mouvement.periodeDebut),
             end: mouvement.periodeFin ? parseISO(mouvement.periodeFin) : undefined,
             color: {
@@ -59,24 +90,29 @@ export class CalendarComponent implements OnInit {
       });
     }
     else{
-      this.loadCalendarDataByInfraId();
+      this.loadCalendarDataByCriteria();
     }
 
   }
 
-  loadCalendarDataByInfraId(): void {
+  loadCalendarDataByCriteria(): void {
     this.isLoading = true;
-    this.mouvementService.getCalendarDataByInfrastructureId(this.infrastructure.id).subscribe({
+    this.mouvementService.getCalendarDataByCriteria(this.infrastructure.id , this.modelesIds).subscribe({
       next: (mouvements: Mouvement[]) => {
-        this.events = mouvements.map(mouvement => ({
-          title: `${mouvement.infrastructure.nom || 'Événement'} - ${mouvement.typeMouvement.nom}`,
-          start: parseISO(mouvement.periodeDebut),
-          end: mouvement.periodeFin ? parseISO(mouvement.periodeFin) : undefined,
-          color: {
-            primary: mouvement.typeMouvement.nom === 'Réservation' ? '#f8f83f' : '#FF0000',
-            secondary: mouvement.typeMouvement.nom === 'Réservation' ? '#c3c363' : '#FF9999'
-          }
-        }));
+        console.log("mouvements:"+JSON.stringify( mouvements));
+        this.events = mouvements.map(mouvement => {
+
+          return {
+            title: `${mouvement.infrastructure.nom || 'Événement'} \n 
+             ${mouvement.typeMouvement.nom} de ${mouvement.client.nom}`,
+            start: parseISO(mouvement.periodeDebut),
+            end: mouvement.periodeFin ? parseISO(mouvement.periodeFin) : undefined,
+            color: {
+              primary: mouvement.typeMouvement.nom === 'Réservation' ? '#f8f83f' : '#FF0000',
+              secondary: mouvement.typeMouvement.nom === 'Réservation' ? '#c3c363' : '#FF9999'
+            }
+          };
+        });
 
         this.isLoading = false;
       },
@@ -86,6 +122,7 @@ export class CalendarComponent implements OnInit {
       }
     });
   }
+
 
   deleteInfrastructure(): void {
     this.infrastructure=new Infrastructure();
@@ -112,7 +149,7 @@ export class CalendarComponent implements OnInit {
     }
     this.viewDateString = format(this.viewDate, 'yyyy-MM-dd');
     this.titleMonth = Monthutil.toMonthString(this.viewDate);
-    this.loadCalendarData(); // Reload data when navigating to previous
+    this.loadCalendarData();
   }
 
   goToNext(): void {
@@ -131,8 +168,7 @@ export class CalendarComponent implements OnInit {
   handleInfrastructureSelected(infra: Infrastructure, content: any) {
     this.infrastructure = { ...infra, capacite: infra.capacite ?? 1 };
     this.infrastructure = infra;
-
-    this.loadCalendarData();
+    // this.loadCalendarData();
     content.dismiss('Cross Click');
     console.log('Selected infrastructure:', this.infrastructure);
   }
@@ -148,13 +184,41 @@ export class CalendarComponent implements OnInit {
     this.modalService.open(content, options);
   }
 
-  handleDayClick(event: any): void {
-    // if (event.day && event.day.date) {
-    //   this.viewDate = event.day.date;
-    //   this.viewDateString = format(this.viewDate, 'yyyy-MM-dd');
-    //   this.view = CalendarView.Day;
-    //   this.titleMonth = Monthutil.toMonthString(this.viewDate);
-    //   this.loadCalendarData(); // Reload data when a day is clicked
-    // }
+  handleEventClick({ event }: { event: CalendarEvent }): void {
+    console.log('Événement cliqué :', event);
+
+    if (event.start) {
+      this.viewDate = event.start;
+      this.viewDateString = format(this.viewDate, 'yyyy-MM-dd');
+      this.view = CalendarView.Day;
+      this.titleMonth = Monthutil.toMonthString(this.viewDate);
+      this.loadCalendarData();
+    }
   }
+
+  handleDayClick(event: any): void {
+    if (event.day && event.day.date) {
+      this.viewDate = event.day.date;
+      this.viewDateString = format(this.viewDate, 'yyyy-MM-dd');
+      const periodeDebut = this.viewDateString+" 00:01:00";
+      const periodeFin = this.viewDateString+" 23:59:00";
+      this.newMouvement.periodeDebut=periodeDebut;
+      this.newMouvement.periodeFin=periodeFin;
+      const options :NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
+      const component =  this.modalService.open(MouvementAddComponent , options);
+      component.componentInstance.newItem = this.newMouvement;
+    }
+  }
+  updateModeleSelection(modeleId: string) {
+    if (this.modelesInfraSelectionned[modeleId]) {
+      if (!this.modelesIds.includes(modeleId)) {
+        this.modelesIds.push(modeleId);
+      }
+    } else {
+      this.modelesIds = this.modelesIds.filter(id => id !== modeleId);
+    }
+
+    console.log(this.modelesIds);
+  }
+
 }

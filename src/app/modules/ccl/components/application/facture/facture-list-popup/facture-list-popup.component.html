@@ -4,7 +4,6 @@
         <span aria-hidden="true">×</span>
     </button>
 </div>
-<div class="modal-content">
     <div class="modal-body">
         <div class="statistics-section" *ngIf="mouvement">
             <h3>Statistiques du Mouvement</h3>
@@ -18,13 +17,21 @@
                     <p>{{ mouvement.typeMouvement.nom || 'N/A' }}</p>
                 </div>
                 <div class="form-group col-md-2">
-                    <label>Infrastructure</label>
-                    <p>{{ mouvement.infrastructure.nom || 'N/A' }}</p>
-                </div>
-                <div class="form-group col-md-2">
                     <label>Client</label>
                     <p>{{ componentUtil.getClientName(mouvement.client) }}</p>
                 </div>
+                <div class="form-group col-md-2">
+                    <label>Periode Debut</label>
+                    <p>{{ mouvement.periodeDebut}}</p>
+                </div>
+                <div class="form-group col-md-2">
+                    <label>Periode Fin</label>
+                    <p>{{ mouvement.periodeFin }}</p>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-green" (click)="openInfrasPopup(mouvement)" >Voir Infrastructures Concernées</button>
+                </div>
+
             </div>
         </div>
 <!--        <div class="action-buttons">-->
@@ -63,4 +70,3 @@
             </div>
         </div>
     </div>
-</div>

@@ -187,10 +187,10 @@ mwl-calendar-day-view {
 
 mwl-calendar-week-view,
 mwl-calendar-day-view {
-  max-height: 60vh; /* Set a maximum height for week and day views */
-  overflow-y: auto; /* Enable vertical scrollbar */
-  scrollbar-width: thin; /* Firefox scrollbar */
-  scrollbar-color: map-get($colors, blue) map-get($colors, soft-white);
+  //max-height: 60vh; /* Set a maximum height for week and day views */
+  //overflow-y: auto; /* Enable vertical scrollbar */
+  //scrollbar-width: thin; /* Firefox scrollbar */
+  //scrollbar-color: map-get($colors, blue) map-get($colors, soft-white);
 
   &::-webkit-scrollbar {
     width: 8px; /* Webkit scrollbar width */
@@ -224,6 +224,29 @@ mwl-calendar-day-view {
     @include card-3d-effect;
   }
 }
+
+
+/* === CHECKBOXES GROUP === */
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  padding: 5px 0;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.checkbox-item input[type="checkbox"] {
+  accent-color: #28a745;
+  width: 16px;
+  height: 16px;
+}
+
 
 // Responsive adjustments
 @media (max-width: 768px) {

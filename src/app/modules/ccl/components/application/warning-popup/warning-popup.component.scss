@@ -1,0 +1,77 @@
+@import "../../base/base-crud.component";
+.modal-content {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  background-color: #fff3cd;
+  border-bottom: 1px solid #ffeeba;
+}
+
+.warning-icon {
+  color: #d39e00;
+  margin-right: 8px;
+  font-size: 2vw;
+}
+.modal-title{
+  font-size: 2vw;
+  color: #b59d05;
+}
+.modal-body {
+  padding: 20px;
+  font-size: 16px;
+  color: #333;
+  textarea {
+    width: 100%;
+    overflow: hidden;
+    resize: none;
+    border: none;
+  }
+
+
+}
+
+
+.modal-footer {
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn {
+  transition: all 0.3s ease;
+}
+
+.btn-animated {
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+}
+
+.btn-red {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+
+  &:hover {
+    background-color: #c82333;
+  }
+}
+
+.btn-green {
+  background-color: #28a745;
+  color: white;
+  border: none;
+
+  &:hover {
+    background-color: #218838;
+  }
+}

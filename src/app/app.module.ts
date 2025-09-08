@@ -13,10 +13,11 @@ import { FrequenceComponent } from './modules/ccl/pages/frequence/frequence/freq
 import {FormsModule} from "@angular/forms";
 import { InfraTarifListpopupComponent } from './modules/ccl/components/application/infra-tarif-listpopup/infra-tarif-listpopup.component';
 import { MouvementInfrasPopupComponent } from './modules/ccl/components/application/mouvement-infras-popup/mouvement-infras-popup/mouvement-infras-popup.component';
+import { WarningPopupComponent } from './modules/ccl/components/application/warning-popup/warning-popup.component';
 
 
 @NgModule({
-  declarations: [AppComponent, FrequenceComponent, InfraTarifListpopupComponent, MouvementInfrasPopupComponent],
+  declarations: [AppComponent, FrequenceComponent, InfraTarifListpopupComponent, MouvementInfrasPopupComponent, WarningPopupComponent],
     imports: [
         BrowserModule,
         AppRoutingModule,

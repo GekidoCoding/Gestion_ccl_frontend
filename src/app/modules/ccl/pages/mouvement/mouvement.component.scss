@@ -1,5 +1,6 @@
 @import "../../components/base/base-crud.component";
-.nom-column-line{
+
+.nom-column-line {
   color: #0b5cad;
 }
 
@@ -8,4 +9,24 @@
   font-weight: 500;
   color: #555;
   margin-bottom: 15px;
+}
+
+tr.tr-Classement td {
+  color: #808080; /* Grey for Classement */
+  //color: #ffffff; /* White text for readability */
+}
+
+tr.tr-Réservation td {
+  color: #b68a04; /* Yellow (not too bright) for Réservations */
+  //color: #000000; /* Black text for readability */
+}
+
+tr.tr-Occupation td {
+  color: rgb(255, 0, 0); /* Pinkish-red (not too red) for Occupations */
+  //color: #ffffff; /* White text for readability */
+}
+
+tr.tr-Renseignement td {
+  color: rgb(0, 145, 0); /* Green for Renseignement */
+  //color: #ffffff; /* White text for readability */
 }

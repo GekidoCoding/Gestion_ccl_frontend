@@ -2,144 +2,134 @@
     <h5 class="modal-title">Détails de l'Infrastructure</h5>
     <button type="button" class="close" (click)="activeModal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
 </div>
-<div class="modal-body" *ngIf="selectedItem">
-    <app-loading [loading]="isLoading"></app-loading>
-     <form #detailForm="ngForm">
+<app-loading [loading]="isLoading"></app-loading>
+<div class="modal-body" *ngIf="selectedItem && !isLoading">
+    <form #detailForm="ngForm" (ngSubmit)="update()">
         <div class="form-row">
             <div class="form-left">
-                <div class="form-group">
-                    <label>Nom</label>
-                    <input type="text" class="form-control" [(ngModel)]="selectedItem.nom" name="nom" [disabled]="!isEditing">
+                <div class="form-group col-md-6 col-lg-10" [ngClass]="{'form-group-error': nom.touched && !nom.valid&&isEditing}">
+                    <label>Nom <strong style="color: red">*</strong></label>
+                    <input type="text" class="form-control" placeholder="Ex : Chambre . 101" [(ngModel)]="selectedItem.nom" name="nom" #nom="ngModel" [disabled]="!isEditing" required>
+                    <div class="error-message" *ngIf="nom.touched && !nom.valid &&isEditing">
+                        <i class="fas fa-exclamation-circle"></i> Le champ Nom est requis.
+                    </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group col-md-6 col-lg-10">
                     <label>Numéro</label>
-                    <input type="text" class="form-control" [(ngModel)]="selectedItem.numero" name="numero" [disabled]="!isEditing">
+                    <input type="text" class="form-control" placeholder="Ex : CHB-101" [(ngModel)]="selectedItem.numero" name="numero" #numero="ngModel" [disabled]="!isEditing">
                 </div>
-                <div class="form-group">
+                <div class="form-group col-md-6 col-lg-10" [ngClass]="{'form-group-error': capacite.touched && !capaciteValid&&isEditing}">
                     <label>Capacité</label>
-                    <input type="number" class="form-control" [(ngModel)]="selectedItem.capacite" name="capacite" [disabled]="!isEditing">
+                    <input type="number" placeholder="10" class="form-control" [(ngModel)]="selectedItem.capacite" name="capacite" #capacite="ngModel" [disabled]="!isEditing" (ngModelChange)="validateCapacite()">
+                    <div class="error-message" *ngIf="capacite.touched && !capaciteValid&&isEditing">
+                        <i class="fas fa-exclamation-circle"></i> La capacité doit être un nombre positif.
+                    </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group col-md-6 col-lg-10" [ngClass]="{'form-group-warning': !elementsValid&&isEditing}">
                     <label>Éléments</label>
-                    <textarea class="form-control" [(ngModel)]="selectedItem.elements" name="elements" [disabled]="!isEditing"></textarea>
+                    <textarea class="form-control" placeholder="Ex : 1 douche intérieure, 2 WC extérieures, 1 chauffe-eau" [(ngModel)]="selectedItem.elements" name="elements" #elements="ngModel" [disabled]="!isEditing" (ngModelChange)="validateElements()"></textarea>
+                    <div class="warning-message" *ngIf="!elementsValid&&isEditing">
+                        <i class="fas fa-exclamation-triangle"></i> Le champ Éléments est vide, pensez à ajouter des détails pour une meilleure description.
+                    </div>
                 </div>
-
-                <div class="form-group">
-                    <label>État</label>
-                    <select class="form-control" [(ngModel)]="selectedItem.etat!.id" name="etat" required [disabled]="!isEditing">
-                        <option value="">Choisir l'état</option>
-                        <option *ngFor="let etat of etats" [value]="etat.id">{{ etat.etat }}</option>
+                <div class="form-group col-md-6 col-lg-10" [ngClass]="{'form-group-error': etat.touched && !etat.valid&&isEditing}">
+                    <label>État <strong style="color: red">*</strong></label>
+                    <select class="form-control" [(ngModel)]="selectedItem.etat!.id" name="etat" #etat="ngModel" [disabled]="!isEditing" required>
+                        <option [ngValue]="''">Choisir l'état</option>
+                        <option *ngFor="let etat of etats" [ngValue]="etat.id">{{ etat.etat }}</option>
                     </select>
+                    <div class="error-message" *ngIf="etat.touched && !etat.valid&&isEditing">
+                        <i class="fas fa-exclamation-circle"></i> Le champ État est requis.
+                    </div>
                 </div>
             </div>
             <div class="form-right">
-                <div class="form-group">
-                    <label>Localisation</label>
+                <div class="form-group col-md-6 col-lg-10" [ngClass]="{'form-group-error': localisation.touched && !localisation.valid&&isEditing}">
+                    <label>Localisation <strong style="color: red">*</strong></label>
                     <div class="input-group">
-                        <select class="form-control" [(ngModel)]="selectedItem.localisation!.id" name="localisation" required [disabled]="!isEditing">
-                            <option value="">Choisir la localisation</option>
-                            <option *ngFor="let localisation of localisations" [value]="localisation.id">{{ localisation.nom }}</option>
+                        <select class="form-control" [(ngModel)]="selectedItem.localisation.id" name="localisation" #localisation="ngModel" [disabled]="!isEditing" required>
+                            <option [ngValue]="null">-- Sélectionnez localisation --</option>
+                            <option *ngFor="let localisation of localisations" [ngValue]="localisation.id">{{ localisation.nom }}</option>
                         </select>
-                        <button *ngIf="isEditing" type="button" class="btn btn-add" (click)="openLocalisationModal(localisationModal)"><i class="fa fa-plus"></i></button>
+                    </div>
+                    <div class="error-message" *ngIf="localisation.touched && !localisation.valid&&isEditing">
+                        <i class="fas fa-exclamation-circle"></i> Le champ Localisation est requis.
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group col-md-6 col-lg-10" >
                     <label>Catégorie d'Infra</label>
                     <div class="input-group">
-                        <select class="form-control" [(ngModel)]="selectedItem.modeleInfra!.catInfra.id" name="catInfra" (ngModelChange)="onCategoryChange($event)" required [disabled]="!isEditing">
-                            <option value="">Sélectionner une catégorie</option>
-                            <option *ngFor="let category of categories" [value]="category.id">{{ category.nom }}</option>
+                        <select class="form-control" [(ngModel)]="selectedItem.modeleInfra.catInfra.id" name="catInfra" #catInfra="ngModel" (ngModelChange)="onCategoryChange($event)" [disabled]="!isEditing" required>
+                            <option [ngValue]="null">-- Sélectionnez catégorie --</option>
+                            <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.nom }}</option>
                         </select>
-                        <button *ngIf="isEditing" type="button" class="btn btn-add" (click)="openCategoryModal(categoryModal)"><i class="fa fa-plus"></i></button>
                     </div>
+
                 </div>
-                <div class="form-group">
-                    <label>Modèle d'Infra</label>
+                <div class="form-group col-md-6 col-lg-10" [ngClass]="{'form-group-error': modeleInfra.touched && !modeleInfra.valid&&isEditing}">
+                    <label>Modèle d'Infra <strong style="color: red">*</strong></label>
                     <div class="input-group">
-                        <select class="form-control" [(ngModel)]="selectedItem.modeleInfra!.id" name="modeleInfra" required [disabled]="!isEditing">
-                            <option value="">Choisir un modèle</option>
-                            <option *ngFor="let modele of filteredModeles" [value]="modele.id">{{ modele.nom }}</option>
+                        <select class="form-control" [(ngModel)]="selectedItem.modeleInfra.id" name="modeleInfra" #modeleInfra="ngModel" [disabled]="!isEditing" required>
+                            <option [ngValue]="null">-- Sélectionnez modèle --</option>
+                            <option *ngFor="let modele of filteredModeles" [ngValue]="modele.id">{{ modele.nom }}</option>
                         </select>
-                        <button *ngIf="isEditing" type="button" class="btn btn-add" (click)="openModeleModal(modeleModal)" ><i class="fa fa-plus"></i></button>
+                    </div>
+                    <div class="error-message" *ngIf="modeleInfra.touched && !modeleInfra.valid&&isEditing">
+                        <i class="fas fa-exclamation-circle"></i> Le champ Modèle d'Infrastructure est requis.
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="form-row" [ngClass]="{'form-group-error': !tarifsValid&&isEditing}">
+            <div class="form-group col-md-12">
+                <label>Tarifs par Fréquence <strong style="color: red">*</strong></label>
+                <div class="input-group">
+                    <select class="form-control" [(ngModel)]="selectedFrequenceId" name="frequence" #frequence="ngModel" (ngModelChange)="onFrequenceChange($event)" [disabled]="!isEditing">
+                        <option [ngValue]="null">-- Sélectionnez fréquence --</option>
+                        <option *ngFor="let frequence of availableFrequences" [ngValue]="frequence.id">{{ frequence.libelle }}</option>
+                    </select>
+                    <input type="number" class="form-control" placeholder="Tarif" [(ngModel)]="newTarif" name="tarif" #tarif="ngModel" [disabled]="!isEditing" min="0" step="0.01">
+                    <button *ngIf="isEditing" type="button" class="btn btn-add" (click)="addTarif()" [disabled]="!selectedFrequenceId || !newTarif || newTarif <= 0" title="Ajouter tarif">+</button>
+                </div>
+                <div class="error-message" *ngIf="!tarifsValid&&isEditing">
+                    <i class="fas fa-exclamation-circle"></i> Veuillez ajouter au moins un tarif valide.
+                </div>
+            </div>
+        </div>
+        <div class="form-row" *ngIf="selectedItem.infraTarifs && selectedItem.infraTarifs.length > 0">
+            <div class="form-group col-md-12">
+                <table class="table table-normal">
+                    <thead>
+                    <tr>
+                        <th>Fréquence</th>
+                        <th>Tarif</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let tarif of selectedItem.infraTarifs; let i = index">
+                        <td>{{ tarif.frequence.libelle }}</td>
+                        <td>{{ tarif.tarifInfra }}</td>
+                        <td>
+                            <button *ngIf="isEditing" type="button" class="btn btn-delete" (click)="removeTarif(i)" >
+                                <i class="fa fa-trash"></i>Supprimer
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="error-message" *ngIf="detailForm.submitted && (detailForm.invalid || !tarifsValid)&&isEditing">
+            <i class="fas fa-exclamation-circle"></i> Veuillez corriger les erreurs dans le formulaire avant de soumettre.
+        </div>
         <div class="action-buttons">
-            <button *ngIf="!isEditing" type="button" class="btn btn-green" (click)="toggleEditMode()" ><i class="fas fa-edit"></i>Modifier</button>
-            <button *ngIf="isEditing" type="button" class="btn btn-green" (click)="update()" ><i class="fas fa-check"></i>Confirmer </button>
-            <button *ngIf="isEditing" type="button" class="btn btn-red" (click)="cancelEdit()" ><i class="fas fa-times"></i> Annuler</button>
-            <button type="button" class="btn btn-eye"  (click)="addMouvementInfra()" ><i class="fas fa-plus-circle"></i>Ajouter un mouvement pour ce client</button>
+            <button *ngIf="!isEditing" type="button" class="btn btn-green" (click)="toggleEditMode()"><i class="fas fa-edit"></i> Modifier</button>
+            <button *ngIf="isEditing" type="submit" class="btn btn-green" [disabled]="detailForm.invalid || !tarifsValid"><i class="fas fa-check"></i> Confirmer</button>
+            <button *ngIf="isEditing" type="button" class="btn btn-red" (click)="cancelEdit()"><i class="fas fa-times"></i> Annuler</button>
+            <button type="button" class="btn btn-eye" (click)="addMouvementInfra()"><i class="fas fa-plus-circle"></i> Ajouter un mouvement pour cette infrastructure</button>
         </div>
     </form>
 </div>
-
-<ng-template #localisationModal let-modal>
-    <div class="modal-header">
-        <h5 class="modal-title">Ajouter une Localisation</h5>
-        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
-    </div>
-    <div class="modal-body">
-        <form #localisationForm="ngForm" (ngSubmit)="addLocalisation(); modal.close('Save click')">
-            <div class="form-row">
-                <div class="form-group col-md-12">
-                    <label>Nom de la Localisation</label>
-                    <input type="text" class="form-control" [(ngModel)]="newLocalisation.nom" name="localisationNom" required>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-grey" (click)="modal.dismiss('Cancel click')">Annuler</button>
-                <button type="submit" class="btn btn-blue" [disabled]="!newLocalisation.nom" ><i class="fas fa-save"></i> Enregistrer</button>
-            </div>
-        </form>
-    </div>
-</ng-template>
-
-<ng-template #categoryModal let-modal>
-    <div class="modal-header">
-        <h5 class="modal-title">Ajouter une Catégorie</h5>
-        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
-    </div>
-    <div class="modal-body">
-        <form #categoryForm="ngForm" (ngSubmit)="addCategory(); modal.close('Save click')">
-            <div class="form-row">
-                <div class="form-group col-md-12">
-                    <label>Nom de la Catégorie</label>
-                    <input type="text" class="form-control" [(ngModel)]="newCategory.nom" name="nom" required>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-grey" (click)="modal.dismiss('Cancel click')" >Annuler</button>
-                <button type="submit" class="btn btn-blue" [disabled]="!newCategory.nom" ><i class="fas fa-save"></i> Enregistrer</button>
-            </div>
-        </form>
-    </div>
-</ng-template>
-
-<ng-template #modeleModal let-modal>
-    <div class="modal-header">
-        <h5 class="modal-title">Ajouter un Modèle</h5>
-        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
-    </div>
-    <div class="modal-body">
-        <form #modeleForm="ngForm" (ngSubmit)="addModele(); modal.close('Save click')">
-            <div class="form-row">
-                <div class="form-group col-md-12">
-                    <label>Nom du Modèle</label>
-                    <input type="text" class="form-control" [(ngModel)]="newModele.nom" name="modeleNom" required>
-                </div>
-                <div class="form-group col-md-12">
-                    <label>Catégorie du Modèle</label>
-                    <select class="form-control" [(ngModel)]="newModele.catInfra.id" name="modeleCategorie" required>
-                        <option value="">Choisir une catégorie</option>
-                        <option *ngFor="let category of categories" [value]="category.id">{{ category.nom }}</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-grey" (click)="modal.dismiss('Cancel click')" >Annuler</button>
-                <button type="submit" class="btn btn-blue" [disabled]="!newModele.nom || !newModele.catInfra" ><i class="fas fa-save"></i> Enregistrer</button>
-            </div>
-        </form>
-    </div>
-</ng-template>

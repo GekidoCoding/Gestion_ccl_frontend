@@ -4,6 +4,7 @@
         <span aria-hidden="true">×</span>
     </button>
 </div>
+<app-loading [loading]="isLoading"></app-loading>
 <div class="modal-body">
     <form #detailForm="ngForm">
         <div class="form-row">
@@ -20,13 +21,16 @@
                 <label>Mouvement :</label>
                 <div class="row">
                     <div class="col-md-6 md-2">
-                        <label>Infrastructure</label>
-                        <input  type="text" class="form-control" name="infrastructure" [value]="newItem.mouvement?.infrastructure?.nom || ''" readonly>
-                    </div>
-                    <div class="col-md-6 md-2">
                         <label>Client</label>
-                        <input type="text" class="form-control" name="client" [value]="newItem.mouvement?.client?.nom || ''" readonly>
+                        <input type="text" class="form-control" name="client"
+                               [value]="
+                                  (newItem.mouvement?.client?.nom && newItem.mouvement?.client?.prenom)
+                                    ? (newItem.mouvement.client.nom + ' ' + newItem.mouvement.client.prenom)
+                                    : (newItem.mouvement?.client?.nom || newItem.mouvement?.client?.prenom || newItem.mouvement?.client?.raisonSociale || '')
+                                "
+                           readonly>
                     </div>
+
                     <div class="col-md-6 md-2">
                         <label>Période début</label>
                         <input type="datetime-local" step="1" class="form-control" name="periodeDebut" [value]="newItem.mouvement?.periodeDebut | date:'yyyy-MM-ddTHH:mm:ss'" readonly>
@@ -34,6 +38,9 @@
                     <div class="col-md-6 md-2">
                         <label>Période fin</label>
                         <input type="datetime-local" step="1" class="form-control" name="periodeFin" [value]="newItem.mouvement?.periodeFin | date:'yyyy-MM-ddTHH:mm:ss'" readonly>
+                    </div>
+                    <div class="col-md-6 md-2" style="margin-top: 2%">
+                        <button class="btn btn-eye" (click)="openInfrasPopup(this.mouvementSelected)">Voir Infrastructures Concernées</button>
                     </div>
                 </div>
             </div>
@@ -66,9 +73,9 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-grey" (click)="activeModal.dismiss('Cross click')">Annuler</button>
+            <button type="button" class="btn btn-red" (click)="activeModal.dismiss('Cross click')"><i class="fas fa-times"></i>Annuler</button>
             <button type="button" class="btn btn-blue" (click)="functionAddAction()" title="Enregistrer" [disabled]="detailForm.invalid">
-                <i class="fas fa-save"></i>
+                <i class="fas fa-save"></i> Enregistrer
             </button>
         </div>
     </form>

@@ -15,6 +15,7 @@ import {CalendarComponent} from "../ccl/pages/calendar/calendar.component";
 import {TestComponent} from "../ccl/pages/test/test.component";
 import {DashboardComponent} from "../ccl/pages/dashboard/dashboard/dashboard.component";
 import {StatsComponent} from "../ccl/pages/stats/stats/stats.component";
+import {FrequenceComponent} from "../ccl/pages/frequence/frequence/frequence.component";
 
 const routes: Routes = [
   {
@@ -31,7 +32,11 @@ const routes: Routes = [
         component: LocalisationComponent, // child route component that the router renders
       },
       {
-        path: 'categorie_infra', // child route path
+        path: 'frequence', // child route path
+        component: FrequenceComponent, // child route component that the router renders
+      },
+      {
+      path: 'categorie_infra', // child route path
         component: CategorieInfraComponent, // child route component that the router renders
       },
 

@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { NgbActiveModal, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
+import { NgForm } from '@angular/forms';
 import { Mouvement } from '../../../model/mouvement/mouvement';
 import { Infrastructure } from '../../../model/infrastructure/infrastructure';
 import { Client } from '../../../model/client/client';
@@ -15,6 +16,9 @@ import { HistoriqueMvtPopupComponent } from '../historique-mvt-popup/historique-
 import { FactureAddComponent } from '../facture/facture-add/facture-add.component';
 import { FactureListPopupComponent } from '../facture/facture-list-popup/facture-list-popup.component';
 import { ConfigService } from '../../../services/config/config.service';
+import { FrequenceService } from '../../../services/frequence/frequence.service';
+import { Frequence } from '../../../model/frequence/frequence';
+import {DetailInfrastructureComponent} from "../detail-infrastructure/detail-infrastructure.component";
 
 @Component({
   selector: 'app-mouvement-detail',
@@ -24,6 +28,7 @@ import { ConfigService } from '../../../services/config/config.service';
 export class MouvementDetailComponent implements OnInit {
   @Input() mouvementId!: string;
   @Output() afterAction = new EventEmitter<void>();
+  @ViewChild('detailForm') detailForm!: NgForm;
   selectedItem: Mouvement = new Mouvement();
   typeMouvements: TypeMouvement[] = [];
   filteredTypeMouvements: TypeMouvement[] = [];
@@ -31,6 +36,14 @@ export class MouvementDetailComponent implements OnInit {
   isReservation: boolean = false;
   isLoading: boolean = true;
   isEditing: boolean = false;
+  mouvementInfrasValid: boolean = true;
+  clientValid: boolean = true;
+  datesValid: boolean = true;
+  capacityValid: boolean = true;
+  totalCapacity: number = 0;
+  frequences: Frequence[] = [];
+  frequencesValid: boolean = true; // New property for frequency validation
+  defaultFrequence: Frequence = new Frequence(); // Default frequency
 
   constructor(
       public activeModal: NgbActiveModal,
@@ -40,6 +53,7 @@ export class MouvementDetailComponent implements OnInit {
       private typeMouvementService: TypeMouvementService,
       private infrastructureService: InfrastructureService,
       private mouvementInfraService: MouvementInfraService,
+      private frequenceService: FrequenceService,
       private toastr: ToastrService,
       private configService: ConfigService
   ) {
@@ -54,6 +68,31 @@ export class MouvementDetailComponent implements OnInit {
     this.loadTypeMouvements();
     this.loadClients();
     this.loadMouvement();
+    this.loadFrequences();
+    this.loadFrequenceDefault();
+  }
+
+  loadFrequenceDefault() {
+    this.frequenceService.findDefaultFrequence().subscribe({
+      next: data => {
+        this.defaultFrequence = { ...data }; // Create a new instance
+      },
+      error: err => {
+        this.toastr.error("Erreur lors du chargement de la fréquence par défaut");
+      }
+    });
+  }
+
+  loadFrequences() {
+    this.frequenceService.getAll().subscribe({
+      next: (frequences) => {
+        this.frequences = frequences;
+      },
+      error: (error) => {
+        console.error('Error loading frequences:', error);
+        this.toastr.error('Erreur lors du chargement des fréquences');
+      }
+    });
   }
 
   loadMouvement() {
@@ -65,10 +104,20 @@ export class MouvementDetailComponent implements OnInit {
             ...data,
             client: { ...data.client },
             typeMouvement: { ...data.typeMouvement },
-            mouvementInfras: data.mouvementInfras ? [...data.mouvementInfras] : []
+            mouvementInfras: data.mouvementInfras ? data.mouvementInfras.map(mi => ({
+              ...mi,
+              infrastructure: { ...mi.infrastructure },
+              mouvement: { ...mi.mouvement },
+              frequence: mi.frequence ? { ...mi.frequence } : { ...this.defaultFrequence }
+            })) : []
           };
           this.onTypeMouvementChange();
           this.filterTypeMouvements();
+          this.validateMouvementInfras();
+          this.validateClient();
+          this.validateDates();
+          this.validateCapacity();
+          this.validateFrequences();
           this.isLoading = false;
         },
         error: (error) => {
@@ -130,6 +179,11 @@ export class MouvementDetailComponent implements OnInit {
       this.selectedItem.periodeDebut = '';
       this.selectedItem.periodeFin = '';
       this.selectedItem.nombre = 0;
+      this.datesValid = true;
+      this.capacityValid = true;
+    } else {
+      this.validateDates();
+      this.validateCapacity();
     }
     this.filterTypeMouvements();
   }
@@ -138,23 +192,84 @@ export class MouvementDetailComponent implements OnInit {
     if (!this.selectedItem.mouvementInfras.some(existing => existing.infrastructure.id === infra.id)) {
       const mi = new MouvementInfra();
       mi.infrastructure = infra;
-      mi.mouvement.id = this.mouvementId;
+      mi.mouvement.id = this.selectedItem.id;
+      mi.frequence = { ...this.defaultFrequence };
+
       this.selectedItem.mouvementInfras.push(mi);
-    } else {
-      this.toastr.warning('Cette infrastructure est déjà sélectionnée.');
+
+      this.validateMouvementInfras();
+      this.validateCapacity();
+      this.validateFrequences();
     }
     content.dismiss('Cross Click');
   }
 
   removeInfrastructure(index: number) {
     this.selectedItem.mouvementInfras = this.selectedItem.mouvementInfras.filter((_, i) => i !== index);
+    this.validateMouvementInfras();
+    this.validateCapacity();
+    this.validateFrequences();
   }
-
+  openDetailModal(id:string){
+    const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
+    const modal = this.modalService.open(DetailInfrastructureComponent, options);
+    modal.componentInstance.infrastructureId = id;
+  }
   handleClientSelected(client: Client, content: any) {
     if (this.selectedItem) {
       this.selectedItem.client = { ...client };
+      this.validateClient();
       content.dismiss('Cross Click');
     }
+  }
+
+  validateMouvementInfras() {
+    this.mouvementInfrasValid = this.selectedItem.mouvementInfras.length > 0;
+  }
+
+  validateClient() {
+    this.clientValid = !!this.selectedItem.client?.id;
+  }
+
+  validateDates() {
+    if (!this.isReservation) {
+      this.datesValid = true;
+      return;
+    }
+    if (!this.selectedItem.periodeDebut || !this.selectedItem.periodeFin) {
+      this.datesValid = true; // Will be caught by required validation
+      return;
+    }
+    const debut = new Date(this.selectedItem.periodeDebut);
+    const fin = new Date(this.selectedItem.periodeFin);
+    this.datesValid = debut <= fin;
+  }
+
+  validateCapacity() {
+    if (!this.isReservation || this.selectedItem.nombre === null || this.selectedItem.nombre === undefined) {
+      this.capacityValid = true;
+      this.totalCapacity = 0;
+      return;
+    }
+
+    this.totalCapacity = this.selectedItem.mouvementInfras.reduce((sum, mi) => {
+      const capacite = mi.infrastructure.capacite ? Number(mi.infrastructure.capacite) : 0;
+      return sum + (isNaN(capacite) ? 0 : capacite);
+    }, 0);
+
+    this.capacityValid = this.selectedItem.nombre <= this.totalCapacity;
+  }
+
+  validateFrequences() {
+    this.frequencesValid = this.selectedItem.mouvementInfras.every(mi => mi.frequence?.id);
+  }
+
+  onFrequenceChange() {
+    this.validateFrequences();
+  }
+
+  trackByIndex(index: number): number {
+    return index;
   }
 
   openPopup(content: any) {
@@ -175,11 +290,21 @@ export class MouvementDetailComponent implements OnInit {
           ...data,
           client: { ...data.client },
           typeMouvement: { ...data.typeMouvement },
-          mouvementInfras: data.mouvementInfras ? [...data.mouvementInfras] : []
+          mouvementInfras: data.mouvementInfras ? data.mouvementInfras.map(mi => ({
+            ...mi,
+            infrastructure: { ...mi.infrastructure },
+            mouvement: { ...mi.mouvement },
+            frequence: mi.frequence ? { ...mi.frequence } : { ...this.defaultFrequence }
+          })) : []
         };
         this.isEditing = false;
         this.onTypeMouvementChange();
         this.filterTypeMouvements();
+        this.validateMouvementInfras();
+        this.validateClient();
+        this.validateDates();
+        this.validateCapacity();
+        this.validateFrequences();
         this.isLoading = false;
       },
       error: (error) => {
@@ -192,6 +317,18 @@ export class MouvementDetailComponent implements OnInit {
 
   update() {
     if (this.selectedItem && this.mouvementId) {
+      this.detailForm.control.markAllAsTouched();
+      this.validateMouvementInfras();
+      this.validateClient();
+      this.validateDates();
+      this.validateCapacity();
+      this.validateFrequences();
+
+      if (!this.detailForm.valid || !this.mouvementInfrasValid || !this.clientValid || !this.datesValid || !this.capacityValid || !this.frequencesValid) {
+        this.isLoading = false;
+        return;
+      }
+
       this.isLoading = true;
 
       if (this.selectedItem.periodeDebut) {
@@ -203,20 +340,23 @@ export class MouvementDetailComponent implements OnInit {
       if (this.selectedItem.dhMouvement) {
         this.selectedItem.dhMouvement = this.selectedItem.dhMouvement + ':00';
       }
-      console.log("selected mouveemnt updating :"+JSON.stringify(this.selectedItem));
-      this.mouvementService.update(this.selectedItem.id , this.selectedItem).subscribe({
+      console.log(JSON.stringify( this.selectedItem.mouvementInfras));
+      this.mouvementService.update(this.selectedItem.id, this.selectedItem).subscribe({
         next: (data) => {
-          this.selectedItem =data;
-          this.mouvementId=this.selectedItem.id;
-          this.isEditing=false;
+          this.selectedItem = data;
+
+          this.mouvementId = this.selectedItem.id;
+          this.isEditing = false;
           this.ngOnInit();
-          this.toastr.success("Mis a jour avec succes !");
+          this.toastr.success('Mis à jour avec succès !');
         },
         error: (error) => {
-          this.toastr.error("erreur lors du mis a jour !");
+          console.log(JSON.stringify( error));
+          const message = error.error?.message || "Erreur inconnue";
+          this.toastr.error(message);
+          this.isLoading = false;
         }
-      })
-
+      });
     }
   }
 
@@ -228,7 +368,12 @@ export class MouvementDetailComponent implements OnInit {
           ...data,
           client: { ...data.client },
           typeMouvement: { ...data.typeMouvement },
-          mouvementInfras: data.mouvementInfras ? [...data.mouvementInfras] : []
+          mouvementInfras: data.mouvementInfras ? data.mouvementInfras.map(mi => ({
+            ...mi,
+            infrastructure: { ...mi.infrastructure },
+            mouvement: { ...mi.mouvement },
+            frequence: mi.frequence ? { ...mi.frequence } : { ...this.defaultFrequence }
+          })) : []
         };
         this.toastr.success('Mouvement classé avec succès');
         this.loadMouvement();
@@ -250,7 +395,12 @@ export class MouvementDetailComponent implements OnInit {
           ...data,
           client: { ...data.client },
           typeMouvement: { ...data.typeMouvement },
-          mouvementInfras: data.mouvementInfras ? [...data.mouvementInfras] : []
+          mouvementInfras: data.mouvementInfras ? data.mouvementInfras.map(mi => ({
+            ...mi,
+            infrastructure: { ...mi.infrastructure },
+            mouvement: { ...mi.mouvement },
+            frequence: mi.frequence ? { ...mi.frequence } : { ...this.defaultFrequence }
+          })) : []
         };
         this.toastr.success('Mouvement accordé avec succès');
         this.loadMouvement();

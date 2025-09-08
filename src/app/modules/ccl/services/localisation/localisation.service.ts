@@ -5,54 +5,39 @@ import { catchError } from 'rxjs/operators';
 import {Localisation} from "../../model/localisation/localisation";
 import {Page} from "../../interface/page.interface";
 import {Etat} from "../../model/etat/etat";
+import {environment} from "../../../../../environments/environment";
 
 @Injectable({
   providedIn: 'root'
 })
 export class LocalisationService {
-  private apiUrl = 'http://localhost:8080/cnaps/gestion/ccl/localisation';
+  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/localisation';
 
   constructor(private http: HttpClient) {}
 
-  private handleError(error: any): Observable<never> {
-    console.error('API error:', error);
-    return throwError(() => new Error('Une erreur s\'est produite.'));
-  }
 
   getAll(): Observable<Localisation[]> {
-    return this.http.get<Localisation[]>(`${this.apiUrl}/`).pipe(
-        catchError(this.handleError)
-    );
+    return this.http.get<Localisation[]>(`${this.apiUrl}/`);
   }
   getPaginated(page: number = 0, pageSize: number = 10): Observable<Page<Localisation>> {
     let params = new HttpParams()
         .set('page', page.toString())
         .set('pageSize', pageSize.toString());
-    return this.http.get<Page<Localisation>>(`${this.apiUrl}/pagination`, { params }).pipe(
-        catchError(this.handleError)
-    );
+    return this.http.get<Page<Localisation>>(`${this.apiUrl}/pagination`, { params });
   }
   getById(id: string): Observable<Localisation> {
-    return this.http.get<Localisation>(`${this.apiUrl}/${id}`).pipe(
-        catchError(this.handleError)
-    );
+    return this.http.get<Localisation>(`${this.apiUrl}/${id}`);
   }
 
   create(activite: any): Observable<Localisation> {
-    return this.http.post<Localisation>(`${this.apiUrl}/create`, activite).pipe(
-        catchError(this.handleError)
-    );
+    return this.http.post<Localisation>(`${this.apiUrl}/create`, activite);
   }
 
   update(id: string, activite: Localisation): Observable<Localisation> {
-    return this.http.put<Localisation>(`${this.apiUrl}/update/${id}`, activite).pipe(
-        catchError(this.handleError)
-    );
+    return this.http.put<Localisation>(`${this.apiUrl}/update/${id}`, activite);
   }
 
   delete (id:string):Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/delete/${id}`).pipe(
-        catchError(this.handleError)
-    );
+    return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
   }
 }

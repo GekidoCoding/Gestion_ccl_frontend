@@ -41,6 +41,39 @@
             </div>
         </div>
 
+        <div class="statistics-section" *ngIf="infrastructure.id">
+            <h3>Statistiques de l'infrastructure </h3>
+            <div class="form-row">
+                <div class="form-group col-md-2">
+                    <label>Nom & numero </label>
+                    <p> {{infrastructure.nom}} {{infrastructure.numero}} </p>
+                </div>
+
+                <div class="form-group col-md-2">
+                    <label>Modele </label>
+                    <p>{{ infrastructure.modeleInfra.nom || 'N/A' }}</p>
+                </div>
+
+                <div class="form-group col-md-2">
+                    <label> Categorie </label>
+                    <p>{{ infrastructure.modeleInfra.catInfra.nom || 'N/A' }}</p>
+                </div>
+                <div class="form-group col-md-2">
+                    <label>Total Mouvements</label>
+                    <p>{{ totalItems || 0 }}</p>
+                </div>
+                <div class="form-group col-md-2">
+                    <label>Dernier Mouvement</label>
+                    <p>{{ latestMovement || 'N/A' }}</p>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button type="button" style="font-size: 0.9rem" class="btn btn-eye" (click)="navigateToDetailClient(client.id)">
+                    <i class="fas fa-info-circle"></i> Détail
+                </button>
+            </div>
+        </div>
+
         <div class="table-controls">
             <div class="entries-select">
                 <label>Afficher</label>
@@ -90,6 +123,9 @@
                         <input type="datetime-local" class="form-control" [(ngModel)]="periodeFin" name="periodeFin">
                     </div>
                     <div class="form-group col-md-2" style="margin-top: 15px">
+                        <button (click)="resetSearchFormCriteria()" class="btn btn-red" style="margin-right: 5%">
+                            <i class="fas fa-times"></i> Effacer
+                        </button>
                         <button type="submit" class="btn btn-search">
                             <i class="fas fa-search"></i> Rechercher
                         </button>
@@ -114,7 +150,7 @@
                 </thead>
                 <tbody>
                 <ng-container *ngFor="let item of filteredItems; let i = index">
-                    <tr class="row-animation" [ngClass]="{'row-animation-delay': i > 0}" [attr.data-index]="i">
+                    <tr class="row-animation" [ngClass]="'tr-' + item.typeMouvement.nom">
                         <td class="nom-column">{{ item.dhMouvement }}</td>
                         <td class="nom-column">{{ item.typeMouvement.nom }}</td>
                         <td class="nom-column-line" *ngIf="client?.id">
@@ -126,14 +162,14 @@
                                     {{
                                         item.client
                                             ? (item.client.nom && item.client.prenom
-                                                ? item.client.nom + ' ' + item.client.prenom
+                                                ? item.client.nom+" "+ item.client.prenom
                                                 : item.client.raisonSociale || 'N/A')
                                             : 'N/A'
                                     }}
                                 </u>
                             </td>
                             <td class="nom-column-line">
-                                <u (click)="openInfrasPopup(item)" >Voir Infrastructures Concernées</u>
+                                <u (click)="openInfrasPopup(item)">Voir Infrastructures Concernées</u>
                             </td>
                         </ng-container>
                         <td class="action-column action-buttons-cell">
@@ -153,11 +189,11 @@
 
         <div class="pagination-controls">
             <div class="pagination-container">
-                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage === 0" (click)="changePage(currentPage)">Précédent</button>
+                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage === 0" (click)="changePage(currentPage)"><i class="fas fa-arrow-left"></i></button>
                 <div class="pagination-buttons">
                     <span *ngFor="let page of pageNumbers" class="page-number btn btn-blue page-animation" [class.active]="page === currentPage + 1" (click)="changePage(page)">{{page}}</span>
                 </div>
-                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage + 1 === totalPages || totalPages === 0" (click)="changePage(currentPage + 2)">Suivant</button>
+                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage + 1 === totalPages || totalPages === 0" (click)="changePage(currentPage + 2)"><i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
     </div>
