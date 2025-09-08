@@ -1,64 +1,88 @@
 <div class="modal-header">
     <h5 class="modal-title">Ajouter une Nouvelle Infrastructure</h5>
-    <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
+    <button type="button" class="close" (click)="modal.dismiss('Cancel click')" aria-label="Close"><span aria-hidden="true">×</span></button>
 </div>
 
 <div class="modal-body">
+<!--    <app-loading [loading]="isLoading"></app-loading>-->
     <form #addForm="ngForm" (ngSubmit)="onSubmit(addForm)">
         <div class="form-row">
             <div class="form-left">
-                <div class="form-group col-md-6 col-lg-10">
-                    <label>Nom</label>
-                    <input type="text" class="form-control" placeholder="Ex : Chambre . 101" [(ngModel)]="newItem.nom" name="nom" required>
+                <div class="form-group col-md-6 col-lg-10" [ngClass]="{'form-group-error': nom.touched && !nom.valid}">
+                    <label>Nom <strong style="color: red">*</strong></label>
+                    <input type="text" class="form-control" placeholder="Ex : Chambre . 101" [(ngModel)]="newItem.nom" name="nom" #nom="ngModel" required>
+                    <div class="error-message" *ngIf="nom.touched && !nom.valid">
+                        <i class="fas fa-exclamation-circle"></i> Le champ Nom est requis.
+                    </div>
                 </div>
-                <div class="form-group col-md-6 col-lg-10">
+                <div class="form-group col-md-6 col-lg-10" >
+<!--                    [ngClass]="{'form-group-error': numero.touched && !numero.valid}"-->
                     <label>Numéro</label>
-                    <input type="text" class="form-control" placeholder="Ex : CHB-101" [(ngModel)]="newItem.numero" name="numero" required>
+                    <input type="text" class="form-control" placeholder="Ex : CHB-101" [(ngModel)]="newItem.numero" name="numero" #numero="ngModel" required>
+<!--                    <div class="error-message" *ngIf="numero.touched && !numero.valid">-->
+<!--                        <i class="fas fa-exclamation-circle"></i> Le champ Numéro est requis.-->
+<!--                    </div>-->
                 </div>
                 <div class="form-group col-md-6 col-lg-10">
-                    <label>Capacité</label>
-                    <input type="number" placeholder="10" class="form-control" [(ngModel)]="newItem.capacite" name="capacite" required>
+<!--                    [ngClass]="{'form-group-error': capacite.touched && !capacite.valid}"-->
+                    <label>Capacité </label>
+                    <input type="number" placeholder="10" class="form-control" [(ngModel)]="newItem.capacite" name="capacite" #capacite="ngModel" required>
+<!--                    <div class="error-message" *ngIf="capacite.touched && !capacite.valid">-->
+<!--                        <i class="fas fa-exclamation-circle"></i> Le champ Capacité est requis.-->
+<!--                    </div>-->
                 </div>
-                <div class="form-group col-md-6 col-lg-10">
+                <div class="form-group col-md-6 col-lg-10" [ngClass]="{'form-group-warning': !elementsValid}">
                     <label>Éléments</label>
-                    <textarea class="form-control" placeholder="Ex : 1 douche interieure , 2 WC exterieures , 1 chaufaud" [(ngModel)]="newItem.elements" name="elements"></textarea>
+                    <textarea class="form-control" placeholder="Ex : 1 douche intérieure, 2 WC extérieures, 1 chauffe-eau" [(ngModel)]="newItem.elements" name="elements" #elements="ngModel" (ngModelChange)="validateElements()"></textarea>
+                    <div class="warning-message" *ngIf="!elementsValid">
+                        <i class="fas fa-exclamation-triangle"></i> Le champ Éléments est vide, pensez à ajouter des détails pour une meilleure description.
+                    </div>
                 </div>
-
             </div>
             <div class="form-right">
-                <div class="form-group">
-                    <label>Localisation</label>
+                <div class="form-group" [ngClass]="{'form-group-error': localisation.touched && !localisation.valid}">
+                    <label>Localisation <strong style="color: red">*</strong></label>
                     <div class="input-group">
-                        <select class="form-control" [ngModel]="newItem.localisation?.id ?? null" name="localisation" (ngModelChange)="newItem.localisation!.id = $event" required>
+                        <select class="form-control" [ngModel]="newItem.localisation?.id ?? null" name="localisation" #localisation="ngModel" (ngModelChange)="newItem.localisation!.id = $event" required>
                             <option [ngValue]="null">-- Sélectionnez localisation --</option>
                             <option *ngFor="let localisation of localisations" [value]="localisation.id">{{ localisation.nom }}</option>
                         </select>
                     </div>
+                    <div class="error-message" *ngIf="localisation.touched && !localisation.valid">
+                        <i class="fas fa-exclamation-circle"></i> Le champ Localisation est requis.
+                    </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group" >
+<!--                    [ngClass]="{'form-group-error': catInfra.touched && !catInfra.valid}"-->
                     <label>Catégorie d'Infra</label>
                     <div class="input-group">
-                        <select class="form-control" [ngModel]="newItem.modeleInfra?.catInfra?.id ?? null" name="catInfra" (ngModelChange)="onCategoryChange($event); newItem.modeleInfra!.catInfra.id = $event">
+                        <select class="form-control" [ngModel]="newItem.modeleInfra?.catInfra?.id ?? null" name="catInfra" #catInfra="ngModel" (ngModelChange)="onCategoryChange($event); newItem.modeleInfra!.catInfra.id = $event" required>
                             <option [ngValue]="null">-- Sélectionnez catégorie --</option>
                             <option *ngFor="let category of categories" [value]="category.id">{{ category.nom }}</option>
                         </select>
                     </div>
+<!--                    <div class="error-message" *ngIf="catInfra.touched && !catInfra.valid">-->
+<!--                        <i class="fas fa-exclamation-circle"></i> Le champ Catégorie d'Infra est requis.-->
+<!--                    </div>-->
                 </div>
-                <div class="form-group">
-                    <label>Modèle d'Infra</label>
+                <div class="form-group" [ngClass]="{'form-group-error': modeleInfra.touched && !modeleInfra.valid}">
+                    <label>Modèle d'Infra <strong style="color: red">*</strong></label>
                     <div class="input-group">
-                        <select class="form-control" [ngModel]="newItem.modeleInfra?.id ?? null" name="modeleInfra" (ngModelChange)="newItem.modeleInfra!.id = $event" required>
+                        <select class="form-control" [ngModel]="newItem.modeleInfra?.id ?? null" name="modeleInfra" #modeleInfra="ngModel" (ngModelChange)="newItem.modeleInfra!.id = $event" required>
                             <option [ngValue]="null">-- Sélectionnez modèle --</option>
                             <option *ngFor="let modele of filteredModeles" [value]="modele.id">{{ modele.nom }}</option>
                         </select>
+                    </div>
+                    <div class="error-message" *ngIf="modeleInfra.touched && !modeleInfra.valid">
+                        <i class="fas fa-exclamation-circle"></i> Le champ Modèle d'Infrastructure est requis.
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="form-row">
+        <div class="form-row" [ngClass]="{'form-group-error': !tarifsValid}">
             <div class="form-group col-md-12">
-                <label>Tarifs par Fréquence</label>
+                <label>Tarifs par Fréquence <strong style="color: red">*</strong></label>
                 <div class="input-group">
                     <select class="form-control" [(ngModel)]="selectedFrequenceId" name="frequence" (ngModelChange)="onFrequenceChange($event)">
                         <option [ngValue]="null">-- Sélectionnez fréquence --</option>
@@ -66,6 +90,9 @@
                     </select>
                     <input type="number" class="form-control" placeholder="Tarif" [(ngModel)]="newTarif" name="tarif" min="0" step="0.01">
                     <button type="button" class="btn btn-add" (click)="addTarif()" [disabled]="!selectedFrequenceId || !newTarif || newTarif <= 0" title="Ajouter tarif">+</button>
+                </div>
+                <div class="error-message" *ngIf="!tarifsValid">
+                    <i class="fas fa-exclamation-circle"></i> Veuillez ajouter au moins un tarif valide.
                 </div>
             </div>
         </div>
@@ -94,9 +121,12 @@
             </div>
         </div>
 
+        <div class="error-message" *ngIf="addForm.submitted && (!addForm.valid || !tarifsValid)">
+            <i class="fas fa-exclamation-circle"></i> Veuillez corriger les erreurs dans le formulaire avant de soumettre.
+        </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-grey" (click)="onCancel()">Annuler</button>
-            <button type="submit" class="btn btn-blue" [disabled]="addForm.invalid"><i class="fas fa-save"></i> Enregistrer</button>
+            <button type="submit" class="btn btn-blue" [disabled]="addForm.invalid || !tarifsValid"><i class="fas fa-save"></i> Enregistrer</button>
         </div>
     </form>
 </div>
@@ -109,14 +139,17 @@
     <div class="modal-body">
         <form #localisationForm="ngForm" (ngSubmit)="addLocalisation(); modal.close('Save click')">
             <div class="form-row">
-                <div class="form-group col-md-6 col-lg-10">
-                    <label>Nom de la Localisation</label>
-                    <input type="text" class="form-control" [(ngModel)]="newLocalisation.nom" name="localisationNom" required>
+                <div class="form-group col-md-6 col-lg-10" [ngClass]="{'form-group-error': localisationNom.touched && !localisationNom.valid}">
+                    <label>Nom de la Localisation <strong style="color: red">*</strong></label>
+                    <input type="text" class="form-control" [(ngModel)]="newLocalisation.nom" name="localisationNom" #localisationNom="ngModel" required>
+                    <div class="error-message" *ngIf="localisationNom.touched && !localisationNom.valid">
+                        <i class="fas fa-exclamation-circle"></i> Le champ Nom de la Localisation est requis.
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-grey" (click)="modal.dismiss('Cancel click')">Annuler</button>
-                <button type="submit" class="btn btn-blue" [disabled]="!newLocalisation.nom"><i class="fas fa-save"></i></button>
+                <button type="submit" class="btn btn-blue" [disabled]="localisationForm.invalid"><i class="fas fa-save"></i></button>
             </div>
         </form>
     </div>
@@ -130,14 +163,17 @@
     <div class="modal-body">
         <form #categoryForm="ngForm" (ngSubmit)="addCategory(); modal.close('Save click')">
             <div class="form-row">
-                <div class="form-group col-md-6 col-lg-10">
-                    <label>Nom de la Catégorie</label>
-                    <input type="text" class="form-control" [(ngModel)]="newCategory.nom" name="nom" required>
+                <div class="form-group col-md-6 col-lg-10" [ngClass]="{'form-group-error': nom.touched && !nom.valid}">
+                    <label>Nom de la Catégorie <strong style="color: red">*</strong></label>
+                    <input type="text" class="form-control" [(ngModel)]="newCategory.nom" name="nom" #nom="ngModel" required>
+                    <div class="error-message" *ngIf="nom.touched && !nom.valid">
+                        <i class="fas fa-exclamation-circle"></i> Le champ Nom de la Catégorie est requis.
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-grey" (click)="modal.dismiss('Cancel click')">Annuler</button>
-                <button type="submit" class="btn btn-blue" [disabled]="!newCategory.nom"><i class="fas fa-save"></i></button>
+                <button type="submit" class="btn btn-blue" [disabled]="categoryForm.invalid"><i class="fas fa-save"></i></button>
             </div>
         </form>
     </div>
@@ -151,21 +187,27 @@
     <div class="modal-body">
         <form #modeleForm="ngForm" (ngSubmit)="addModele(); modal.close('Save click')">
             <div class="form-row">
-                <div class="form-group col-md-6 col-lg-10">
-                    <label>Nom du Modèle</label>
-                    <input type="text" class="form-control" [(ngModel)]="newModele.nom" name="modeleNom" required>
+                <div class="form-group col-md-6 col-lg-10" [ngClass]="{'form-group-error': modeleNom.touched && !modeleNom.valid}">
+                    <label>Nom du Modèle <strong style="color: red">*</strong></label>
+                    <input type="text" class="form-control" [(ngModel)]="newModele.nom" name="modeleNom" #modeleNom="ngModel" required>
+                    <div class="error-message" *ngIf="modeleNom.touched && !modeleNom.valid">
+                        <i class="fas fa-exclamation-circle"></i> Le champ Nom du Modèle est requis.
+                    </div>
                 </div>
-                <div class="form-group col-md-6 col-lg-10">
-                    <label>Catégorie du Modèle</label>
-                    <select class="form-control" [ngModel]="newModele.catInfra?.id ?? null" name="modeleCategorie" (ngModelChange)="newModele.catInfra.id = $event" required>
+                <div class="form-group col-md-6 col-lg-10" [ngClass]="{'form-group-error': modeleCategorie.touched && !modeleCategorie.valid}">
+                    <label>Catégorie du Modèle <strong style="color: red">*</strong></label>
+                    <select class="form-control" [ngModel]="newModele.catInfra?.id ?? null" name="modeleCategorie" #modeleCategorie="ngModel" (ngModelChange)="newModele.catInfra.id = $event" required>
                         <option [ngValue]="null">-- Sélectionnez catégorie --</option>
                         <option *ngFor="let category of categories" [value]="category.id">{{ category.nom }}</option>
                     </select>
+                    <div class="error-message" *ngIf="modeleCategorie.touched && !modeleCategorie.valid">
+                        <i class="fas fa-exclamation-circle"></i> Le champ Catégorie du Modèle est requis.
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-grey" (click)="modal.dismiss('Cancel click')">Annuler</button>
-                <button type="submit" class="btn btn-blue" [disabled]="!newModele.nom || !newModele.catInfra"><i class="fas fa-save"></i></button>
+                <button type="submit" class="btn btn-blue" [disabled]="modeleForm.invalid"><i class="fas fa-save"></i></button>
             </div>
         </form>
     </div>

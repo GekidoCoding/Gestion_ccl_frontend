@@ -28,7 +28,7 @@ export class DashboardComponent implements OnInit {
   public year: number = 2025;
   public loading: boolean = false;
   private pendingRequests: number = 0;
-
+  public filteredModeles: ModeleInfra[] = [];
   private pieChartInstance: Chart | null = null;
   private lineChartInstance: Chart | null = null;
   public historiques :HistoriqueMvt[]=[];
@@ -36,6 +36,8 @@ export class DashboardComponent implements OnInit {
   public typeMouvementId:string=''
   public categories:CategorieInfra[]=[];
   public categorieInfraId:string='';
+  public modelesIds:string[]=[];
+  public modelesInfraSelectionned: { [key: string]: boolean } = {};
 
   public statsCards = [
     { title: 'Réservation(s)', value: 0, icon: 'fas fa-calendar-check', color: 'yellow' },
@@ -90,13 +92,26 @@ export class DashboardComponent implements OnInit {
               private historiqueMvtService: HistoriqueMvtService,
               private typeMouvementService: TypeMouvementService,
               private categorieInfraService: CategorieInfraService,
+              private modeleInfraService: ModeleInfraService,
   ) { }
 
   ngOnInit(): void {
     this.loadData();
     this.loadTypeMouvements();
+    this.loadModeles();
   }
 
+  loadModeles() {
+    this.modeleInfraService.getAll().subscribe({
+      next: (modeles) => {
+        this.filteredModeles = modeles;
+      },
+      error: (error) => {
+        console.error('Error loading modeles:', error);
+        this.toastr.error('Error loading modeles:', error);
+      }
+    });
+  }
   loadTypeMouvements() {
     this.typeMouvementService.getAll().subscribe({
       next: (types) => {
@@ -144,8 +159,26 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  updateModeleSelection(modeleId: string) {
+    if (this.modelesInfraSelectionned[modeleId]) {
+      if (!this.modelesIds.includes(modeleId)) {
+        this.modelesIds.push(modeleId);
+      }
+    } else {
+      this.modelesIds = this.modelesIds.filter(id => id !== modeleId);
+    }
+
+    console.log(this.modelesIds);
+  }
   getTotalDashboard() {
-    this.dashboardService.getTotalDashboard(this.date1, this.date2, this.year).subscribe({
+    this.dashboardService.getTotalDashboard(
+        this.date1,
+        this.date2,
+        this.year,
+        this.categorieInfraId,
+        this.typeMouvementId,
+        this.modelesIds
+    ).subscribe({
       next: (totals) => {
         console.log(JSON.stringify(totals));
         this.statsCards[0].value = totals[0];
@@ -164,7 +197,14 @@ export class DashboardComponent implements OnInit {
   }
 
   getPourcentageDashboard() {
-    this.dashboardService.getPourcentageDashboard(this.date1, this.date2, this.year).subscribe({
+    this.dashboardService.getPourcentageDashboard(
+        this.date1,
+        this.date2,
+        this.year,
+        this.categorieInfraId,
+        this.typeMouvementId,
+        this.modelesIds
+    ).subscribe({
       next: (totals) => {
         console.log("pourcentage:" + JSON.stringify(totals));
         this.pieData = totals;
@@ -181,7 +221,14 @@ export class DashboardComponent implements OnInit {
   }
 
   getLineChartDataDashboard() {
-    this.dashboardService.getMonthlyData(this.date1, this.date2, this.year).subscribe({
+    this.dashboardService.getMonthlyData(
+        this.date1,
+        this.date2,
+        this.year,
+        this.categorieInfraId,
+        this.typeMouvementId,
+        this.modelesIds
+    ).subscribe({
       next: (data) => {
         console.log("line Charts:" + JSON.stringify(data));
         this.lineChartDatasets[0].data = data[0];
@@ -198,9 +245,10 @@ export class DashboardComponent implements OnInit {
       }
     });
   }
+
   getActivitiesHistoriques():void{
     this.loading = true;
-    this.historiqueMvtService.getHistoriqueMvtsCriteria(this.date1, this.date2, this.year , this.categorieInfraId , this.typeMouvementId).subscribe({
+    this.historiqueMvtService.getHistoriqueMvtsCriteria(this.date1, this.date2, this.year , this.categorieInfraId , this.typeMouvementId , this.modelesIds).subscribe({
       next: (data) => {
         this.historiques = data;
       },

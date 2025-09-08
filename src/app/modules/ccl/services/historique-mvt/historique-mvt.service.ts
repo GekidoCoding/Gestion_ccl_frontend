@@ -4,27 +4,22 @@ import { Observable, throwError } from "rxjs";
 import { catchError } from "rxjs/operators";
 import {Page} from "../../interface/page.interface";
 import {HistoriqueMvt} from "../../model/historique-mvt/historique-mvt";
+import {environment} from "../../../../../environments/environment";
 
 @Injectable({
   providedIn: 'root'
 })
 export class HistoriqueMvtService {
-  private apiUrl = 'http://localhost:8080/cnaps/gestion/ccl/historique_mvt';
+  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/historique_mvt';
 
   constructor(private http: HttpClient) { }
 
-  private handleError(error: any) {
-    console.error('error API:', error);
-    return throwError(() => new Error("Une erreur s'est produite"));
-  }
 
   getByIdMvt(id:string): Observable<HistoriqueMvt[]> {
-    return this.http.get<HistoriqueMvt[]>(`${this.apiUrl}/mouvement/${id}`).pipe(
-        catchError(this.handleError)
-    );
+    return this.http.get<HistoriqueMvt[]>(`${this.apiUrl}/mouvement/${id}`);
   }
 
-  getHistoriqueMvtsCriteria(date1?: string, date2?: string, year?: number , categorieInfraId?:string , typeMouvementId?:string): Observable<HistoriqueMvt[]> {
+  getHistoriqueMvtsCriteria(date1?: string, date2?: string, year?: number , categorieInfraId?:string , typeMouvementId?:string , modelesIds?:string[]): Observable<HistoriqueMvt[]> {
     let params = new HttpParams();
 
     if (date1) {
@@ -39,13 +34,17 @@ export class HistoriqueMvtService {
     if (typeMouvementId) {
       params = params.set('typeMouvementId', typeMouvementId);
     }
+    if (modelesIds&& modelesIds.length > 0) {
+      for (let modele of modelesIds) {
+        params = params.set('modelesIds', modele);
+      }
+    }
     if (year !== undefined) {
       params = params.set('year', year.toString());
     }
 
-    return this.http.get<HistoriqueMvt[]>(`${this.apiUrl}/mouvement/dashboard`, { params }).pipe(
-        catchError(this.handleError)
-    );
+    return this.http.get<HistoriqueMvt[]>(`${this.apiUrl}/mouvement/dashboard`, { params });
+
   }
 
 

@@ -71,25 +71,12 @@ export class ClientComponent extends BaseCrudComponent<Client> implements OnInit
     });
   }
 
-  protected applyFilters(items: Client[]): Client[] {
-    let result = [...items];
-    if (this.searchCriteria.id) {
-      result = result.filter(item => item.id.toLowerCase().includes(this.searchCriteria.id!.toLowerCase()));
-    }
-    if (this.searchCriteria.nom) {
-      const searchTerm = this.searchCriteria.nom.toLowerCase();
-      result = result.filter(item =>
-          item.nom.toLowerCase().includes(searchTerm) ||
-          item.raisonSociale.toLowerCase().includes(searchTerm)
-      );
-    }
-    return result;
-  }
 
-  protected isDateColumn(column: keyof Client): boolean {
-    return false;
-  }
 
+  reserSearchForm(){
+    this.searchCriteria = new Client();
+    this.loadData();
+  }
   initializeNewItem(): Partial<Client> {
     return new Client();
   }
@@ -163,9 +150,9 @@ export class ClientComponent extends BaseCrudComponent<Client> implements OnInit
     });
   }
   navigateToMovements(id: string) {
-    this.router.navigate([`/general/mouvement/client/${id}`]);
+    this.router.navigate([`/cnaps/gestion/ccl/mouvement/client/${id}`]);
   }
-  applySearch() {
+  applySearches() {
     this.service.searchClients(this.searchCriteria, this.selectedInfrastructureIds, this.currentPage, this.itemsPerPage)
         .subscribe(result => {
           this.items = result.content;

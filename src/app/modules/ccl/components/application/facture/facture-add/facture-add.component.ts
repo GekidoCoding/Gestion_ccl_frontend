@@ -7,6 +7,13 @@ import {Etat} from "../../../../model/etat/etat";
 import {EtatService} from "../../../../services/etat/etat.service";
 import {ToastrService} from "ngx-toastr";
 import {FactureService} from "../../../../services/facture/facture.service";
+import {
+  MouvementInfrasPopupComponent
+} from "../../mouvement-infras-popup/mouvement-infras-popup/mouvement-infras-popup.component";
+import {Frequence} from "../../../../model/frequence/frequence";
+import {FrequenceService} from "../../../../services/frequence/frequence.service";
+import { forkJoin } from 'rxjs';
+import {MouvementService} from "../../../../services/mouvement/mouvement.service";
 
 @Component({
   selector: 'app-facture-add',
@@ -18,45 +25,63 @@ export class FactureAddComponent implements OnInit {
   @Input() title:string ="Ajouter une Facture";
   @Input() newItem: Facture = new Facture();
   @Input() mouvementSelected: Mouvement=new Mouvement();
+  frequenceSelected :Frequence = new Frequence();
+  frequences: Frequence[] = [];
+  isLoading: boolean = false;
   etats:Etat[]  =[];
 
-  constructor(
+ngOnInit(): void {
+  forkJoin({
+    etats: this.etatService.getEtatsFacture(),
+    frequences: this.frequenceService.getAll(),
+    remise: this.factureService.getRemise(),
+    defaultFrequence: this.frequenceService.findDefaultFrequence(),
+    etatProforma:this.etatService.getEtatProforma(),
+    mouvementLoad:this.mouvementService.getById(this.mouvementSelected.id)
+}).subscribe({
+  next: (results) => {
+    this.etats = results.etats;
+    this.frequences = results.frequences;
+    this.newItem.remise = results.remise;
+    this.frequenceSelected = results.defaultFrequence;
+    this.newItem.etat=results.etatProforma;
+    this.newItem.mouvement = results.mouvementLoad;
+    this.initFacture(results.mouvementLoad);
+  },
+  error: (err) => {
+    this.toastr.error("Erreur lors du chargement initial");
+    console.error(err);
+  }
+});
+}
+
+constructor(
       public activeModal: NgbActiveModal,
       private modalService: NgbModal,
       private etatService: EtatService,
       private toastr: ToastrService,
       private factureService: FactureService,
+      private frequenceService: FrequenceService,
+      private mouvementService: MouvementService,
 
   ) { }
 
-  ngOnInit(): void {
 
-    if(this.mouvementSelected.id){
-      this.newItem.mouvement=this.mouvementSelected;
-      this.factureService.getRemise().subscribe({
-        next: res=>{
-          this.newItem.remise=res;
-
-        }
-      });
-    }
-    this.loadEtats();
-
-  }
-  loadEtats() {
-
-    this.etatService.getAll().subscribe({
-      next: (etats) => {
-        this.etats = etats;
-        this.newItem.etat =this.etats.find(e=>e.etat=="Proformat")!
+  initFacture(mouvement: Mouvement) {
+    this.factureService.getDefaultProforma(mouvement.id).subscribe({
+      next: data => {
+        this.newItem = data;
       },
-
-      error: (error) => {
-        this.toastr.error('Erreur lors du chargement des états') ;
+      error: err => {
+        const message = err.error?.message || "Erreur inconnue";
+        this.toastr.error(message);
+        this.activeModal.close();
       }
     });
   }
+
   functionAddAction(): void {
+    this.newItem.dhCreation ='';
     console.log('Facture à sauvegarder : ', this.newItem);
     this.newItem.gestionnaire = null;
     this.factureService.create(this.newItem).subscribe({
@@ -84,6 +109,14 @@ export class FactureAddComponent implements OnInit {
     component.componentInstance.handleSelected.subscribe((mouvement: Mouvement) => {
       this.handleSelected(mouvement);
     });
+  }
+  openInfrasPopup(mouvement: Mouvement) {
+    const modal = this.modalService.open(MouvementInfrasPopupComponent, { size: 'lg', centered: true, backdrop: 'static' });
+    modal.componentInstance.mouvementInfras = mouvement.mouvementInfras || [];
+    modal.componentInstance.mouvementId = mouvement.id;
+    modal.componentInstance.afterEmit.subscribe(() => {
+      this.ngOnInit();
+    })
   }
 
 }

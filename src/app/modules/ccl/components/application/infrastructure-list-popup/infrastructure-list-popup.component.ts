@@ -32,7 +32,6 @@ export class InfrastructureListPopupComponent implements OnInit {
   newItem: Infrastructure = new Infrastructure();
   isLoading = true;
   showConfirmation = false;
-  showError = false;
   confirmationMessage = '';
   errorMessage = '';
   showSearchForm = false;
@@ -52,7 +51,7 @@ export class InfrastructureListPopupComponent implements OnInit {
       private catInfraService: CategorieInfraService,
       private modeleInfraService: ModeleInfraService,
       private toastr: ToastrService ,
-      public activeModal: NgbActiveModal ,
+      // public activeModal: NgbActiveModal ,
       public modal:NgbModal,
   ) {}
 
@@ -69,7 +68,6 @@ export class InfrastructureListPopupComponent implements OnInit {
     this.infrastructureService.getAll().subscribe({
       next: (infrastructures) => {
         this.items = infrastructures;
-        // Filter out infrastructures that are in infrastructureNotInSelections
         this.filteredItems = this.items.filter(
             item => !this.infrastructureNotInSelections.some(notSelected => notSelected.id === item.id)
         );
@@ -77,7 +75,7 @@ export class InfrastructureListPopupComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading infrastructures:', error);
-        this.showErrorMessage('Erreur lors du chargement des infrastructures');
+        this.toastr.error('Erreur lors du chargement des infrastructures');
         this.isLoading = false;
       }
     });
@@ -88,7 +86,7 @@ export class InfrastructureListPopupComponent implements OnInit {
       next: (localisations) => this.localisations = localisations,
       error: (error) => {
         console.error('Error loading localisations:', error);
-        this.showErrorMessage('Erreur lors du chargement des localisations');
+        this.toastr.error('Erreur lors du chargement des localisations');
       }
     });
   }
@@ -98,7 +96,7 @@ export class InfrastructureListPopupComponent implements OnInit {
       next: (etats) => this.etats = etats,
       error: (error) => {
         console.error('Error loading etats:', error);
-        this.showErrorMessage('Erreur lors du chargement des états');
+        this.toastr.error('Erreur lors du chargement des états');
       }
     });
   }
@@ -108,7 +106,7 @@ export class InfrastructureListPopupComponent implements OnInit {
       next: (categories) => this.categories = categories,
       error: (error) => {
         console.error('Error loading categories:', error);
-        this.showErrorMessage('Erreur lors du chargement des catégories');
+        this.toastr.error('Erreur lors du chargement des catégories');
       }
     });
   }
@@ -121,7 +119,7 @@ export class InfrastructureListPopupComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading modeles:', error);
-        this.showErrorMessage('Erreur lors du chargement des modèles');
+        this.toastr.error('Erreur lors du chargement des modèles');
       }
     });
   }
@@ -139,12 +137,12 @@ export class InfrastructureListPopupComponent implements OnInit {
     this.infrastructureService.create(infrastructure).subscribe({
       next: () => {
         this.loadInfrastructures();
-        this.showSuccessMessage('Infrastructure ajoutée avec succès !');
+        // this.toastr.success('Infrastructure ajoutée avec succès !');
         this.newItem =new Infrastructure();
       },
       error: (error) => {
         console.error('Error adding infrastructure:', error);
-        this.showErrorMessage('Erreur lors de l\'ajout de l\'infrastructure');
+        this.toastr.error('Erreur lors de l\'ajout de l\'infrastructure');
       }
     });
   }
@@ -153,10 +151,18 @@ export class InfrastructureListPopupComponent implements OnInit {
     const selectedInfra = this.items.find(item => item.id === id);
     if (selectedInfra) {
       this.infrastructureSelected.emit(selectedInfra);
-      this.showSuccessMessage('Infrastructure sélectionnée avec succès !');
+      // this.toastr.success('Infrastructure sélectionnée avec succès !');
     }
   }
 
+  resetSearchForm(){
+    this.searchCriteria=new Infrastructure();
+    this.debutSearch='';
+    this.finSearch='';
+    this.modelesIds=[];
+    this.localisationIds=[];
+    this.ngOnInit();
+  }
 
   toggleSearchForm() {
     this.showSearchForm = !this.showSearchForm;
@@ -197,7 +203,7 @@ export class InfrastructureListPopupComponent implements OnInit {
       },
       error: (error) => {
         console.error('Erreur lors de l\'application des filtres:', error);
-        this.showErrorMessage('Erreur lors de l\'application des filtres');
+        this.toastr.error('Erreur lors de l\'application des filtres');
         this.isLoading = false;
       }
     });
@@ -223,22 +229,15 @@ export class InfrastructureListPopupComponent implements OnInit {
   }
 
   showSuccessMessage(message: string) {
-    this.confirmationMessage = message;
-    this.showConfirmation = true;
-    setTimeout(() => this.closeToast(), 3000);
+    this.toastr.success(message);
   }
 
   showErrorMessage(message: string) {
-    this.errorMessage = message;
-    this.showError = true;
-    setTimeout(() => this.closeToast(), 3000);
+    this.toastr.error(message);
   }
 
   closeToast() {
-    this.showConfirmation = false;
-    this.showError = false;
-    this.confirmationMessage = '';
-    this.errorMessage = '';
+    // No need to manually close toastr notifications as they auto-close
   }
 
   navigateToDetailInfra(id: string) {

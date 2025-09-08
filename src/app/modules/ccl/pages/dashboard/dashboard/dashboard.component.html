@@ -2,7 +2,9 @@
    <app-loading [loading]="loading" ></app-loading>
 
     <div class="content-wrapper" [ngClass]="{ 'loading': loading }">
+
         <div class="filter-form-container">
+            <div class="results-count">Résultats trouvés : {{historiques.length}}</div>
             <form #filterForm="ngForm" (ngSubmit)="onFilterSubmit()">
                 <div class="form-group">
                     <label for="date1">Date de début</label>
@@ -36,7 +38,33 @@
                             class="form-control"
                     />
                 </div>
-
+                <div class="form-group">
+                    <label>Type Mouvement</label>
+                    <select class="form-control" name="typeMouvement" required
+                            [(ngModel)]="typeMouvementId"
+                    >
+                        <option [ngValue]="''" >-- Sélectionner le type de mouvement --</option>
+                        <option *ngFor="let type of typeMouvements" [value]="type.id">{{ type.nom }}</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Categorie d'infrastructures :</label>
+                    <select class="form-control" name="categorieInfraId"
+                            [(ngModel)]="categorieInfraId"
+                    >
+                        <option [ngValue]="''" >-- Sélectionner la categorie  --</option>
+                        <option *ngFor="let type of categories" [value]="type.id">{{ type.nom }}</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-3">
+                    <label>Modèles</label>
+                    <div class="checkbox-group">
+                        <div *ngFor="let modele of filteredModeles" class="checkbox-item">
+                            <input type="checkbox" [id]="'mod-' + modele.id" [(ngModel)]="modelesInfraSelectionned[modele.id]" name="modele-{{modele.id}}" (ngModelChange)="updateModeleSelection(modele.id)">
+                            <label [for]="'mod-' + modele.id">{{ modele.nom }}</label>
+                        </div>
+                    </div>
+                </div>
                 <button type="submit" class="btn btn-primary-dashboard">Filtrer</button>
             </form>
         </div>
@@ -71,52 +99,7 @@
                 </div>
             </div>
         </div>
-        <div class="list-container">
-            <div class="table-title-dashboard"><i class="now-ui-icons design_bullet-list-67"></i> Historiques des Mouvements  </div>
-            <div class="results-count">Résultats trouvés : {{historiques.length}}</div>
-            <div class="filter-form-container">
-                <form #filterForm="ngForm" (ngSubmit)="getActivitiesHistoriques()">
-                    <div class="form-group">
-                        <label>Type Mouvement</label>
-                        <select class="form-control" name="typeMouvement" required
-                                [(ngModel)]="typeMouvementId"
-                        >
-                            <option [ngValue]="''" >-- Sélectionner le type de mouvement --</option>
-                            <option *ngFor="let type of typeMouvements" [value]="type.id">{{ type.nom }}</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Categorie d'infrastructures :</label>
-                        <select class="form-control" name="categorieInfraId"
-                                [(ngModel)]="categorieInfraId"
-                        >
-                            <option [ngValue]="''" >-- Sélectionner la categorie  --</option>
-                            <option *ngFor="let type of categories" [value]="type.id">{{ type.nom }}</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary-dashboard">Filtrer</button>
-                </form>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-normal" *ngIf="historiques.length > 0">
-                    <thead>
-                    <tr>
-                        <th>Date et Heure</th>
-<!--                        <th>matricule</th>-->
-                        <th>Description</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr *ngFor="let item of historiques" class="row-animation">
-                        <td class="nom-column">{{ item.dhAction.replace("T" , " " ) || 'N/A' }}</td>
-<!--                        <td class="nom-column">{{ item.gestionnaire.agent.matricule || 'N/A' }}</td>-->
-                        <td class="nom-column">{{ item.typeMouvement.nom || 'N/A' }}</td>
-                    </tr>
-                    </tbody>
-                </table>
-                <div *ngIf="historiques.length === 0" class="no-results">Pas d'historiques </div>
-            </div>
-        </div>
+
 
     </div>
 </div>

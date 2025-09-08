@@ -5,45 +5,35 @@ import { catchError } from "rxjs/operators";
 import {Facture} from "../../model/facture/facture";
 import {Page} from "../../interface/page.interface";
 import {Infrastructure} from "../../model/infrastructure/infrastructure";
+import {environment} from "../../../../../environments/environment";
 
 @Injectable({
   providedIn: 'root'
 })
 export class FactureService {
-  private apiUrl = 'http://localhost:8080/cnaps/gestion/ccl/facture';
+  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/facture';
 
   constructor(private http: HttpClient) { }
 
-  private handleError(error: any) {
-    console.error('error API:', error);
-    return throwError(() => new Error("Une erreur s'est produite"));
-  }
-
   create(facture: Facture): Observable<Facture> {
-    return this.http.post<Facture>(`${this.apiUrl}/create`, facture).pipe(
-        catchError(this.handleError)
-    );
+    return this.http.post<Facture>(`${this.apiUrl}/create`, facture);
   }
   udpate(id:string, facture: Facture): Observable<Facture> {
-    return this.http.put<Facture>(`${this.apiUrl}/update/${id}`, facture).pipe(
-        catchError(this.handleError)
-    );
+    return this.http.put<Facture>(`${this.apiUrl}/update/${id}`, facture);
   }
   getRemise(): Observable<number> {
-    return this.http.get<number>(`${this.apiUrl}/config/remise`).pipe(
-        catchError(this.handleError)
-    );
+    return this.http.get<number>(`${this.apiUrl}/config/remise`);
   }
 
   getById(id: string): Observable<Facture> {
-    return this.http.get<Facture>(`${this.apiUrl}/${id}`).pipe(
-        catchError(this.handleError)
-    );
+    return this.http.get<Facture>(`${this.apiUrl}/${id}`);
+  }
+
+  getDefaultProforma(id: string): Observable<Facture> {
+    return this.http.get<Facture>(`${this.apiUrl}/default/proforma/${id}`);
   }
   getByMouvementId(id: string): Observable<Facture[]> {
-    return this.http.get<Facture[]>(`${this.apiUrl}/mouvement/${id}`).pipe(
-        catchError(this.handleError)
-    )
+    return this.http.get<Facture[]>(`${this.apiUrl}/mouvement/${id}`);
   }
 
 }

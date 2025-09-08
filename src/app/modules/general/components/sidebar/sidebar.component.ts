@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import {environment} from "../../../../../environments/environment";
 
 declare interface RouteInfo {
   path: string;
@@ -17,53 +18,59 @@ export const ROUTES: RouteInfo[] = [
     class: '',
     subItems: [
       {
-        path: '/general/localisation',
+        path: '/'+environment.PREFIX+'/localisation',
         title: 'Localisation',
         icon: 'fas fa-map-marker-alt',
         class: ''
       },
       {
-        path: '/general/categorie_infra',
-        title: 'Categorie',
-        icon: 'far fa-folder',
+        path: '/'+environment.PREFIX+'/categorie_infra',
+        title: 'Catégorie',
+        icon: 'fas fa-folder',
         class: ''
       },
       {
-        path: '/general/modele_infra',
+        path: '/'+environment.PREFIX+'/modele_infra',
         title: 'Modele',
         icon: 'far fa-object-group',
+        class: ''
+      },
+      {
+        path: '/'+environment.PREFIX+'/frequence',
+        title: 'Fréquence',
+        icon: 'fas fa-bolt',
         class: ''
       }
     ]
   },
   {
-    path: '/general/client',
+    path: '/'+environment.PREFIX+'/client',
     title: 'Client',
     icon: 'far fa-user-circle',
     class: ''
   },
   {
-    path: '/general/infrastructure',
+    path: '/'+environment.PREFIX+'/infrastructure',
     title: 'Infrastructure',
     icon: 'far fa-building',
     class: ''
   },
   {
-    path: '/general/mouvement',
+    path: '/'+environment.PREFIX+'/mouvement',
     title: 'Mouvement',
     icon: 'fas fa-exchange-alt',
     class: ''
   },
 
   {
-    path: '/general/calendar',
+    path: '/'+environment.PREFIX+'/calendar',
     title: 'Calendrier',
     icon: 'far fa-calendar',
     class: ''
   },
 
   {
-    path: '/general/dashboard',
+    path: '/'+environment.PREFIX+'/dashboard',
     title: 'Statistique',
     icon: 'far fa-chart-bar',
     class: ''
@@ -101,7 +108,7 @@ export class SidebarComponent implements OnInit {
   }
 
   isExpanded(title: string): boolean {
-    return !!this.expandedItems[title];
+    return this.expandedItems[title];
   }
 
   hasSubItems(item: RouteInfo): boolean {

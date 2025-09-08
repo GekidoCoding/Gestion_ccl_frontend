@@ -92,7 +92,7 @@ export class ModeleInfraComponent extends BaseCrudComponent<ModeleInfra> {
 
     this.modeleInfraService.create(modeleInfra).subscribe({
       next: (createdModeleInfra) => {
-        this.currentPage = 0; // Reset to first page
+        this.currentPage = 0;
         this.loadData();
         this.showSuccessMessage('Modèle d\'infrastructure ajouté avec succès !');
       },
@@ -144,7 +144,7 @@ export class ModeleInfraComponent extends BaseCrudComponent<ModeleInfra> {
       this.showSuccessMessage('Suppression réussie !');
     }).catch(error => {
       console.error('Error deleting modele infras:', error);
-      this.showErrorMessage('Erreur lors de la suppression des modèles d\'infrastructure');
+      this.showErrorMessage('Impossible de supprimer le(s) modèle(s) d\'infrastructure qui ont des entités qui en dépendent  ');
     });
   }
 }

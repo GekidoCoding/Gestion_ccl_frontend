@@ -1,88 +1,95 @@
-<!--<div class="main-content">-->
+<div class="modal-header">
+    <h5 class="modal-title">Liste Des Infrastructures</h5>
+    <button type="button" class="close" (click)="activeModal.dismiss('Cross Click')" aria-label="Close">
+        <span aria-hidden="true">×</span>
+    </button>
+</div>
+<app-loading [loading]="isLoading"></app-loading>
+
+<div class="modal-body">
+    <form>
+        <div class="form-group col-md-12">
+            <label>Nom de l'Infrastructure</label>
+            <input type="text" class="form-control" [(ngModel)]="selectedInfrastructure.nom" name="nom" readonly>
+        </div>
+        <div class="form-group col-md-12">
+            <label>Numéro</label>
+            <input type="text" class="form-control" [(ngModel)]="selectedInfrastructure.numero" name="numero" readonly>
+        </div>
+        <div class="form-group col-md-12">
+            <label>Modèle</label>
+            <input type="text" class="form-control" [(ngModel)]="selectedInfrastructure.modeleInfra.nom" name="modele" readonly>
+        </div>
+        <div class="form-group col-md-12">
+            <label>Catégorie</label>
+            <input type="text" class="form-control" [(ngModel)]="selectedInfrastructure.modeleInfra.catInfra.nom" name="categorie" readonly>
+        </div>
+    </form>
+
+    <div class="table-controls">
+        <div class="search-form slide-in-out">
+            <form #searchForm="ngForm" (ngSubmit)="addTarif()">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tarif</label>
+                        <input type="number" class="form-control" [(ngModel)]="newInfraTarif.tarifInfra" name="tarif">
+                    </div>
+                    <div class="form-group">
+                        <label>Frequence</label>
+                        <select class="form-control"
+                                [(ngModel)]="newInfraTarif.frequence.id"
+                                name="frequenceId">
+                            <option [ngValue]="''"> -- Selectionnez -- </option>
+                            <option *ngFor="let frequence of filteredFrequences" [ngValue]="frequence.id">{{ frequence.libelle }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-add" style="margin-top: 13%">
+                            <i class="fas fa-plus"></i> Ajouter tarif
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-normal" *ngIf="selectedInfrastructure.infraTarifs.length > 0">
+                <thead>
+                <tr>
+                    <th>Frequence</th>
+                    <th>Tarif</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let item of selectedInfrastructure.infraTarifs" class="row-animation">
+                    <td class="name-column">{{ item.frequence.libelle }}</td>
+                    <td class="name-column">{{ item.tarifInfra }}</td>
+                    <td class="action-column action-buttons-cell">
+                        <button class="btn btn-red" (click)="openDeleteModal(deleteModal, item.id, selectedInfrastructure.nom, selectedInfrastructure.numero)">
+                            <i class="fa fa-trash"></i> Supprimer
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div *ngIf="selectedInfrastructure.infraTarifs.length === 0 && !isLoading" class="no-results">Aucune Tarif trouvée pour cette infrastructure.</div>
+        </div>
+    </div>
+</div>
+
+<ng-template #deleteModal let-modal>
     <div class="modal-header">
-        <h5 class="modal-title">Liste Des Infrastructures</h5>
-        <button type="button" class="close" (click)="activeModal.dismiss('Cross Click')" aria-label="Close">
+        <h5 class="modal-title">Confirmation de Suppression</h5>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
             <span aria-hidden="true">×</span>
         </button>
     </div>
-    <app-loading [loading]="isLoading"></app-loading>
-
     <div class="modal-body">
-        <form >
-            <div class="form-group">
-                <label>Nom de l'Infrastructure</label>
-                <input type="text" class="form-control" [(ngModel)]="selectedInfrastructure.nom" name="nom" readonly>
-            </div>
-            <div class="form-group">
-                <label>Numéro</label>
-                <input type="text" class="form-control" [(ngModel)]="selectedInfrastructure.numero" name="numero" readonly>
-            </div>
-            <div class="form-group">
-                <label>Modèle</label>
-                <input type="text" class="form-control" [(ngModel)]="selectedInfrastructure.modeleInfra.nom" name="modele" readonly>
-            </div>
-            <div class="form-group">
-                <label>Catégorie</label>
-                <input type="text" class="form-control" [(ngModel)]="selectedInfrastructure.modeleInfra.catInfra.nom" name="categorie" readonly>
-            </div>
-        </form>
-
-
-        <div class="table-controls">
-            <div class="search-form slide-in-out">
-                <form #searchForm="ngForm" (ngSubmit)="addTarif()">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Tarif</label>
-                            <input type="number" class="form-control" [(ngModel)]="newInfraTarif.tarifInfra" name="tarif">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Frequence</label>
-                            <select class="form-control"
-                                    [(ngModel)]="newInfraTarif.frequence.id"
-                                    [ngModel]="newInfraTarif.frequence.id"
-                                    name="frequenceId"
-                            >
-                                <option [ngValue]="''"> -- Selectionnez -- </option>
-                                <option *ngFor="let frequence of filteredFrequences" [ngValue]="frequence.id">{{ frequence.libelle }}</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-add" style="margin-top: 13%">
-                                <i class="fas fa-plus"></i> Ajouter tarif
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-normal" *ngIf="selectedInfrastructure.infraTarifs.length > 0">
-                    <thead>
-                    <tr>
-                        <th>Frequence</th>
-                        <th>Tarif</th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr *ngFor="let item of selectedInfrastructure.infraTarifs" class="row-animation">
-                        <td class="name-column">{{ item.frequence.libelle }}</td>
-                        <td class="name-column">{{ item.tarifInfra }}</td>
-                        <td class="action-column action-buttons-cell">
-                            <button class="btn btn-red" (click)="deleteTarif(item.id)" title="Sélectionner">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-
-                    </tbody>
-                </table>
-                <div *ngIf="selectedInfrastructure.infraTarifs.length === 0 && !isLoading" class="no-results">Aucune Tarif trouvée pour cette infrastrcuture.</div>
-            </div>
-        </div>
+        <p>Voulez-vous vraiment supprimer le tarif pour l'infrastructure "<strong>{{ selectedInfrastructure.nom }}</strong>" (Numéro: <strong>{{ selectedInfrastructure.numero }}</strong>) ?</p>
     </div>
-
-<!--</div>-->
+    <div class="modal-footer">
+        <button type="button" class="btn btn-red" (click)="modal.dismiss('Cancel click')"><i class="fas fa-times"></i>Annuler</button>
+        <button type="button" class="btn btn-green" (click)="deleteTarif(selectedTarifId); modal.close('Save click')"><i class="fas fa-check"></i>Oui</button>
+    </div>
+</ng-template>

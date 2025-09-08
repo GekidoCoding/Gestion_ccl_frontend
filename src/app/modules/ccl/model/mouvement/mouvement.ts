@@ -20,6 +20,7 @@ export class Mouvement {
         this.typeMouvement = new TypeMouvement();
         this.client = new Client();
         this.infrastructure = new Infrastructure();
+        this.mouvementInfras=[];
     }
 
 }

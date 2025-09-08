@@ -1,11 +1,11 @@
 
     <app-loading [loading]="isLoading"></app-loading>
     <div class="modal-body">
-        <div class="action-buttons">
-            <button type="button" class="btn btn-add" (click)="openAddModal(addModal)">
-                <i class="fa fa-plus"></i> Ajouter Infrastructure
-            </button>
-        </div>
+<!--        <div class="action-buttons">-->
+<!--            <button type="button" class="btn btn-add" (click)="openAddModal(addModal)">-->
+<!--                <i class="fa fa-plus"></i> Ajouter Infrastructure-->
+<!--            </button>-->
+<!--        </div>-->
 
         <div class="table-controls">
             <div class="search-form slide-in-out">
@@ -56,15 +56,15 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <button type="button" class="btn btn-grey" (click)="toggleSearchForm()">Fermer</button>
+
                             <button type="submit" class="btn btn-search">
                                 <i class="fas fa-search"></i> Rechercher
                             </button>
+                            <button type="button" class="btn btn-red" (click)="resetSearchForm()"><i class="fas fa-times"></i>Effacer</button>
                         </div>
                     </div>
                 </form>
             </div>
-
             <div class="table-responsive">
                 <table class="table table-normal" *ngIf="items.length > 0">
                     <thead>
@@ -76,59 +76,36 @@
                         <th></th>
                     </tr>
                     </thead>
-                    <tbody>
-                    <tr *ngFor="let item of filteredItems" class="row-animation">
-                        <td class="name-column">{{ item.nom }}</td>
-                        <td class="name-column">{{ item.numero }}</td>
-                        <td class="name-column">{{ item.modeleInfra.nom }}</td>
-                        <td class="name-column">{{ item.modeleInfra.catInfra.nom }}</td>
-                        <td class="action-column action-buttons-cell">
-                            <button class="btn btn-eye" (click)="navigateToDetailInfra(item.id)" title="Modifier ce client">
-                                <i class="fa fa-info-circle"></i>
-                            </button>
-                            <button class="btn btn-green" (click)="selectionnedInfrastructure(item.id)" title="Sélectionner">
-                                <i class="fa fa-check"></i>
-                            </button>
-                        </td>
-                    </tr>
-
-                    </tbody>
+                        <tbody>
+                        <tr *ngFor="let item of filteredItems" class="row-animation">
+                            <td class="name-column">{{ item.nom }}</td>
+                            <td class="name-column">{{ item.numero }}</td>
+                            <td class="name-column">{{ item.modeleInfra.nom }}</td>
+                            <td class="name-column">{{ item.modeleInfra.catInfra.nom }}</td>
+                            <td class="action-column action-buttons-cell">
+                                <button class="btn btn-eye" (click)="navigateToDetailInfra(item.id)">
+                                    <i class="fa fa-info-circle"></i>
+                                </button>
+                                <button class="btn btn-green" (click)="selectionnedInfrastructure(item.id)">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
                 </table>
                 <div *ngIf="items.length === 0 && !isLoading" class="no-results">Aucune infrastructure trouvée.</div>
             </div>
         </div>
     </div>
 
-    <ng-template #addModal let-modal>
-        <div class="modal-header">
-            <h5 class="modal-title">Ajouter une Nouvelle Infrastructure</h5>
-            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
-                <span aria-hidden="true">×</span>
-            </button>
-        </div>
-        <div class="modal-body">
-            <app-infrastructure-add-form
-                    [newItem]="newItem"
-                    [localisations]="localisations"
-                    [etats]="etats"
-                    [categories]="categories"
-                    [filteredModeles]="filteredModeles"
-                    (submitForm)="handleAddFormSubmit($event); modal.close('Save click')"
-                    (cancel)="modal.dismiss('Cancel click')"
-            ></app-infrastructure-add-form>
-        </div>
-    </ng-template>
-
-    <div class="toast-container" *ngIf="showConfirmation">
-        <div class="toast fade-animation">
-            {{ confirmationMessage }}
-            <button class="toast-close" (click)="closeToast()">×</button>
-        </div>
-    </div>
-
-    <div class="toast-container" *ngIf="showError">
-        <div class="toast fade-animation">
-            {{ errorMessage }}
-            <button class="toast-close" (click)="closeToast()">×</button>
-        </div>
-    </div>
+<!--    <ng-template #addModal let-modal>-->
+<!--            <app-infrastructure-add-form-->
+<!--                    [newItem]="newItem"-->
+<!--                    [localisations]="localisations"-->
+<!--                    [etats]="etats"-->
+<!--                    [categories]="categories"-->
+<!--                    [filteredModeles]="filteredModeles"-->
+<!--                    (submitForm)="handleAddFormSubmit($event); modal.close('Save click')"-->
+<!--                    (cancel)="modal.dismiss('Cancel click')"-->
+<!--            ></app-infrastructure-add-form>-->
+<!--    </ng-template>-->

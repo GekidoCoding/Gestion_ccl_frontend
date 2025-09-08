@@ -1,9 +1,13 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Facture} from "../../../../model/facture/facture";
-import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
+import {NgbActiveModal, NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {HistoFactureService} from "../../../../services/histo-facture/histo-facture.service";
 import {HistoFacture} from "../../../../model/histo-facture/histo-facture";
 import {ToastrService} from "ngx-toastr";
+import {Mouvement} from "../../../../model/mouvement/mouvement";
+import {
+  MouvementInfrasPopupComponent
+} from "../../mouvement-infras-popup/mouvement-infras-popup/mouvement-infras-popup.component";
 
 @Component({
   selector: 'app-histo-facture-list-popup',
@@ -17,10 +21,17 @@ export class HistoFactureListPopupComponent implements OnInit {
       public activeModal: NgbActiveModal,
       private service: HistoFactureService,
       private toastr: ToastrService,
+      private modalService: NgbModal
   ) { }
 
   ngOnInit(): void {
     this.loadData();
+  }
+
+  openInfrasPopup(mouvement: Mouvement) {
+    const modal = this.modalService.open(MouvementInfrasPopupComponent, { size: 'lg', centered: true, backdrop: 'static' });
+    modal.componentInstance.mouvementInfras = mouvement.mouvementInfras || [];
+    modal.componentInstance.mouvementId = mouvement.id;
   }
   loadData(){
     this.service.getByFacture(this.selected.id).subscribe({

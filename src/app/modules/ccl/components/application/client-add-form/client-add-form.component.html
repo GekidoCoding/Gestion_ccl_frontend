@@ -1,16 +1,22 @@
-<form (ngSubmit)="submitForm()">
+<form #clientForm="ngForm" (ngSubmit)="submitForm()">
     <div class="row">
-        <div class="form-group col-md-6 col-12">
-            <label>Type de Client</label>
-            <select class="form-control" [(ngModel)]="client.typeClient.id" [ngModel]="client.typeClient.id" name="typeClient" (ngModelChange)="onTypeClientChange($event)">
-                <option [ngValue]="null">-- Sélectionnez le type du client --</option>
+        <div class="form-group col-md-6 col-12" [ngClass]="{'form-group-error': typeClient.touched && !typeClient.valid}">
+            <label>Type de Client <strong style="color: red">*</strong></label>
+            <select class="form-control" [(ngModel)]="client.typeClient.id" name="typeClient" #typeClient="ngModel" required (change)="onTypeClientChange(client.typeClient.id)">
+                <option value="">-- Sélectionnez le type du client --</option>
                 <option *ngFor="let type of typeClients" [ngValue]="type.id">{{type.typeClient}}</option>
             </select>
+            <div class="error-message" *ngIf="typeClient.touched && !typeClient.valid">
+                <i class="fas fa-exclamation-circle"></i> Veuillez sélectionner un type de client.
+            </div>
         </div>
 
-        <div class="form-group col-md-6 col-12" *ngIf="!isEntreprise">
-            <label>Nom</label>
-            <input type="text" class="form-control" [(ngModel)]="client.nom" name="nom" placeholder="Ex : RAKOTO" />
+        <div class="form-group col-md-6 col-12" *ngIf="!isEntreprise" [ngClass]="{'form-group-error': nom.touched && !nom.valid}">
+            <label>Nom <strong style="color: red">*</strong></label>
+            <input type="text" class="form-control" [(ngModel)]="client.nom" name="nom" #nom="ngModel" required placeholder="Ex : RAKOTO" (change)="validateField('nom')" />
+            <div class="error-message" *ngIf="nom.touched && !nom.valid">
+                <i class="fas fa-exclamation-circle"></i> Le champ Nom est requis.
+            </div>
         </div>
 
         <div class="form-group col-md-6 col-12" *ngIf="!isEntreprise">
@@ -18,30 +24,51 @@
             <input type="text" class="form-control" [(ngModel)]="client.prenom" name="prenom" placeholder="Ex : Jean Bernard" />
         </div>
 
-        <div class="form-group col-md-6 col-12" *ngIf="isEntreprise">
-            <label>Raison Sociale</label>
-            <input type="text" class="form-control" [(ngModel)]="client.raisonSociale" name="raisonSociale"
-                   placeholder="Ex : CNaPS (Caisse Nationale de Prévoyance Sociale)"/>
+        <div class="form-group col-md-6 col-12" *ngIf="isEntreprise" [ngClass]="{'form-group-error': raisonSociale.touched && !raisonSociale.valid}">
+            <label>Raison Sociale <strong style="color: red">*</strong></label>
+            <input type="text" class="form-control" [(ngModel)]="client.raisonSociale" name="raisonSociale" #raisonSociale="ngModel" required placeholder="Ex : CNaPS (Caisse Nationale de Prévoyance Sociale)" (change)="validateField('raisonSociale')" />
+            <div class="error-message" *ngIf="raisonSociale.touched && !raisonSociale.valid">
+                <i class="fas fa-exclamation-circle"></i> Le champ Raison Sociale est requis.
+            </div>
         </div>
 
-        <div class="form-group col-md-6 col-12">
-            <label>Adresse</label>
-            <input type="text" class="form-control" [(ngModel)]="client.adresse" name="adresse" placeholder="Ex : Lot 66 BLE-67Ha Sud-Tana III" />
+        <div class="form-group col-md-6 col-12" >
+            <label>Adresse </label>
+            <input type="text" class="form-control" [(ngModel)]="client.adresse" name="adresse" #adresse="ngModel" required placeholder="Ex : Lot 66 BLE-67Ha Sud-Tana III" (change)="validateField('adresse')" />
+
         </div>
 
-        <div class="form-group col-md-6 col-12" *ngIf="!isEntreprise">
+        <div class="form-group col-md-6 col-12" *ngIf="!isEntreprise" [ngClass]="{'form-group-error': cin.touched && !cinValid}">
             <label>CIN</label>
-            <input type="number" class="form-control" [(ngModel)]="client.cin" name="cin" placeholder="Ex : 12111121021" />
+            <input type="text" class="form-control" [(ngModel)]="client.cin" name="cin" #cin="ngModel" pattern="^\d{12,}$" placeholder="Ex : 12111121021" (change)="validateField('cin')" />
+            <div class="error-message" *ngIf="cin.touched && !cinValid">
+                <i class="fas fa-exclamation-circle"></i> Le CIN doit contenir 12 chiffres ou plus.
+            </div>
         </div>
 
-        <div class="form-group col-md-6 col-12">
-            <label>Contact(s)</label>
-            <input type="text" class="form-control" (change)="verifContacts()" [(ngModel)]="client.contacts" name="contacts" placeholder="Ex : 0344444444 ou +261344444444" />
+        <div class="form-group col-md-6 col-12" [ngClass]="{'form-group-error': contacts.touched && (!contacts.valid || !contactsValid)}">
+            <label>Contact(s) <strong style="color: red">*</strong></label>
+            <input type="text" class="form-control" [(ngModel)]="client.contacts" name="contacts" #contacts="ngModel" required placeholder="Ex : 0344444444;+261384884488" (change)="verifContacts()" />
+            <div class="error-message" *ngIf="contacts.touched && !contacts.valid">
+                <i class="fas fa-exclamation-circle"></i> Le champ Contact(s) est requis.
+            </div>
+            <div class="error-message" *ngIf="contacts.touched && contacts.valid && !contactsValid && !contactsFormatError && !contactsDuplicateError">
+                <i class="fas fa-exclamation-circle"></i> Utilisez le format 0xxxxxxxxx ou +261xxxxxxxxx, séparé(s) par ';'.
+            </div>
+            <div class="error-message" *ngIf="contacts.touched && contacts.valid && contactsFormatError">
+                <i class="fas fa-exclamation-circle"></i> Numéro(s) invalide(s) : {{ invalidContacts.join(', ') }}. Utilisez le format 0xxxxxxxxx ou +261xxxxxxxxx, séparé(s) par ';'.
+            </div>
+            <div class="error-message" *ngIf="contacts.touched && contacts.valid && contactsDuplicateError">
+                <i class="fas fa-exclamation-circle"></i> Numéro(s) dupliqué(s) : {{ duplicateContacts.join(', ') }}.
+            </div>
         </div>
 
-        <div class="form-group col-md-6 col-12">
+        <div class="form-group col-md-6 col-12" [ngClass]="{'form-group-error': email.touched && !emailValid}">
             <label>Email</label>
-            <input type="email" class="form-control" [(ngModel)]="client.email" name="email" placeholder="Ex : jean2505@gmail.com" />
+            <input type="email" class="form-control" [(ngModel)]="client.email" name="email" #email="ngModel" placeholder="Ex : jean2505@gmail.com" (change)="verifEmail()" />
+            <div class="error-message" *ngIf="email.touched && email.valid && !emailValid">
+                <i class="fas fa-exclamation-circle"></i> Adresse email invalide. Exemple attendu : jean2505@gmail.com.
+            </div>
         </div>
 
         <div class="form-group col-md-6 col-12">
@@ -50,9 +77,13 @@
         </div>
     </div>
 
+    <div class="error-message" *ngIf="clientForm.submitted && (!clientForm.valid || !contactsValid || !emailValid || !cinValid)">
+        <i class="fas fa-exclamation-circle"></i> Veuillez corriger les erreurs dans le formulaire avant de soumettre.
+    </div>
+
     <div class="modal-footer">
-        <button type="button" class="btn btn-grey" (click)="cancelForm()">Annuler</button>
-        <button type="submit" class="btn btn-green">
+        <button type="button" class="btn btn-red" (click)="cancelForm()"><i class="fas fa-times"></i> Annuler</button>
+        <button type="submit" class="btn btn-green" [disabled]="clientForm.invalid || !contactsValid || !emailValid || !cinValid">
             <i class="fas fa-save"></i> Enregistrer
         </button>
     </div>

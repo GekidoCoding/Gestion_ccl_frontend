@@ -124,7 +124,7 @@ export class CategorieInfraComponent extends BaseCrudComponent<CategorieInfra> {
       this.showSuccessMessage('Suppression réussie !');
     }).catch(error => {
       console.error('Error deleting categories:', error);
-      this.showErrorMessage('Erreur lors de la suppression des catégories');
+      this.showErrorMessage('Impossible de supprimer le(s) catégorie(s) qui ont des entités qui en dépendent ');
     });
   }
 }

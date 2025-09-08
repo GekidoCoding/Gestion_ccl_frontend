@@ -8,7 +8,7 @@ import {MouvementInfra} from "../../model/mouvement-infra/mouvement-infra";
   providedIn: 'root'
 })
 export class MouvementInfraService {
-  private apiUrl = `${environment.PRINCIPAL}/cnaps/gestion/ccl/mouvement_infra`;
+  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/mouvement_infra';
 
   constructor(private http: HttpClient) {}
 

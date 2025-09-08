@@ -8,7 +8,7 @@ import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-localisation',
   templateUrl: './localisation.component.html',
-  styleUrls: ['../../components/base/base-crud.component.scss']
+  styleUrls: ['./localisation.component.scss']
 })
 export class LocalisationComponent extends BaseCrudComponent<Localisation> {
   constructor(modalService: NgbModal, private service: LocalisationService, protected toastr: ToastrService) {
@@ -124,7 +124,7 @@ export class LocalisationComponent extends BaseCrudComponent<Localisation> {
       this.showSuccessMessage('Suppression réussie !');
     }).catch(error => {
       console.error('Error deleting localisations:', error);
-      this.showErrorMessage('Erreur lors de la suppression des localisations');
+      this.showErrorMessage('Impossible de supprimer le(s) localisation(s) qui ont des entités qui en dépendent ');
     });
   }
 }

@@ -18,9 +18,9 @@
 
             </div>
             <div class="form-group col-md-2">
-                <label>Infrastructure concerner </label>
-                <p>{{ selected.mouvement.infrastructure.nom+' ● '+selected.mouvement.infrastructure.numero || 'N/A' }}</p>
+                <button class="btn btn-green" (click)="openInfrasPopup(selected.mouvement)" >Voir Infrastructures Concernées</button>
             </div>
+
             <div class="form-group col-md-2">
                 <label>Montant total ( en Ariary)</label>
                 <p>{{ selected.montantTotal || 'N/A' }}</p>

@@ -127,7 +127,10 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
       }
     });
   }
-
+  public resetSearchForm(){
+    this.searchCriteria=new Infrastructure();
+    this.loadData();
+  }
   public applySearch(): void {
     this.isLoading = true;
 
@@ -237,7 +240,7 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
   }
 
   navigateToMovements(id: string) {
-    this.router.navigate([`/general/mouvement/infrastructure/${id}`]);
+    this.router.navigate([`/cnaps/gestion/ccl/mouvement/infrastructure/${id}`]);
   }
 
   deleteSelectedItems(modal: any) {

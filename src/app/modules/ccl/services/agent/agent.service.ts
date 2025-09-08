@@ -5,24 +5,19 @@ import { catchError } from "rxjs/operators";
 import {Agent} from "../../model/agent/agent";
 import {Page} from "../../interface/page.interface";
 import {Infrastructure} from "../../model/infrastructure/infrastructure";
+import {environment} from "../../../../../environments/environment";
 
 @Injectable({
   providedIn: 'root'
 })
 export class AgentService {
-  private apiUrl = 'http://localhost:8080/cnaps/gestion/ccl/agent';
+  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/agent';
 
   constructor(private http: HttpClient) { }
 
-  private handleError(error: any) {
-    console.error('error API:', error);
-    return throwError(() => new Error("Une erreur s'est produite"));
-  }
 
   getAll(): Observable<Agent[]> {
-    return this.http.get<Agent[]>(`${this.apiUrl}/`).pipe(
-        catchError(this.handleError)
-    );
+    return this.http.get<Agent[]>(`${this.apiUrl}/`);
   }
 
 
@@ -30,9 +25,7 @@ export class AgentService {
     let params = new HttpParams()
         .set('page', page.toString())
         .set('pageSize', pageSize.toString());
-    return this.http.get<Page<Agent>>(`${this.apiUrl}/paginated`, { params }).pipe(
-        catchError(this.handleError)
-    );
+    return this.http.get<Page<Agent>>(`${this.apiUrl}/paginated`, { params });
   }
 
   searchByCriteria(criteria: Agent): Observable<Agent[]> {
@@ -45,9 +38,7 @@ export class AgentService {
     if (criteria.codeService) params = params.set('codeService', criteria.codeService);
     if (criteria.codeDirection) params = params.set('codeDirection', criteria.codeDirection);
 
-    return this.http.get<Agent[]>(`${this.apiUrl}/criteria`, { params }).pipe(
-        catchError(this.handleError)
-    );
+    return this.http.get<Agent[]>(`${this.apiUrl}/criteria`, { params });
   }
 
 
