@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {NgbModal, NgbModalOptions} from '@ng-bootstrap/ng-bootstrap';
 import { Router } from '@angular/router';
-import { BaseCrudComponent, Page } from '../../components/base/base-crud.component';
+import { BaseCrudComponent, Page } from '../../base/base-crud.component';
 import { Infrastructure } from '../../model/infrastructure/infrastructure';
 import { InfrastructureService } from '../../services/infrastructure/infrastructure.service';
 import { Localisation } from '../../model/localisation/localisation';
@@ -13,13 +13,15 @@ import { ModeleInfraService } from '../../services/modele-infra/modele-infra.ser
 import { CategorieInfra } from '../../model/categorie-infra/categorie-infra';
 import { CategorieInfraService } from '../../services/categorie-infra/categorie-infra.service';
 import { ToastrService } from 'ngx-toastr';
-import { DetailInfrastructureComponent } from '../../components/application/detail-infrastructure/detail-infrastructure.component';
+import { DetailInfrastructureComponent } from '../../components/infrastructure/detail-infrastructure/detail-infrastructure.component';
 import {
   InfrastructureAddFormComponent
-} from "../../components/application/infrastructure-add-form/infrastructure-add-form.component";
+} from "../../components/infrastructure/infrastructure-add-form/infrastructure-add-form.component";
 import {
   InfraTarifListpopupComponent
-} from "../../components/application/infra-tarif-listpopup/infra-tarif-listpopup.component";
+} from "../../components/infrastructure/infra-tarif-listpopup/infra-tarif-listpopup.component";
+import {YesNoWarningComponent} from "../../components/yes-no-warning/yes-no-warning.component";
+import {InfrastructureUtil} from "../../util/infrastructure.util";
 
 @Component({
   selector: 'app-infra-crud',
@@ -42,6 +44,7 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
   debutSearch :string='';
   finSearch:string='';
   observation: string = '';
+
 
   constructor(
       modalService: NgbModal,
@@ -110,14 +113,28 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
     });
   }
 
+  getVisiblePageNumbers(totalPages: number, currentPage: number): number[] {
+    console.log(`totalPages:${totalPages} , currentPage: ${currentPage} `);
+    if (totalPages <= 0) return [];
+    const maxVisible = 5;
+    const half = Math.floor(maxVisible / 2);
+    let start = Math.max(1, currentPage - half);
+    let end = Math.min(totalPages, start + maxVisible - 1);
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
   loadData() {
     this.isLoading = true;
     this.service.getPaginated(this.currentPage, this.itemsPerPage).subscribe({
       next: (page: Page<Infrastructure>) => {
+        console.log("page backend:"+JSON.stringify(page));
         this.items = page.content;
         this.totalPages = page.totalPages;
         this.totalItems = page.totalElements;
-        this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        this.pageNumbers = this.getVisiblePageNumbers(this.totalPages, this.currentPage + 1);  // Nouveau getter ci-dessous
+        console.log("pagination ="+JSON.stringify(this.pageNumbers));
         this.isLoading = false;
       },
       error: (error) => {
@@ -133,7 +150,6 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
   }
   public applySearch(): void {
     this.isLoading = true;
-
     const nom = this.searchCriteria.nom?.trim() || undefined;
     const numero = this.searchCriteria.numero?.trim() || undefined;
 
@@ -163,12 +179,10 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
         this.items = page.content;
         this.totalPages = page.totalPages;
         this.totalItems = page.totalElements;
-        this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+      this.pageNumbers = this.getVisiblePageNumbers(this.totalPages, this.currentPage + 1);  // Nouveau getter ci-dessous
         this.isLoading = false;
-        // this.showSuccessMessage('Filtrage appliqué avec succès');
       },
       error: (error) => {
-        // console.error('Erreur lors de l\'application des filtres:', error);
         this.showErrorMessage('Erreur lors de l\'application des filtres');
         this.isLoading = false;
       }
@@ -194,7 +208,8 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
     return new Infrastructure();
   }
 
-  addItem(infrastructure: Infrastructure) {
+
+  create(infrastructure: Infrastructure) {
     this.service.create(infrastructure).subscribe({
       next: () => {
         this.currentPage = 0;
@@ -209,6 +224,35 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
     });
   }
 
+  addItem(infrastructure: Infrastructure) {
+    this.service.checkInfrastructureSimilarity(infrastructure).subscribe({
+      next: (data:Infrastructure[]) => {
+        console.log(JSON.stringify(data));
+        if(data.length>0){
+            let message :string = InfrastructureUtil.getWarningMessageSimilarityFromList(data );
+            let composant= this.modalService.open(YesNoWarningComponent );
+            composant.componentInstance.message=message;
+            composant.componentInstance.confirm.subscribe({
+              next: () => {
+                this.create(infrastructure);
+              }
+            });
+            composant.componentInstance.decline.subscribe({
+              next: () => {
+                composant.close();
+              }
+            })
+        }else{
+          this.create(infrastructure);
+        }
+      },
+      error: (error) => {
+        this.showErrorMessage('Erreur lors de verification de similarite');
+      }
+    })
+
+  }
+
   openAddModalPopup() {
     this.newItem = this.initializeNewItem();
     const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
@@ -220,14 +264,11 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
     modalComponent.componentInstance.filteredModeles = this.filteredModeles;
     modalComponent.componentInstance.submitForm.subscribe((event: any) => {
       this.addItem(event);
-      modalComponent.close('Save click');
     });
     modalComponent.componentInstance.cancel.subscribe(() => {
       modalComponent.dismiss('Cancel click');
     });
-    // modalComponent.componentInstance.categoryChange.subscribe((event: any) => {
-    //   this.onCategoryChange(event);
-    // });
+
   }
 
   navigateToDetail(id: string) {
@@ -277,5 +318,12 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
 
   updateModeleSelection(modeleId: string) {
     this.modelesIds = Object.keys(this.modelesInfraSelectionned).filter(id => this.modelesInfraSelectionned[id]);
+  }
+  changePage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page - 1;
+      this.applySearch();
+      this.showConfirmation = false;
+    }
   }
 }

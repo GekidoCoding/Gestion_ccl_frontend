@@ -1,18 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
-import { BaseCrudComponent, Page } from '../../components/base/base-crud.component';
+import { BaseCrudComponent, Page } from '../../base/base-crud.component';
 import { Client } from '../../model/client/client';
 import { ClientService } from '../../services/client/client.service';
 import { TypeClientService } from '../../services/type-client/type-client.service';
 import { TypeClient } from '../../model/type-client/type-client';
 import { ToastrService } from 'ngx-toastr';
-import {ClientDetailComponent} from "../../components/application/client-detail/client-detail.component";
+import {ClientDetailComponent} from "../../components/client/client-detail/client-detail.component";
 import {Router} from "@angular/router";
+import {ClientUtil} from "../../util/client.util";
+import {ClientAddFormComponent} from "../../components/client/client-add-form/client-add-form.component";
 
 @Component({
   selector: 'app-client',
   templateUrl: './client.component.html',
-  styleUrls: ['../../components/base/base-crud.component.scss']
+  styleUrls: ['../../base/base-crud.component.scss']
 })
 export class ClientComponent extends BaseCrudComponent<Client> implements OnInit {
   typeClients: TypeClient[] = [];
@@ -26,6 +28,7 @@ export class ClientComponent extends BaseCrudComponent<Client> implements OnInit
       private typeClientService: TypeClientService,
       protected toastr: ToastrService ,
       private router:Router,
+      private clientUtil:ClientUtil
   ) {
     super(modalService, toastr);
   }
@@ -55,6 +58,13 @@ export class ClientComponent extends BaseCrudComponent<Client> implements OnInit
       }
     });
   }
+  changePage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page - 1; // Converti en 0-based pour l'API
+      this.applySearches();
+      this.showConfirmation = false;
+    }
+  }
 
   loadTypeClients() {
     this.isLoading = true;
@@ -72,6 +82,17 @@ export class ClientComponent extends BaseCrudComponent<Client> implements OnInit
   }
 
 
+  openAddModal() {
+    this.newItem = this.initializeNewItem();
+    const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
+
+    const modalRef = this.modalService.open(ClientAddFormComponent, options);
+
+    modalRef.componentInstance.loadData.subscribe(() => {
+      this.loadData();
+    });
+  }
+
 
   reserSearchForm(){
     this.searchCriteria = new Client();
@@ -85,19 +106,7 @@ export class ClientComponent extends BaseCrudComponent<Client> implements OnInit
     return new Client();
   }
 
-  handleAddFormSubmit(client: Client) {
-    this.service.create(client).subscribe({
-      next: (created) => {
-        this.currentPage = 0;
-        this.loadData();
-        this.showSuccessMessage('Client ajouté avec succès !');
-      },
-      error: (error) => {
-        console.error('Error adding client:', error);
-        this.showErrorMessage('Erreur lors de l\'ajout du client');
-      }
-    });
-  }
+
 
   confirmUpdate(client: Client) {
     this.service.update(client.id, client).subscribe({

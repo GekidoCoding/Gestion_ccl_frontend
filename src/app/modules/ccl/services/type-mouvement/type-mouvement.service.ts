@@ -10,7 +10,7 @@ import {environment} from "../../../../../environments/environment";
   providedIn: 'root'
 })
 export class TypeMouvementService {
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/type_mouvement';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/type_mouvement';
 
   constructor(private http: HttpClient) { }
 
@@ -21,7 +21,9 @@ export class TypeMouvementService {
   getTrierAdding(): Observable<TypeMouvement[]> {
     return this.http.get<TypeMouvement[]>(`${this.apiUrl}/adding/trier`);
   }
-
+  getAdding(): Observable<TypeMouvement[]> {
+    return this.http.get<TypeMouvement[]>(`${this.apiUrl}/adding`);
+  }
 
   getPaginated(page: number = 0, pageSize: number = 10): Observable<Page<TypeMouvement>> {
     let params = new HttpParams()

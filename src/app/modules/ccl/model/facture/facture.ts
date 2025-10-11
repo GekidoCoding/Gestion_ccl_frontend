@@ -11,7 +11,9 @@ export class Facture {
     refFacture!: string;
     montantTotal!: number ;
     remise!: number;
-    acompteVerse!: number;
+    totalDu!: number;
+    reste!: number;
+    totalAcompte!: number;
 
     constructor() {
         this.gestionnaire = new Gestionnaire();

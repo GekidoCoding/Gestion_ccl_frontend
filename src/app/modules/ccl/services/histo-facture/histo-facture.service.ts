@@ -11,7 +11,7 @@ import {environment} from "../../../../../environments/environment";
   providedIn: 'root'
 })
 export class HistoFactureService{
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/histo_facture';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/histo_facture';
 
   constructor(private http: HttpClient) { }
 

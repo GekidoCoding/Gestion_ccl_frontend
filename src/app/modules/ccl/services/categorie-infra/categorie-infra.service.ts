@@ -10,7 +10,7 @@ import {environment} from "../../../../../environments/environment";
   providedIn: 'root'
 })
 export class CategorieInfraService {
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/categorie_infra';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/categorie_infra';
 
   constructor(private http: HttpClient) { }
 

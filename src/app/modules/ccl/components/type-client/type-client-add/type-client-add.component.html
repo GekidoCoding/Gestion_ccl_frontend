@@ -1,0 +1,20 @@
+<div class="modal-header">
+    <h5 class="modal-title">Ajouter un Nouveau Type de Client</h5>
+    <button type="button" class="close" (click)="activeModal.dismiss('Cross click')" aria-label="Close">
+        <span aria-hidden="true">×</span>
+    </button>
+</div>
+<div class="modal-body">
+    <form #addForm="ngForm" (ngSubmit)="addItem(addForm)">
+        <div class="form-row">
+            <div class="form-group col-md-6 col-12">
+                <label>Nom</label>
+                <input type="text" class="form-control" [(ngModel)]="newItem.typeClient" name="nom" required>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-red" (click)="activeModal.dismiss('Cancel click')"><i class="fas fa-times"></i>Annuler</button>
+            <button type="submit" class="btn btn-green" [disabled]="addForm.invalid"><i class="fas fa-save"></i>Enregistrer</button>
+        </div>
+    </form>
+</div>

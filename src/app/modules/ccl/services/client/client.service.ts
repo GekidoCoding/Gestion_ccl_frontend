@@ -6,16 +6,20 @@ import {Client} from "../../model/client/client";
 import {Page} from "../../interface/page.interface";
 import {CategorieInfra} from "../../model/categorie-infra/categorie-infra";
 import {environment} from "../../../../../environments/environment";
+import {Infrastructure} from "../../model/infrastructure/infrastructure";
 @Injectable({
   providedIn: 'root'
 })
 export class ClientService {
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/client';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/client';
 
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Client[]> {
     return this.http.get<Client[]>(`${this.apiUrl}/`);
+  }
+  checkSimilarity(client :Client): Observable<Client[]> {
+    return this.http.post<Client[]>(`${this.apiUrl}/check/similarity`,client );
   }
   getPaginated(page: number = 0, pageSize: number = 10): Observable<Page<Client>> {
     let params = new HttpParams()
@@ -42,8 +46,8 @@ export class ClientService {
     console.log('🔎 search criteria:', criteria);
     console.log('🔎 infraIds:', infraIds);
 
-    if (criteria.nom) {
-      params = params.set('nom', criteria.nom);
+    if (criteria.designationClient) {
+      params = params.set('designationClient', criteria.designationClient);
     }
     if (criteria.email) {
       params = params.set('email', criteria.email);

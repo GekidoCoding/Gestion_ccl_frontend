@@ -1,0 +1,103 @@
+<div class="main-content">
+    <app-loading [loading]="isLoading"></app-loading>
+    <div class="table-title">Gestion des Types de Clients</div>
+
+    <div class="list-container">
+        <div class="table-controls">
+            <div class="entries-select">
+                <label style="margin-top:10px ">Afficher</label>
+                <select [(ngModel)]="itemsPerPage" (ngModelChange)="changePage(1)">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                <span>entrée(s)</span>
+            </div>
+            <div class="action-buttons">
+                <button type="button" class="btn btn-add" (click)="openAddModal()">
+                    <i class="fa fa-plus"></i>Ajouter un nouveau type de client
+                </button>
+                <button type="button" class="btn btn-select" (click)="toggleSelectionMode()">
+                    <i class="fa" [ngClass]="isSelectionMode ? 'fa-times' : 'fa-check-square'"></i> {{ isSelectionMode ? 'Quitter' : 'Sélectionner pour supprimer' }}
+                </button>
+                <button type="button" class="btn btn-delete" (click)="openDeleteModal(deleteModal)" title="Supprimer tout" [disabled]="selectedCount === 0" *ngIf="isSelectionMode">
+                    <i class="fa fa-trash"></i>Supprimer
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-normal">
+                <thead>
+                <tr>
+                    <th *ngIf="isSelectionMode" class="checkbox-column">
+                        <input type="checkbox" [(ngModel)]="selectAll" (ngModelChange)="toggleSelectAll()">
+                    </th>
+                    <th class="sortable">
+                        <span>Nom</span>
+                    </th>
+                    <th class="action-column"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <ng-container *ngFor="let item of filteredItems; let i = index">
+                    <tr class="row-animation" [ngClass]="{'row-animation-delay': i > 0}" [attr.data-index]="i">
+                        <td *ngIf="isSelectionMode" class="checkbox-column">
+                            <input type="checkbox" [(ngModel)]="selectedIds[item.id]" (ngModelChange)="updateSelect(item.id)">
+                        </td>
+                        <td class="name-column">{{item.typeClient}}</td>
+                        <td class="action-column action-buttons-cell">
+                            <button class="btn btn-update" (click)="openUpdateModal(item)">
+                                <i class="fa fa-edit">Modifier</i>
+                            </button>
+                        </td>
+                    </tr>
+                </ng-container>
+                </tbody>
+            </table>
+            <div *ngIf="filteredItems.length === 0" class="no-results">Aucun résultat trouvé.</div>
+        </div>
+
+        <div class="pagination-controls">
+            <div class="pagination-container">
+                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage === 0" (click)="changePage(currentPage)"><i class="fas fa-arrow-left"></i></button>
+                <div class="pagination-buttons">
+                    <span *ngFor="let page of pageNumbers" class="page-number btn btn-blue page-animation" [class.active]="page === currentPage + 1" (click)="changePage(page)">{{page}}</span>
+                </div>
+                <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage + 1 === totalPages" (click)="changePage(currentPage + 2)"><i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #deleteModal let-modal>
+        <div class="modal-header">
+            <h5 class="modal-title">Confirmation de Suppression</h5>
+            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>Voulez-vous vraiment supprimer cet(ces) <strong>{{ selectedCount }}</strong> élément(s) ?</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-red" (click)="modal.dismiss('Cancel click')"><i class="fa fa-times"></i>Annuler</button>
+            <button type="button" class="btn btn-green" (click)="deleteSelectedItems(modal)"><i class="fa fa-check"></i>Oui</button>
+        </div>
+    </ng-template>
+
+    <div class="toast-container" *ngIf="showConfirmation">
+        <div class="toast fade-animation">
+            {{confirmationMessage}}
+            <button class="toast-close" (click)="closeToast()">×</button>
+        </div>
+    </div>
+
+    <div class="toast-container" *ngIf="showError">
+        <div class="toast fade-animation">
+            {{errorMessage}}
+            <button class="toast-close" (click)="closeToast()">×</button>
+        </div>
+    </div>
+</div>

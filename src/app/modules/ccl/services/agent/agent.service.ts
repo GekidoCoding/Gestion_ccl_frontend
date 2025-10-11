@@ -6,14 +6,17 @@ import {Agent} from "../../model/agent/agent";
 import {Page} from "../../interface/page.interface";
 import {Infrastructure} from "../../model/infrastructure/infrastructure";
 import {environment} from "../../../../../environments/environment";
+import {AccountService} from "../../../general/services/account.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class AgentService {
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/agent';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/agent';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient,
+    private accountService:AccountService
+  ) { }
 
 
   getAll(): Observable<Agent[]> {
@@ -39,6 +42,27 @@ export class AgentService {
     if (criteria.codeDirection) params = params.set('codeDirection', criteria.codeDirection);
 
     return this.http.get<Agent[]>(`${this.apiUrl}/criteria`, { params });
+  }
+
+  public getCurrentAgentByMatricule():Observable<Agent> {
+    let params = new HttpParams();
+    let matricule = this.getCurrentAgentMatricule();
+    if (matricule) params = params.set('matricule', matricule);
+    return this.http.get<Agent>(`${this.apiUrl}/matricule`, { params });
+  }
+
+  public getCurrentAgentMatricule(): string | null {
+    const userInfo = this.accountService.getUserInfoInToken();
+
+    if (userInfo && userInfo.matricule) {
+      return userInfo.matricule;
+    }
+
+    if (userInfo && userInfo.sub) {
+      return userInfo.sub;
+    }
+
+    return null;
   }
 
 

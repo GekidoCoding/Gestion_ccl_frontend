@@ -1,0 +1,74 @@
+<app-loading [loading]="isLoading"></app-loading>
+
+<div class="modal-body">
+    <div class="action-buttons mb-3">
+        <button type="button" class="btn btn-add" (click)="openAddModal()">
+            <i class="fa fa-plus"></i> Ajouter un client
+        </button>
+    </div>
+
+    <div class="search-form slide-in-out">
+        <form #searchForm="ngForm" (ngSubmit)="applySearches()">
+            <div class="form-row">
+                <div class="form-group col-md-3">
+                    <label>Type Client</label>
+                    <select class="form-control" name="typeClient" [(ngModel)]="searchCriteria.typeClient.id">
+                        <option value="">-- Sélectionnez le type de client --</option>
+                        <option *ngFor="let type of typeClients" [value]="type.id">{{ type.typeClient }}</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-3">
+                    <label>Designation client</label>
+                    <input type="text" class="form-control" placeholder="Ex : CNaPS ou RAKOTO" [(ngModel)]="searchCriteria.designationClient" name="designationClient">
+                </div>
+                <div class="form-group col-md-3">
+                    <label>Email</label>
+                    <input type="text" class="form-control" [(ngModel)]="searchCriteria.email" placeholder="Ex : rakoto2505@gmail.com" name="email" email>
+                </div>
+                <div class="form-group col-md-3">
+                    <label>Contacts</label>
+                    <input type="text" class="form-control" [(ngModel)]="searchCriteria.contacts" placeholder="Ex : 0344444444" name="contacts">
+                </div>
+                <div class="form-group col-md-12" style="margin-top: 10px">
+                    <button type="button" class="btn btn-red" (click)="resetSearchForm()">
+                        <i class="fas fa-times"></i> Effacer
+                    </button>
+                    <button type="submit" class="btn btn-search">
+                        <i class="fas fa-search"></i> Rechercher
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-controls">
+        <div class="table-responsive">
+            <table class="table table-normal" *ngIf="items.length > 0">
+                <thead class="thead-light">
+                <tr>
+                    <th scope="col">Type</th>
+                    <th scope="col">Designation client</th>
+                    <th scope="col">Contact(s)</th>
+                    <th scope="col" class="text-center">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let item of items" class="row-animation">
+                    <td>{{ item.typeClient.typeClient }}</td>
+                    <td>{{ item.designationClient}}</td>
+                    <td>{{ item.contacts }}</td>
+                    <td class="action-column action-buttons-cell">
+                        <button class="btn btn-eye" (click)="openDetailModal(item)">
+                            <i class="fa fa-info-circle"></i>
+                        </button>
+                        <button class="btn btn-green" (click)="selectionnedClient(item.id)">
+                            <i class="fa fa-check"></i>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div *ngIf="items.length === 0 && !isLoading" class="text-muted mt-3">Aucun client trouvé pour le moment.</div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,86 @@
+<div class="modal-header">
+    <h5 class="modal-title">Ajouter un nouveau client</h5>
+    <button type="button" class="close" (click)="cancelForm()" aria-label="Fermer la fenêtre">
+        <span aria-hidden="true">×</span>
+    </button>
+</div>
+<div class="modal-body">
+    <form #clientForm="ngForm" (ngSubmit)="handleAddFormSubmit()">
+        <div class="row">
+            <div class="form-group col-md-6 col-12" [ngClass]="{'form-group-error': typeClient.touched && !typeClient.valid}">
+                <label>Type de Client <strong style="color: red">*</strong></label>
+                <select class="form-control" [(ngModel)]="client.typeClient.id" name="typeClient" #typeClient="ngModel" required>
+                    <option value="">-- Sélectionnez le type du client --</option>
+                    <option *ngFor="let type of typeClients" [ngValue]="type.id">{{type.typeClient}}</option>
+                </select>
+                <div class="error-message" *ngIf="typeClient.touched && !typeClient.valid">
+                    <i class="fas fa-exclamation-circle"></i> Veuillez sélectionner un type de client.
+                </div>
+            </div>
+
+            <div class="form-group col-md-6 col-12"  [ngClass]="{'form-group-error': designationClient.touched && !designationClient.valid}">
+                <label>Designation client <strong style="color: red">*</strong></label>
+                <input type="text" class="form-control" [(ngModel)]="client.designationClient" name="designationClient" #designationClient="ngModel" required placeholder="Ex : RAKOTO" (change)="validateField('nom')" />
+                <div class="error-message" *ngIf="designationClient.touched && !designationClient.valid">
+                    <i class="fas fa-exclamation-circle"></i> Le champ Designation client est requis.
+                </div>
+            </div>
+
+
+            <div class="form-group col-md-6 col-12" >
+                <label>Adresse </label>
+                <input type="text" class="form-control" [(ngModel)]="client.adresse" name="adresse" #adresse="ngModel" required placeholder="Ex : Lot 66 BLE-67Ha Sud-Tana III" (change)="validateField('adresse')" />
+
+            </div>
+
+            <div class="form-group col-md-6 col-12" [ngClass]="{'form-group-error': cin.touched && !cinValid}">
+                <label>CIN</label>
+                <input type="text" class="form-control" [(ngModel)]="client.cin" name="cin" #cin="ngModel" pattern="^\d{12,}$" placeholder="Ex : 12111121021" (change)="validateField('cin')" />
+                <div class="error-message" *ngIf="cin.touched && !cinValid">
+                    <i class="fas fa-exclamation-circle"></i> Le CIN doit contenir 12 chiffres ou plus.
+                </div>
+            </div>
+
+            <div class="form-group col-md-6 col-12" [ngClass]="{'form-group-error': contacts.touched && (!contacts.valid || !contactsValid)}">
+                <label>Contact(s) <small style="color: red">* numéro(s) séparé(s) par ';'</small></label>
+                <input type="text" class="form-control" [(ngModel)]="client.contacts" name="contacts" #contacts="ngModel" required placeholder="Ex : 0344444444;+261384884488" (change)="verifContacts()" />
+                <div class="error-message" *ngIf="contacts.touched && !contacts.valid">
+                    <i class="fas fa-exclamation-circle"></i> Le champ Contact(s) est requis.
+                </div>
+                <div class="error-message" *ngIf="contacts.touched && contacts.valid && !contactsValid && !contactsFormatError && !contactsDuplicateError">
+                    <i class="fas fa-exclamation-circle"></i> Utilisez le format 0xxxxxxxxx ou +261xxxxxxxxx, séparé(s) par ';'.
+                </div>
+                <div class="error-message" *ngIf="contacts.touched && contacts.valid && contactsFormatError">
+                    <i class="fas fa-exclamation-circle"></i> Numéro(s) invalide(s) : {{ invalidContacts.join(', ') }}. Utilisez le format 0xxxxxxxxx ou +261xxxxxxxxx, séparé(s) par ';'.
+                </div>
+                <div class="error-message" *ngIf="contacts.touched && contacts.valid && contactsDuplicateError">
+                    <i class="fas fa-exclamation-circle"></i> Numéro(s) dupliqué(s) : {{ duplicateContacts.join(', ') }}.
+                </div>
+            </div>
+
+            <div class="form-group col-md-6 col-12" [ngClass]="{'form-group-error': email.touched && !emailValid}">
+                <label>Email</label>
+                <input type="email" class="form-control" [(ngModel)]="client.email" name="email" #email="ngModel" placeholder="Ex : jean2505@gmail.com" (change)="verifEmail()" />
+                <div class="error-message" *ngIf="email.touched && email.valid && !emailValid">
+                    <i class="fas fa-exclamation-circle"></i> Adresse email invalide. Exemple attendu : jean2505@gmail.com
+                </div>
+            </div>
+
+            <div class="form-group col-md-6 col-12">
+                <label>Fonction</label>
+                <input type="text" class="form-control" [(ngModel)]="client.fonction" name="fonction" placeholder="Ex : Chauffeur" />
+            </div>
+        </div>
+
+        <div class="error-message" *ngIf="clientForm.submitted && (!clientForm.valid || !contactsValid || !emailValid || !cinValid)">
+            <i class="fas fa-exclamation-circle"></i> Veuillez corriger les erreurs dans le formulaire avant de soumettre.
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-red" (click)="cancelForm()"><i class="fas fa-times"></i> Annuler</button>
+            <button type="submit" class="btn btn-green" [disabled]="clientForm.invalid || !contactsValid || !emailValid || !cinValid">
+                <i class="fas fa-save"></i> Enregistrer
+            </button>
+        </div>
+    </form>
+</div>

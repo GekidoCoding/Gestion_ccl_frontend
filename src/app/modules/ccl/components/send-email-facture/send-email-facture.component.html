@@ -1,0 +1,51 @@
+<div class="modal-header">
+    <h5 class="modal-title">Envoyer une Facture par Email</h5>
+    <button type="button" class="close" (click)="activeModal.dismiss('Cross Click')" aria-label="Close">
+        <span aria-hidden="true">×</span>
+    </button>
+</div>
+<div class="modal-body">
+    <app-loading [loading]="isLoading"></app-loading>
+    <div class="form-row">
+        <div class="form-group col-md-8 col-12">
+            <label>Ajouter un destinataire</label>
+            <div class="input-group">
+                <input type="email" class="form-control" [(ngModel)]="newEmail" placeholder="Entrez un email" (keyup.enter)="addEmail()">
+                <div class="input-group-append">
+                    <button class="btn btn-add" (click)="addEmail()">
+                        <i class="fa fa-plus"></i> Ajouter
+                    </button>
+                </div>
+            </div>
+            <small class="text-danger" *ngIf="emailError">{{ emailError }}</small>
+        </div>
+    </div>
+
+    <div class="table-controls">
+        <div class="table-responsive">
+            <table class="table table-normal">
+                <thead>
+                <tr>
+                    <th>Email</th>
+                    <th class="action-column"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="row-animation" *ngFor="let email of recipients; let i = index">
+                    <td class="name-column">{{ email }}</td>
+                    <td class="action-column action-buttons-cell">
+                        <button class="btn btn-red" (click)="removeEmail(email)">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div *ngIf="recipients.length === 0" class="no-results">Aucun destinataire ajouté.</div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-red" (click)="activeModal.dismiss('Cancel click')"><i class="fas fa-times"></i> Fermer</button>
+    <button type="button" class="btn btn-green" (click)="sendEmail()"><i class="fa fa-paper-plane"></i> Envoyer</button>
+</div>

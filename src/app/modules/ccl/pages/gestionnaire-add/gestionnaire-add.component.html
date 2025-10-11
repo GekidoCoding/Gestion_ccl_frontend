@@ -87,7 +87,16 @@
                     </ng-container>
                     <ng-template #agentContent>
                         <div class="agent-card" *ngFor="let obj of agents; let i=index">
-                            <div class="agent-image">NO IMAGE AVAILABLE</div>
+                            <div class="agent-image">
+                                <img
+                                        *ngIf="obj?.matricule;else noImage"
+                                        [src]="FILE_STORAGE + '/files/agent/' + obj.matricule"
+                                        alt="Agent image"
+                                />
+                            </div>
+                            <ng-template #noImage>
+                                <img src="{{ FILE_STORAGE }}" alt="No image available" />
+                            </ng-template>
                             <div class="agent-info">
                                 <span data-label="Matricule" [attr.data-value]="obj.matricule || 'N/A'"></span>
                                 <span data-label="Nom & Prénom" [attr.data-value]="(obj.nom || obj.prenoms) ? (obj.nom || 'N/A') + ' ' + (obj.prenoms || 'N/A') : 'N/A'"></span>

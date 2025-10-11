@@ -3,9 +3,8 @@ import {TypeClient} from "../type-client/type-client";
 
 export class Client {
     id!: string ;
-    nom!: string;
-    prenom!: string;
-    raisonSociale!: string;
+    designationClient!: string;
+
     fonction!: string;
     email!: string;
     cin!: string;

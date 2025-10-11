@@ -10,7 +10,7 @@ import {environment} from "../../../../../environments/environment";
   providedIn: 'root'
 })
 export class ModeleInfraService {
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/modele_infra';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/modele_infra';
 
   constructor(private http: HttpClient) { }
 

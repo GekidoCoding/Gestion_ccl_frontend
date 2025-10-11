@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { BaseCrudComponent } from '../../components/base/base-crud.component';
+import { BaseCrudComponent } from '../../base/base-crud.component';
 import { Mouvement } from '../../model/mouvement/mouvement';
 import { MouvementService } from '../../services/mouvement/mouvement.service';
 import { InfrastructureService } from '../../services/infrastructure/infrastructure.service';
@@ -17,15 +17,16 @@ import { TypeClientService } from '../../services/type-client/type-client.servic
 import { TypeClient } from '../../model/type-client/type-client';
 import { Page } from '../../interface/page.interface';
 import { TypeMouvementService } from '../../services/type-mouvement/type-mouvement.service';
-import { DetailInfrastructureComponent } from '../../components/application/detail-infrastructure/detail-infrastructure.component';
-import { HistoriqueMvtPopupComponent } from '../../components/application/historique-mvt-popup/historique-mvt-popup.component';
-import { MouvementDetailComponent } from '../../components/application/mouvement-detail/mouvement-detail.component';
-import { ClientDetailComponent } from '../../components/application/client-detail/client-detail.component';
+import { DetailInfrastructureComponent } from '../../components/infrastructure/detail-infrastructure/detail-infrastructure.component';
+import { HistoriqueMvtPopupComponent } from '../../components/historique/historique-mvt-popup/historique-mvt-popup.component';
+import { MouvementDetailComponent } from '../../components/mouvement/mouvement-detail/mouvement-detail.component';
+import { ClientDetailComponent } from '../../components/client/client-detail/client-detail.component';
 import { CategorieInfraService } from '../../services/categorie-infra/categorie-infra.service';
 import { CategorieInfra } from '../../model/categorie-infra/categorie-infra';
-import { MouvementAddComponent } from '../../components/application/mouvement-add/mouvement-add.component';
-import {MouvementInfrasPopupComponent} from "../../components/application/mouvement-infras-popup/mouvement-infras-popup/mouvement-infras-popup.component";
-import {Infrastructure} from "../../model/infrastructure/infrastructure";
+import { MouvementAddComponent } from '../../components/mouvement/mouvement-add/mouvement-add.component';
+import { MouvementInfrasPopupComponent } from '../../components/mouvement/mouvement-infras-popup/mouvement-infras-popup.component';
+import { Infrastructure } from '../../model/infrastructure/infrastructure';
+import {MouvementInfra} from "../../model/mouvement-infra/mouvement-infra";
 
 @Component({
   selector: 'app-mouvement',
@@ -46,8 +47,6 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
   latestMovement: string | null = null;
   categories: CategorieInfra[] = [];
   searchCriteria: Mouvement = new Mouvement();
-  periodeDebut: string = '';
-  periodeFin: string = '';
 
   constructor(
       private route: ActivatedRoute,
@@ -67,60 +66,65 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
   }
 
   ngOnInit() {
-    this.type = this.route.snapshot.paramMap.get('type') || '';
+    this.searchCriteria.id = 'MVT-';
+    this.type = this.route.snapshot.paramMap.get('type') || 'all';
     this.id = this.route.snapshot.paramMap.get('id') || '';
-    this.loadMain();
     this.loadTypeMouvements();
     this.loadClients();
     this.loadCategories();
     this.loadTypeClients();
     this.loadGestionnaires();
     this.loadEtats();
+    this.loadMain(); // Moved loadMain before loadData to ensure client/infrastructure is loaded first
     this.loadData();
   }
 
   loadMain() {
     if (this.type === 'client') {
-      console.log("client ... :" + this.id);
       this.loadClient(this.id);
-    }
-    if (this.type === 'infrastructure') {
-      console.log("infra ... :" + this.id);
+    } else if (this.type === 'infrastructure') {
       this.loadInfrastrcuture(this.id);
     }
   }
 
   loadClient(id: string) {
     if (id) {
+      this.isLoading = true;
       this.clientService.getById(id).subscribe({
         next: (data) => {
           this.client = data;
           this.newItem.client = this.client;
+          this.isLoading = false;
         },
         error: (error) => {
           console.error('Error loading client:', error);
           this.toastr.error('Erreur lors du chargement du client');
+          this.isLoading = false;
         }
       });
     }
   }
 
-
   loadInfrastrcuture(id: string) {
     if (id) {
+      this.isLoading = true;
       this.infrastructureService.getById(id).subscribe({
         next: (data) => {
           this.infrastructure = data;
           this.newItem.infrastructure = this.infrastructure;
+          this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error loading infrastrcuture:', error);
-          this.toastr.error('Erreur lors du chargement de l\'infrastrcuture');
+          console.error('Error loading infrastructure:', error);
+          this.toastr.error('Erreur lors du chargement de l\'infrastructure');
+          this.isLoading = false;
         }
       });
     }
   }
+
   loadTypeMouvements() {
+    this.isLoading = true;
     this.typeMouvementService.getAll().subscribe({
       next: (types) => {
         this.typeMouvements = types;
@@ -131,30 +135,42 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
           console.error('Erreur lors de la récupération du TypeMouvement:', error);
           this.toastr.error('Erreur lors de la récupération du TypeMouvement');
         }
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Erreur lors du chargement des types de mouvement:', error);
         this.toastr.error('Erreur lors du chargement des types de mouvement');
+        this.isLoading = false;
       }
     });
   }
 
   loadClients() {
+    this.isLoading = true;
     this.clientService.getAll().subscribe({
-      next: (clients) => this.clients = clients,
+      next: (clients) => {
+        this.clients = clients;
+        this.isLoading = false;
+      },
       error: (error) => {
         console.error('Error loading clients:', error);
         this.toastr.error('Erreur lors du chargement des clients');
+        this.isLoading = false;
       }
     });
   }
 
   loadCategories() {
+    this.isLoading = true;
     this.catInfraService.getAll().subscribe({
-      next: (categories) => this.categories = categories,
+      next: (categories) => {
+        this.categories = categories;
+        this.isLoading = false;
+      },
       error: (error) => {
         console.error('Error loading categories:', error);
-        this.showErrorMessage('Erreur lors du chargement des catégories');
+        this.toastr.error('Erreur lors du chargement des catégories');
+        this.isLoading = false;
       }
     });
   }
@@ -175,82 +191,84 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
   }
 
   loadGestionnaires() {
+    this.isLoading = true;
     this.gestionnaireService.getAll().subscribe({
-      next: (gestionnaires) => this.gestionnaires = gestionnaires,
+      next: (gestionnaires) => {
+        this.gestionnaires = gestionnaires;
+        this.isLoading = false;
+      },
       error: (error) => {
         console.error('Error loading gestionnaires:', error);
         this.toastr.error('Erreur lors du chargement des gestionnaires');
+        this.isLoading = false;
       }
     });
   }
 
   loadEtats() {
+    this.isLoading = true;
     this.etatService.getAll().subscribe({
-      next: (etats) => this.etats = etats,
+      next: (etats) => {
+        this.etats = etats;
+        this.isLoading = false;
+      },
       error: (error) => {
         console.error('Error loading etats:', error);
         this.toastr.error('Erreur lors du chargement des états');
+        this.isLoading = false;
       }
     });
   }
 
-  loadAll() {
-    this.loadMain();
-    this.loadClients();
-    this.loadData();
-  }
-
   loadData() {
     this.isLoading = true;
-    if (this.type === 'client') {
-      console.log("client loading ... ");
+    if (this.type === 'client' && this.id) {
+      console.log('Loading mouvements for client:', this.id);
       this.mouvementService.getByClientPaginated(this.id, this.currentPage, this.itemsPerPage).subscribe({
         next: (page: Page<Mouvement>) => {
           this.items = page.content;
           this.totalPages = page.totalPages;
           this.totalItems = page.totalElements;
           this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-          this.latestMovement = (this.items.length > 0 ? this.items[0].dhMouvement.replace("T", " ") : null);
+          this.latestMovement = this.items.length > 0 ? this.items[0].dhMouvement.replace('T', ' ') : null;
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error loading mouvements:', error);
-          this.toastr.error('Erreur lors du chargement des mouvements');
+          console.error('Error loading mouvements for client:', error);
+          this.toastr.error('Erreur lors du chargement des mouvements pour le client');
           this.isLoading = false;
         }
       });
-    }
-    if (this.type === 'infrastructure') {
-      console.log("infra loading ... ");
+    } else if (this.type === 'infrastructure' && this.id) {
+      console.log('Loading mouvements for infrastructure:', this.id);
       this.mouvementService.getByInfrastructurePaginated(this.id, this.currentPage, this.itemsPerPage).subscribe({
         next: (page: Page<Mouvement>) => {
           this.items = page.content;
           this.totalPages = page.totalPages;
           this.totalItems = page.totalElements;
           this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-          this.latestMovement = (this.items.length > 0 ? this.items[0].dhMouvement.replace("T", " ") : null);
+          this.latestMovement = this.items.length > 0 ? this.items[0].dhMouvement.replace('T', ' ') : null;
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error loading mouvements:', error);
-          this.toastr.error('Erreur lors du chargement des mouvements');
+          console.error('Error loading mouvements for infrastructure:', error);
+          this.toastr.error('Erreur lors du chargement des mouvements pour l\'infrastructure');
           this.isLoading = false;
         }
       });
-    }
-    else {
-      console.log("here ... ");
+    } else {
+      console.log('Loading all mouvements');
       this.mouvementService.getPaginated(this.currentPage, this.itemsPerPage).subscribe({
         next: (page: Page<Mouvement>) => {
           this.items = page.content;
           this.totalPages = page.totalPages;
           this.totalItems = page.totalElements;
           this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-          this.latestMovement = (this.items.length > 0 ? this.items[0].dhMouvement.replace("T", " ") : null);
+          this.latestMovement = this.items.length > 0 ? this.items[0].dhMouvement.replace('T', ' ') : null;
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error loading mouvements:', error);
+          console.error('Error loading all mouvements:', error);
           this.toastr.error('Erreur lors du chargement des mouvements');
           this.isLoading = false;
         }
@@ -258,16 +276,32 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
     }
   }
 
+  changePage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page - 1; // Convert to 0-based for API
+      this.applySearch();
+      this.showConfirmation = false;
+    }
+  }
+
   public applySearch(): void {
-    this.searchCriteria.periodeDebut = this.periodeDebut;
-    this.searchCriteria.periodeFin = this.periodeFin;
+    this.isLoading = true;
+    if(this.type=='client'){
+      this.searchCriteria.client.id=this.client.id;
+    }
+    if(this.type=='infrastructure'){
+      let mouvementInfra:MouvementInfra = new MouvementInfra();
+      mouvementInfra.infrastructure.id = this.infrastructure.id;
+      this.searchCriteria.mouvementInfras.push(mouvementInfra);
+    }
+
     this.mouvementService.getCriteria(this.currentPage, this.itemsPerPage, this.searchCriteria).subscribe({
       next: (page: Page<Mouvement>) => {
         this.items = page.content;
         this.totalPages = page.totalPages;
         this.totalItems = page.totalElements;
         this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-        this.latestMovement = (this.items.length > 0 ? this.items[0].dhMouvement.replace("T", " ") : null);
+        this.latestMovement = this.items.length > 0 ? this.items[0].dhMouvement.replace('T', ' ') : null;
         this.isLoading = false;
       },
       error: (error) => {
@@ -283,24 +317,25 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
   }
 
   resetSearchCriteria(): Partial<Mouvement> {
-
     return new Mouvement();
   }
+
   resetSearchFormCriteria(): void {
-    this.searchCriteria=new Mouvement();
-    this.periodeDebut = '';
-    this.periodeFin = '';
-    this.loadAll();
+    this.searchCriteria = new Mouvement();
+    this.searchCriteria.id = 'MVT-';
+    this.loadData(); // Changed to loadData instead of loadAll to avoid redundant calls
   }
 
   getTypeMouvement(): TypeMouvement {
-    const searching = "Renseignement".toLowerCase().replace(" ", "");
+    const searching = 'Renseignement'.toLowerCase().replace(' ', '');
     if (!this.typeMouvements || this.typeMouvements.length === 0) {
-      this.showErrorMessage("Veuillez insérer un TypeMouvement avec nom Renseignement");
+      this.showErrorMessage('Veuillez insérer un TypeMouvement avec nom Renseignement');
+      throw new Error('TypeMouvement not found');
     }
-    const foundType = this.typeMouvements.find(type => type.nom.toLowerCase().replace(" ", "") === searching) || new TypeMouvement();
-    if (!foundType) {
-      this.showErrorMessage("Veuillez insérer un TypeMouvement avec nom Renseignement");
+    const foundType = this.typeMouvements.find(type => type.nom.toLowerCase().replace(' ', '') === searching) || new TypeMouvement();
+    if (!foundType.id) {
+      this.showErrorMessage('Veuillez insérer un TypeMouvement avec nom Renseignement');
+      throw new Error('TypeMouvement not found');
     }
     return foundType;
   }
@@ -309,14 +344,14 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
     const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
     const component = this.modalService.open(MouvementAddComponent, options);
     component.componentInstance.client = this.client;
-    component.componentInstance.afterAdd.subscribe(() => this.loadAll());
+    component.componentInstance.afterAdd.subscribe(() => this.loadData());
   }
 
   openMouvementDetail(mouvementId: string) {
     const modal = this.modalService.open(MouvementDetailComponent, { size: 'lg', centered: true, backdrop: 'static' });
     modal.componentInstance.mouvementId = mouvementId;
     modal.componentInstance.afterAction.subscribe(() => {
-      this.loadAll();
+      this.loadData();
     });
   }
 
@@ -325,8 +360,8 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
     modal.componentInstance.mouvementInfras = mouvement.mouvementInfras || [];
     modal.componentInstance.mouvementId = mouvement.id;
     modal.componentInstance.afterEmit.subscribe(() => {
-      this.loadAll();
-    })
+      this.loadData();
+    });
   }
 
   navigateToDetailInfra(id: string) {
@@ -354,25 +389,12 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
     this.modalService.open(content, options);
   }
 
-  handleAddMouvement(mouvement: Mouvement) {
-    console.log("mouvement in handle :" + JSON.stringify(mouvement));
-    this.mouvementService.create(mouvement).subscribe({
-      next: (created) => {
-        this.loadData();
-        this.toastr.success('Mouvement ajouté avec succès !');
-      },
-      error: (error) => {
-        console.error('Error adding mouvement:', error);
-        this.toastr.error('Erreur lors de l\'ajout du mouvement');
-      }
-    });
-  }
-
   handleClientAdd(client: Client) {
     this.clientService.create(client).subscribe({
       next: (created) => {
         this.loadClients();
         this.toastr.success('Client ajouté avec succès !');
+        this.loadData(); // Ensure data is reloaded after client creation
       },
       error: (error) => {
         console.error('Error adding client:', error);
@@ -392,5 +414,9 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
   openHistoriquePopup(mouvementId: string) {
     const modal = this.modalService.open(HistoriqueMvtPopupComponent, { size: 'lg', centered: true, backdrop: 'static' });
     modal.componentInstance.mouvementId = mouvementId;
+  }
+
+  get filteredItems(): Mouvement[] {
+    return this.items;
   }
 }

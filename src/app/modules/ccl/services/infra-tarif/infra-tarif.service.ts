@@ -11,7 +11,7 @@ import {environment} from "../../../../../environments/environment";
   providedIn: 'root'
 })
 export class InfraTarifService {
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/infra_tarif';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/infra_tarif';
 
   constructor(private http: HttpClient) {}
 

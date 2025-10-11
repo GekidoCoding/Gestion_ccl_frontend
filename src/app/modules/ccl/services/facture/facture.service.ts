@@ -11,22 +11,22 @@ import {environment} from "../../../../../environments/environment";
   providedIn: 'root'
 })
 export class FactureService {
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/facture';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/facture';
 
   constructor(private http: HttpClient) { }
 
   create(facture: Facture): Observable<Facture> {
-    return this.http.post<Facture>(`${this.apiUrl}/create`, facture);
+    return this.http.post<Facture>(`${this.apiUrl}/create/new`, facture);
   }
   udpate(id:string, facture: Facture): Observable<Facture> {
-    return this.http.put<Facture>(`${this.apiUrl}/update/${id}`, facture);
+    return this.http.put<Facture>(`${this.apiUrl}/update/new/${id}`, facture);
   }
   getRemise(): Observable<number> {
     return this.http.get<number>(`${this.apiUrl}/config/remise`);
   }
 
   getById(id: string): Observable<Facture> {
-    return this.http.get<Facture>(`${this.apiUrl}/${id}`);
+    return this.http.get<Facture>(`${this.apiUrl}/dto/${id}`);
   }
 
   getDefaultProforma(id: string): Observable<Facture> {
@@ -35,5 +35,37 @@ export class FactureService {
   getByMouvementId(id: string): Observable<Facture[]> {
     return this.http.get<Facture[]>(`${this.apiUrl}/mouvement/${id}`);
   }
+  downloadProforma(idMouvement: string, isRegister: boolean): Observable<Blob> {
+    return this.http.post(
+        `${this.apiUrl}/export-proforma/${idMouvement}/${isRegister}`,
+        {},
+        { responseType: 'blob' }
+    );
+  }
+  downloadProformaExist(idFacture: string): Observable<Blob> {
+    return this.http.post(
+        `${this.apiUrl}/export-proforma/exist/${idFacture}`,
+        {},
+        { responseType: 'blob' }
+    );
+  }
+  downloadFacturePaiement(idPaiement: string): Observable<Blob> {
+    return this.http.post(
+        `${this.apiUrl}/export-facture/${idPaiement}`,
+        {},
+        { responseType: 'blob' }
+    );
+  }
+
+  sendFactureEmail(idFacture: string, destinataires: string[]): Observable<string> {
+    const body = {
+      idFacture,
+      destinataires
+    };
+    return this.http.post<string>(`${this.apiUrl}/sendEmail/facture`, body);
+  }
+
+
+
 
 }

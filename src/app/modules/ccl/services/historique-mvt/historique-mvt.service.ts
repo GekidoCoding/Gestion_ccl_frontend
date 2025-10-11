@@ -10,7 +10,7 @@ import {environment} from "../../../../../environments/environment";
   providedIn: 'root'
 })
 export class HistoriqueMvtService {
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/historique_mvt';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/historique_mvt';
 
   constructor(private http: HttpClient) { }
 

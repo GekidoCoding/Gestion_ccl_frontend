@@ -1,6 +1,20 @@
+
 <div class="main-content">
     <app-loading [loading]="isLoading"></app-loading>
     <div class="table-title" style="color: #FFFFFF">{{titleMonth || 'Mois' }}</div>
+    <div class="legend-container">
+        <div class="legend-item">
+            <span class="legend-text">Légende</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color reservation"></span>
+            <span class="legend-text">Réservation</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color occupation"></span>
+            <span class="legend-text">Occupation</span>
+        </div>
+    </div>
     <div class="calendar-controls">
         <label>Calendrier du : </label>
         <input type="date" [(ngModel)]="viewDateString" (ngModelChange)="onDateChange($event)">
@@ -20,22 +34,21 @@
     <div class="search-form slide-in-out" >
         <form #searchForm="ngForm" (ngSubmit)="loadCalendarData()">
             <div class="form-row">
-                <div class="form-group col-md-12">
-                    <div class="input-group-append mb-3">
-                        <button type="button" (click)="openPopup(infrastructureListModal)" class="btn btn-add">
-                            <i class="fa fa-building"></i> Sélectionner une Infrastructure
-                        </button>
-
-                    </div>
-                </div>
-                <div class="form-group col-md-12" *ngIf="infrastructure?.id">
-                    <label>Nom</label>
-                    <input type="text" class="form-control" [value]="infrastructure.nom || 'N/A'" readonly>
-                </div>
-                <div class="form-group col-md-12" *ngIf="infrastructure?.id">
-                    <label>Numéro</label>
-                    <input type="text" class="form-control" [value]="infrastructure.numero || 'N/A'" readonly>
-                </div>
+<!--                <div class="form-group col-md-12">-->
+<!--                    <div class="input-group-append mb-3">-->
+<!--                        <button type="button" (click)="openPopup(infrastructureListModal)" class="btn btn-add">-->
+<!--                            <i class="fa fa-building"></i> Sélectionner une Infrastructure-->
+<!--                        </button>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="form-group col-md-12" *ngIf="infrastructure?.id">-->
+<!--                    <label>Nom</label>-->
+<!--                    <input type="text" class="form-control" [value]="infrastructure.nom || 'N/A'" readonly>-->
+<!--                </div>-->
+<!--                <div class="form-group col-md-12" *ngIf="infrastructure?.id">-->
+<!--                    <label>Numéro</label>-->
+<!--                    <input type="text" class="form-control" [value]="infrastructure.numero || 'N/A'" readonly>-->
+<!--                </div>-->
                 <div class="form-group col-md-12">
                     <label>Modèles</label>
                     <div class="checkbox-group">
@@ -55,14 +68,13 @@
         </form>
     </div>
 
-
     <mwl-calendar-month-view
             *ngIf="view === CalendarView.Month"
             [viewDate]="viewDate"
             [events]="events"
             (eventClicked)="handleEventClick($event)"
             (dayClicked)="handleDayClick($event)"
-          >
+    >
     </mwl-calendar-month-view>
 
     <mwl-calendar-week-view
@@ -88,6 +100,5 @@
     </div>
     <app-infrastructure-list-popup
             (infrastructureSelected)="handleInfrastructureSelected($event, modal)"
-
     ></app-infrastructure-list-popup>
 </ng-template>

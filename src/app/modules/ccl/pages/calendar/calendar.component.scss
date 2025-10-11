@@ -1,4 +1,4 @@
-@import '../../components/base/base-crud.component';
+@import '../../base/base-crud.component';
 
 .main-content {
   @extend .list-container;
@@ -12,11 +12,12 @@
   background-color: map-get($colors, soft-white);
   border-radius: 0.5rem;
   min-height: 90vh;
-  max-height: 90vh;
-  overflow-y: auto;
+  //max-height: 90vh;
+  //overflow-y: auto;
   @include card-3d-effect;
-  scrollbar-width: thin;
-  scrollbar-color: map-get($colors, blue) map-get($colors, soft-white);
+  //scrollbar-width: thin;
+  //scrollbar-color: map-get($colors, blue) map-get($colors, soft-white);
+  position: relative; /* Ensure relative positioning for the legend */
 
   &::-webkit-scrollbar {
     width: 8px;
@@ -53,6 +54,55 @@
       padding: 0.4rem 0.75rem;
       font-size: 0.9rem;
     }
+  }
+
+  .legend-container {
+    position: fixed;
+    top: 170px;
+    right: 70px;
+    background-color: map-get($colors, soft-white);
+    border: 1px solid map-get($colors, border-grey);
+    border-radius: 0.4rem;
+    padding: 0.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    @include card-3d-effect;
+
+    @media (max-width: 576px) {
+      bottom: 10px;
+      right: 10px;
+      padding: 0.4rem 0.8rem;
+    }
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    display: inline-block;
+
+    &.reservation {
+      background-color: #ffc107; /* Yellow for Réservation */
+    }
+
+    &.occupation {
+      background-color: map-get($colors, red); /* Red for Occupation */
+    }
+  }
+
+  .legend-text {
+    @include responsive-text(0.9rem);
+    font-weight: 500;
+    color: map-get($colors, text-color);
   }
 
   .navigation-controls {
@@ -187,24 +237,6 @@ mwl-calendar-day-view {
 
 mwl-calendar-week-view,
 mwl-calendar-day-view {
-  //max-height: 60vh; /* Set a maximum height for week and day views */
-  //overflow-y: auto; /* Enable vertical scrollbar */
-  //scrollbar-width: thin; /* Firefox scrollbar */
-  //scrollbar-color: map-get($colors, blue) map-get($colors, soft-white);
-
-  &::-webkit-scrollbar {
-    width: 8px; /* Webkit scrollbar width */
-  }
-
-  &::-webkit-scrollbar-track {
-    background: map-get($colors, soft-white);
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: map-get($colors, blue);
-    border-radius: 4px;
-  }
-
   .cal-hour-segment {
     border: 1px solid map-get($colors, border-grey);
     transition: background-color 0.3s ease;
@@ -224,7 +256,6 @@ mwl-calendar-day-view {
     @include card-3d-effect;
   }
 }
-
 
 /* === CHECKBOXES GROUP === */
 .checkbox-group {
@@ -246,7 +277,6 @@ mwl-calendar-day-view {
   width: 16px;
   height: 16px;
 }
-
 
 // Responsive adjustments
 @media (max-width: 768px) {

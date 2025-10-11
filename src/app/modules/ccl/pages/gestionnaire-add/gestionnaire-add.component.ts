@@ -12,6 +12,7 @@ import { Page } from '../../interface/page.interface';
 import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+import {environment} from "../../../../../environments/environment";
 
 @Component({
   selector: 'app-gestionnaire-add',
@@ -36,6 +37,7 @@ export class GestionnaireAddComponent implements OnInit {
   pageNumbers: number[] = [];
   serviceCtrl = new FormControl('');
   directionCtrl = new FormControl('');
+  FILE_STORAGE=environment.FILE_STORAGE;
 
   constructor(
       private agentService: AgentService,
@@ -204,7 +206,7 @@ export class GestionnaireAddComponent implements OnInit {
 
   confirmAddAgentConfirmation(modal: any): void {
     const gestionnaire = new Gestionnaire();
-    gestionnaire.agent = this.agentAdd;
+    gestionnaire.matriculeGestionnaire = this.agentAdd.matricule;
     this.gestionnaireService.create(gestionnaire).subscribe({
       next: () => {
         this.loadAgents();

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { NavItem } from '../ccl/model/nav-item';
-import { StateService } from '../ccl/services/state.service';
+import { NavItem } from './model/nav-item';
+import { StateService } from './services/state.service';
 
 @Component({
   selector: 'app-general',

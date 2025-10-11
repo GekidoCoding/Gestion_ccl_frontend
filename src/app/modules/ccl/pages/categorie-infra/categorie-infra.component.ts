@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
-import { BaseCrudComponent, Page } from '../../components/base/base-crud.component';
+import { BaseCrudComponent, Page } from '../../base/base-crud.component';
 import { CategorieInfra } from '../../model/categorie-infra/categorie-infra';
 import { CategorieInfraService } from '../../services/categorie-infra/categorie-infra.service';
 import { ToastrService } from 'ngx-toastr';
@@ -8,7 +8,7 @@ import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-categorie-infra',
   templateUrl: './categorie-infra.component.html',
-  styleUrls: ['../../components/base/base-crud.component.scss']
+  styleUrls: ['../../base/base-crud.component.scss']
 })
 export class CategorieInfraComponent extends BaseCrudComponent<CategorieInfra> {
   constructor(modalService: NgbModal, private categorieInfraService: CategorieInfraService, protected toastr: ToastrService) {
@@ -17,9 +17,6 @@ export class CategorieInfraComponent extends BaseCrudComponent<CategorieInfra> {
 
   ngOnInit() {
     this.loadData();
-    setTimeout(() => {
-      this.isLoading = false;
-    }, 3000);
   }
 
   loadData() {
@@ -30,11 +27,12 @@ export class CategorieInfraComponent extends BaseCrudComponent<CategorieInfra> {
         this.totalPages = page.totalPages;
         this.totalItems = page.totalElements;
         this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-        this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading categories:', error);
         this.showErrorMessage('Erreur lors du chargement des catégories');
+      },
+      complete: () => {
         this.isLoading = false;
       }
     });
@@ -68,30 +66,34 @@ export class CategorieInfraComponent extends BaseCrudComponent<CategorieInfra> {
   }
 
   addItem() {
+    this.isLoading = true;
     const categorieInfra: CategorieInfra = new CategorieInfra();
     categorieInfra.nom = this.newItem.nom!;
 
     this.categorieInfraService.create(categorieInfra).subscribe({
-      next: (createdCategorie) => {
-        this.currentPage = 0; // Revenir à la première page
+      next: () => {
+        this.currentPage = 0;
         this.loadData();
         this.showSuccessMessage('Catégorie ajoutée avec succès !');
       },
       error: (error) => {
         console.error('Error adding categorie:', error);
         this.showErrorMessage('Erreur lors de l\'ajout de la catégorie');
+      },
+      complete: () => {
+        this.isLoading = false;
       }
     });
   }
 
   confirmUpdate(modal: any) {
+    this.isLoading = true;
     const categorieInfra: CategorieInfra = new CategorieInfra();
     categorieInfra.id = this.selectedItem!.id;
     categorieInfra.nom = this.selectedItem!.nom;
 
     this.categorieInfraService.update(this.selectedItem!.id, categorieInfra).subscribe({
-      next: (updatedCategorie) => {
-        this.currentPage = 0; // Revenir à la première page
+      next: () => {
         this.loadData();
         modal.close();
         this.showSuccessMessage('Modification réussie !');
@@ -99,6 +101,9 @@ export class CategorieInfraComponent extends BaseCrudComponent<CategorieInfra> {
       error: (error) => {
         console.error('Error updating categorie:', error);
         this.showErrorMessage('Erreur lors de la modification de la catégorie');
+      },
+      complete: () => {
+        this.isLoading = false;
       }
     });
   }
@@ -110,12 +115,13 @@ export class CategorieInfraComponent extends BaseCrudComponent<CategorieInfra> {
   }
 
   deleteSelectedItems(modal: any) {
+    this.isLoading = true;
     const deleteObservables = Object.keys(this.selectedIds).map(id =>
         this.categorieInfraService.delete(id)
     );
 
     Promise.all(deleteObservables.map(obs => obs.toPromise())).then(() => {
-      this.currentPage = 0; // Revenir à la première page
+      this.currentPage = 0;
       this.loadData();
       this.selectedIds = {};
       this.selectAll = false;
@@ -124,7 +130,9 @@ export class CategorieInfraComponent extends BaseCrudComponent<CategorieInfra> {
       this.showSuccessMessage('Suppression réussie !');
     }).catch(error => {
       console.error('Error deleting categories:', error);
-      this.showErrorMessage('Impossible de supprimer le(s) catégorie(s) qui ont des entités qui en dépendent ');
+      this.showErrorMessage('Impossible de supprimer le(s) catégorie(s) qui ont des entités qui en dépendent');
+    }).finally(() => {
+      this.isLoading = false;
     });
   }
 }

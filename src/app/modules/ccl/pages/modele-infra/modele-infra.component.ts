@@ -1,16 +1,17 @@
 import { Component } from '@angular/core';
 import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { ModeleInfra } from '../../model/modele-infra/modele-infra';
-import { BaseCrudComponent, Page } from '../../components/base/base-crud.component';
+import { BaseCrudComponent, Page } from '../../base/base-crud.component';
 import { CategorieInfra } from '../../model/categorie-infra/categorie-infra';
 import { ModeleInfraService } from '../../services/modele-infra/modele-infra.service';
 import { CategorieInfraService } from '../../services/categorie-infra/categorie-infra.service';
 import { ToastrService } from 'ngx-toastr';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-modele-infra-crud',
   templateUrl: './modele-infra.component.html',
-  styleUrls: ['../../components/base/base-crud.component.scss']
+  styleUrls: ['../../base/base-crud.component.scss']
 })
 export class ModeleInfraComponent extends BaseCrudComponent<ModeleInfra> {
   catInfras: CategorieInfra[] = [];
@@ -25,21 +26,24 @@ export class ModeleInfraComponent extends BaseCrudComponent<ModeleInfra> {
   }
 
   ngOnInit() {
-    this.loadCategorieInfras();
-    this.loadData();
-    setTimeout(() => {
-      this.isLoading = false;
-    }, 3000);
-  }
-
-  loadCategorieInfras() {
-    this.categorieInfraService.getAll().subscribe({
-      next: (catInfras) => {
-        this.catInfras = catInfras;
+    this.isLoading = true;
+    forkJoin({
+      categories: this.categorieInfraService.getAll(),
+      data: this.modeleInfraService.getPaginated(this.currentPage, this.itemsPerPage)
+    }).subscribe({
+      next: ({ categories, data }) => {
+        this.catInfras = categories;
+        this.items = data.content;
+        this.totalPages = data.totalPages;
+        this.totalItems = data.totalElements;
+        this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
       },
       error: (error) => {
-        console.error('Error loading categorie infras:', error);
-        this.showErrorMessage('Erreur lors du chargement des catégories d\'infrastructure');
+        console.error('Error during initialization:', error);
+        this.showErrorMessage('Erreur lors du chargement initial des données');
+      },
+      complete: () => {
+        this.isLoading = false;
       }
     });
   }
@@ -52,11 +56,28 @@ export class ModeleInfraComponent extends BaseCrudComponent<ModeleInfra> {
         this.totalPages = page.totalPages;
         this.totalItems = page.totalElements;
         this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-        this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading modele infras:', error);
         this.showErrorMessage('Erreur lors du chargement des modèles d\'infrastructure');
+      },
+      complete: () => {
+        this.isLoading = false;
+      }
+    });
+  }
+
+  loadCategorieInfras() {
+    this.isLoading = true;
+    this.categorieInfraService.getAll().subscribe({
+      next: (catInfras) => {
+        this.catInfras = catInfras;
+      },
+      error: (error) => {
+        console.error('Error loading categorie infras:', error);
+        this.showErrorMessage('Erreur lors du chargement des catégories d\'infrastructure');
+      },
+      complete: () => {
         this.isLoading = false;
       }
     });
@@ -86,12 +107,13 @@ export class ModeleInfraComponent extends BaseCrudComponent<ModeleInfra> {
   }
 
   addItem() {
+    this.isLoading = true;
     const modeleInfra: ModeleInfra = new ModeleInfra();
     modeleInfra.nom = this.newItem.nom!;
     modeleInfra.catInfra = this.catInfras.find(cat => cat.id === this.newItem.catInfra!.id)!;
 
     this.modeleInfraService.create(modeleInfra).subscribe({
-      next: (createdModeleInfra) => {
+      next: () => {
         this.currentPage = 0;
         this.loadData();
         this.showSuccessMessage('Modèle d\'infrastructure ajouté avec succès !');
@@ -99,19 +121,22 @@ export class ModeleInfraComponent extends BaseCrudComponent<ModeleInfra> {
       error: (error) => {
         console.error('Error adding modele infra:', error);
         this.showErrorMessage('Erreur lors de l\'ajout du modèle d\'infrastructure');
+      },
+      complete: () => {
+        this.isLoading = false;
       }
     });
   }
 
   confirmUpdate(modal: any) {
+    this.isLoading = true;
     const modeleInfra: ModeleInfra = new ModeleInfra();
     modeleInfra.id = this.selectedItem!.id;
     modeleInfra.nom = this.selectedItem!.nom;
     modeleInfra.catInfra = this.catInfras.find(cat => cat.id === this.selectedItem!.catInfra!.id)!;
 
     this.modeleInfraService.update(this.selectedItem!.id, modeleInfra).subscribe({
-      next: (updatedModeleInfra) => {
-        this.currentPage = 0; // Reset to first page
+      next: () => {
         this.loadData();
         modal.close();
         this.showSuccessMessage('Modification réussie !');
@@ -119,6 +144,9 @@ export class ModeleInfraComponent extends BaseCrudComponent<ModeleInfra> {
       error: (error) => {
         console.error('Error updating modele infra:', error);
         this.showErrorMessage('Erreur lors de la modification du modèle d\'infrastructure');
+      },
+      complete: () => {
+        this.isLoading = false;
       }
     });
   }
@@ -130,12 +158,13 @@ export class ModeleInfraComponent extends BaseCrudComponent<ModeleInfra> {
   }
 
   deleteSelectedItems(modal: any) {
+    this.isLoading = true;
     const deleteObservables = Object.keys(this.selectedIds).map(id =>
         this.modeleInfraService.delete(id)
     );
 
     Promise.all(deleteObservables.map(obs => obs.toPromise())).then(() => {
-      this.currentPage = 0; // Reset to first page
+      this.currentPage = 0;
       this.loadData();
       this.selectedIds = {};
       this.selectAll = false;
@@ -144,7 +173,9 @@ export class ModeleInfraComponent extends BaseCrudComponent<ModeleInfra> {
       this.showSuccessMessage('Suppression réussie !');
     }).catch(error => {
       console.error('Error deleting modele infras:', error);
-      this.showErrorMessage('Impossible de supprimer le(s) modèle(s) d\'infrastructure qui ont des entités qui en dépendent  ');
+      this.showErrorMessage('Impossible de supprimer le(s) modèle(s) d\'infrastructure qui ont des entités qui en dépendent');
+    }).finally(() => {
+      this.isLoading = false;
     });
   }
 }

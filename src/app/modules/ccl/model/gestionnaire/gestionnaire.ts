@@ -2,10 +2,7 @@ import {Agent} from "../agent/agent";
 
 export class Gestionnaire {
     public id!: string;
-    public agent!: Agent;
+    public matriculeGestionnaire!: string;
 
 
-    constructor() {
-        this.agent = new Agent();
-    }
 }
