@@ -1,0 +1,43 @@
+<div class="modal-header">
+    <h5 class="modal-title">Modifier un Modèle d'Infrastructure</h5>
+    <button type="button" class="close" (click)="cancelForm()" aria-label="Close">
+        <span aria-hidden="true">×</span>
+    </button>
+</div>
+<div class="modal-body">
+    <app-loading [loading]="isLoading"></app-loading>
+    <form #updateForm="ngForm" (ngSubmit)="submitForm()">
+        <div class="form-row">
+            <div class="form-group col-md-6 col-12">
+                <label>Identifiant</label>
+                <input type="text" class="form-control" [(ngModel)]="modeleInfra.id" name="id" readonly>
+            </div>
+            <div class="form-group col-md-6 col-12">
+                <label>Nom</label>
+                <input type="text" class="form-control" [(ngModel)]="modeleInfra.nom" name="nom" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6 col-12">
+                <label>Catégorie d'Infrastructure</label>
+                <select class="form-control" [(ngModel)]="modeleInfra.catInfra!.id" name="catInfra" required>
+                    <option value="">Choisir catégorie d'infrastructure</option>
+                    <option *ngFor="let catInfra of catInfras" [value]="catInfra.id">{{ catInfra.nom }}</option>
+                </select>
+            </div>
+            <div class="form-group col-md-6 col-12">
+                <label>Couleur</label>
+                <select class="form-control color-select" [(ngModel)]="modeleInfra.couleur" name="couleur" required>
+                    <option value="">Choisir une couleur</option>
+                    <option *ngFor="let color of availableColors" [value]="color" [ngStyle]="{'background-color': color}">
+                        <span class="color-square" [ngStyle]="{'background-color': color}"></span>{{ color }}
+                    </option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-red" (click)="cancelForm()"><i class="fas fa-times"></i>Annuler</button>
+            <button type="submit" class="btn btn-green" [disabled]="updateForm.invalid"><i class="fas fa-save"></i>Enregistrer</button>
+        </div>
+    </form>
+</div>

@@ -71,7 +71,7 @@ export class MouvementService {
   }
 
   delete(id: string): Observable<Mouvement> {
-    return this.http.delete<Mouvement>(`${this.apiUrl}/delete/${id}`);
+    return this.http.delete<Mouvement>(`${this.apiUrl}/annuler/${id}`);
   }
   getCriteria(
       page: number = 0,
@@ -103,7 +103,7 @@ export class MouvementService {
   }
 
   getCalendarData():Observable<Mouvement[]>{
-    return this.http.get<Mouvement[]>(`${this.apiUrl}/calendar`);
+      return this.http.get<Mouvement[]>(`${this.apiUrl}/calendar`);
   }
   getCalendarDataByInfrastructureId(infrastructureId:string):Observable<Mouvement[]>{
     return this.http.get<Mouvement[]>(`${this.apiUrl}/calendar/${infrastructureId}`);
@@ -118,8 +118,6 @@ export class MouvementService {
         params = params.append('modelesIds', id);
       });
     }
-
-
     return this.http.get<Mouvement[]>(`${this.apiUrl}/calendar/criteria` , {params}  );
   }
 }
