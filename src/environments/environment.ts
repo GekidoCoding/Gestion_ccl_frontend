@@ -3,9 +3,9 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false,
-  // PRINCIPAL: 'http://192.168.7.85:8080',
-  PRINCIPAL: 'http://localhost:8080/',
+  production: true,
+  PRINCIPAL: 'http://192.168.7.85:8080',
+  SERVER_URL: 'http://localhost:8080/',
   PREFIX:'cnaps/gestion/ccl',
   FILE_STORAGE: "http://192.168.2.177:88/filestorage",
   GRH: 'http://192.168.2.242/grh',

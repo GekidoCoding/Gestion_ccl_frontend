@@ -11,37 +11,39 @@ declare interface RouteInfo {
 }
 
 export const ROUTES: RouteInfo[] = [
+  // {
+  //   path: '',
+  //   title: 'Géstion des Entités',
+  //   icon: 'fas fa-tag',
+  //   class: '',
+  //   subItems: [
+  //
+  //
+  //   ]
+  // },
   {
-    path: '',
-    title: 'Géstion des Entités',
-    icon: 'fas fa-tag',
-    class: '',
-    subItems: [
-      {
-        path: '/'+environment.PREFIX+'/localisation',
-        title: 'Localisation',
-        icon: 'fas fa-map-marker-alt',
-        class: ''
-      },
-      {
-        path: '/'+environment.PREFIX+'/categorie_infra',
-        title: 'Catégorie',
-        icon: 'fas fa-folder',
-        class: ''
-      },
-      {
-        path: '/'+environment.PREFIX+'/modele_infra',
-        title: 'Modele',
-        icon: 'far fa-object-group',
-        class: ''
-      },
-      {
-        path: '/'+environment.PREFIX+'/frequence',
-        title: 'Fréquence',
-        icon: 'fas fa-bolt',
-        class: ''
-      }
-    ]
+    path: '/'+environment.PREFIX+'/localisation',
+    title: 'Localisation',
+    icon: 'fas fa-map-marker-alt',
+    class: ''
+  },
+  {
+    path: '/'+environment.PREFIX+'/categorie_infra',
+    title: 'Catégorie',
+    icon: 'fas fa-folder',
+    class: ''
+  },
+  {
+    path: '/'+environment.PREFIX+'/modele_infra',
+    title: 'Modele',
+    icon: 'far fa-object-group',
+    class: ''
+  },
+  {
+    path: '/'+environment.PREFIX+'/type_client',
+    title: 'Type de client',
+    icon: 'fas fa-users',
+    class: ''
   },
   {
     path: '/'+environment.PREFIX+'/client',

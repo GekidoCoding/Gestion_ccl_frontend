@@ -9,7 +9,7 @@ import {environment} from "../../../../../environments/environment";
   providedIn: 'root'
 })
 export class DirectionService {
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/direction';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/direction';
 
   constructor(private http: HttpClient) { }
 

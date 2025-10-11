@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
-import { BaseCrudComponent, Page } from '../../components/base/base-crud.component';
+import { BaseCrudComponent, Page } from '../../base/base-crud.component';
 import { Localisation } from '../../model/localisation/localisation';
 import { LocalisationService } from '../../services/localisation/localisation.service';
 import { ToastrService } from 'ngx-toastr';
@@ -17,9 +17,6 @@ export class LocalisationComponent extends BaseCrudComponent<Localisation> {
 
   ngOnInit() {
     this.loadData();
-    setTimeout(() => {
-      this.isLoading = false;
-    }, 3000);
   }
 
   loadData() {
@@ -30,11 +27,12 @@ export class LocalisationComponent extends BaseCrudComponent<Localisation> {
         this.totalPages = page.totalPages;
         this.totalItems = page.totalElements;
         this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-        this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading localisations:', error);
         this.showErrorMessage('Erreur lors du chargement des localisations');
+      },
+      complete: () => {
         this.isLoading = false;
       }
     });
@@ -68,30 +66,34 @@ export class LocalisationComponent extends BaseCrudComponent<Localisation> {
   }
 
   addItem() {
+    this.isLoading = true;
     const localisation: Localisation = new Localisation();
     localisation.nom = this.newItem.nom!;
 
     this.service.create(localisation).subscribe({
-      next: (created) => {
-        this.currentPage = 0; // Reset to first page
+      next: () => {
+        this.currentPage = 0;
         this.loadData();
         this.showSuccessMessage('Localisation ajoutée avec succès !');
       },
       error: (error) => {
         console.error('Error adding localisation:', error);
         this.showErrorMessage('Erreur lors de l\'ajout de la localisation');
+      },
+      complete: () => {
+        this.isLoading = false;
       }
     });
   }
 
   confirmUpdate(modal: any) {
+    this.isLoading = true;
     const localisation: Localisation = new Localisation();
     localisation.id = this.selectedItem!.id;
     localisation.nom = this.selectedItem!.nom;
 
     this.service.update(this.selectedItem!.id, localisation).subscribe({
-      next: (updated) => {
-        this.currentPage = 0; // Reset to first page
+      next: () => {
         this.loadData();
         modal.close();
         this.showSuccessMessage('Modification réussie !');
@@ -99,6 +101,9 @@ export class LocalisationComponent extends BaseCrudComponent<Localisation> {
       error: (error) => {
         console.error('Error updating localisation:', error);
         this.showErrorMessage('Erreur lors de la modification de la localisation');
+      },
+      complete: () => {
+        this.isLoading = false;
       }
     });
   }
@@ -110,6 +115,7 @@ export class LocalisationComponent extends BaseCrudComponent<Localisation> {
   }
 
   deleteSelectedItems(modal: any) {
+    this.isLoading = true;
     const deleteObservables = Object.keys(this.selectedIds).map(id =>
         this.service.delete(id)
     );
@@ -124,7 +130,9 @@ export class LocalisationComponent extends BaseCrudComponent<Localisation> {
       this.showSuccessMessage('Suppression réussie !');
     }).catch(error => {
       console.error('Error deleting localisations:', error);
-      this.showErrorMessage('Impossible de supprimer le(s) localisation(s) qui ont des entités qui en dépendent ');
+      this.showErrorMessage('Impossible de supprimer le(s) localisation(s) qui ont des entités qui en dépendent');
+    }).finally(() => {
+      this.isLoading = false;
     });
   }
 }

@@ -11,7 +11,7 @@ import {environment} from "../../../../../environments/environment";
   providedIn: 'root'
 })
 export class TypeClientService {
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/type_client';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/type_client';
 
   constructor(private http: HttpClient) {}
 

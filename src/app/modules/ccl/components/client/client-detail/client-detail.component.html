@@ -1,0 +1,96 @@
+<div class="modal-header">
+    <h5 class="modal-title">Détails du Client</h5>
+    <button type="button" class="close" (click)="activeModal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
+</div>
+<div class="modal-body" *ngIf="selectedItem">
+    <app-loading [loading]="isLoading"></app-loading>
+    <form #detailForm="ngForm" (ngSubmit)="update(detailForm)">
+        <div class="row">
+            <div class="form-group col-md-6 md-2">
+                <label>Total de personnes intégrées par ce client</label>
+                <input type="text" class="form-control" [(ngModel)]="totalPersonnes" name="totalPersonnes" readonly>
+            </div>
+            <div class="form-group col-md-6 md-2">
+                <label>Total de mouvements par ce client</label>
+                <input type="text" class="form-control" [(ngModel)]="totalMouvements" name="totalMouvements" readonly>
+            </div>
+
+            <div class="form-group col-md-6 md-2" [ngClass]="{'form-group-error': typeClient.touched && !typeClient.valid &&isEditing }">
+                <label>Type de Client <strong style="color: red">*</strong></label>
+                <select class="form-control" [(ngModel)]="selectedItem.typeClient.id" name="typeClient" #typeClient="ngModel" [disabled]="!isEditing" required  readonly>
+                    <option value="">Choisir un type</option>
+                    <option *ngFor="let type of typeClients" [ngValue]="type.id">{{ type.typeClient }}</option>
+                </select>
+                <div class="error-message" *ngIf="typeClient.touched && !typeClient.valid &&isEditing">
+                    <i class="fas fa-exclamation-circle"></i> Veuillez sélectionner un type de client.
+                </div>
+            </div>
+
+            <div class="form-group col-md-6 md-2"  [ngClass]="{'form-group-error': designationClient.touched && !designationClient.valid &&isEditing}">
+                <label>Nom <strong style="color: red">*</strong></label>
+                <input type="text" class="form-control" [(ngModel)]="selectedItem.designationClient" name="designationClient" #designationClient="ngModel" [disabled]="!isEditing" required (change)="validateField('designationClient')">
+                <div class="error-message" *ngIf="designationClient.touched && !designationClient.valid &&isEditing">
+                    <i class="fas fa-exclamation-circle"></i> Le champ Designation client est requis.
+                </div>
+            </div>
+
+
+
+
+
+            <div class="form-group col-md-6 md-2" >
+                <label>Adresse</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedItem.adresse" name="adresse" #adresse="ngModel" [disabled]="!isEditing" required (change)="validateField('adresse')">
+
+            </div>
+
+            <div class="form-group col-md-6 md-2"  [ngClass]="{'form-group-error': cin.touched && !cinValid &&isEditing}">
+                <label>CIN</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedItem.cin" name="cin" #cin="ngModel" [disabled]="!isEditing" pattern="^\d{12,}$" (change)="validateField('cin')">
+                <div class="error-message" *ngIf="cin.touched && !cinValid &&isEditing">
+                    <i class="fas fa-exclamation-circle"></i> Le CIN doit contenir 12 chiffres ou plus.
+                </div>
+            </div>
+
+            <div class="form-group col-md-6 md-2" [ngClass]="{'form-group-error': contacts.touched && !contactsValid &&isEditing}">
+                <label>Contact(s) <strong style="color: red">*</strong></label>
+                <input type="text" class="form-control" [(ngModel)]="selectedItem.contacts" name="contacts" #contacts="ngModel" [disabled]="!isEditing" required placeholder="Ex : 0344444444;+261384884488" (change)="verifContacts()">
+                <div class="error-message" *ngIf="contacts.touched && !contacts.valid &&isEditing">
+                    <i class="fas fa-exclamation-circle"></i> Le champ Contact(s) est requis.
+                </div>
+                <div class="error-message" *ngIf="contacts.touched && contacts.valid && !contactsValid && !contactsFormatError && !contactsDuplicateError &&isEditing">
+                    <i class="fas fa-exclamation-circle"></i> Utilisez le format 0xxxxxxxxx ou +261xxxxxxxxx, séparé(s) par ';'.
+                </div>
+                <div class="error-message" *ngIf="contacts.touched && contacts.valid && contactsFormatError &&isEditing">
+                    <i class="fas fa-exclamation-circle"></i> Numéro(s) invalide(s) : {{ invalidContacts.join(', ') }}. Utilisez le format 0xxxxxxxxx ou +261xxxxxxxxx, séparé(s) par ';'.
+                </div>
+                <div class="error-message" *ngIf="contacts.touched && contacts.valid && contactsDuplicateError &&isEditing">
+                    <i class="fas fa-exclamation-circle"></i> Numéro(s) dupliqué(s) : {{ duplicateContacts.join(', ') }}.
+                </div>
+            </div>
+
+            <div class="form-group col-md-6 md-2" [ngClass]="{'form-group-error': email.touched && !emailValid &&isEditing}">
+                <label>Email </label>
+                <input type="email" class="form-control" [(ngModel)]="selectedItem.email" name="email" #email="ngModel" [disabled]="!isEditing" required placeholder="Ex : jean2505@gmail.com" (change)="verifEmail()">
+
+                <div class="error-message" *ngIf="email.touched && !emailValid &&isEditing">
+                    <i class="fas fa-exclamation-circle"></i> Adresse email invalide. Exemple attendu : jean2505@gmail.com.
+                </div>
+            </div>
+
+            <div class="form-group col-md-6 md-2">
+                <label>Fonction</label>
+                <input type="text" class="form-control" [(ngModel)]="selectedItem.fonction" name="fonction" [disabled]="!isEditing">
+            </div>
+        </div>
+        <div class="error-message" *ngIf="detailForm.submitted && (!detailForm.valid || !contactsValid || !emailValid || !cinValid &&isEditing)">
+            <i class="fas fa-exclamation-circle"></i> Veuillez corriger les erreurs dans le formulaire avant de soumettre.
+        </div>
+        <div class="modal-footer">
+            <button *ngIf="!isEditing" type="button" class="btn btn-green" (click)="toggleEditMode()"><i class="fas fa-edit"></i> Modifier</button>
+            <button *ngIf="isEditing" type="submit" class="btn btn-green" [disabled]="detailForm.invalid || !contactsValid || !emailValid || !cinValid"><i class="fas fa-check"></i> Confirmer</button>
+            <button *ngIf="isEditing" type="button" class="btn btn-red" (click)="cancelEdit()"><i class="fas fa-times"></i> Annuler</button>
+            <button type="button" class="btn btn-eye" (click)="addMouvementClient()"><i class="fas fa-plus-circle"></i> Ajouter un mouvement pour ce client</button>
+        </div>
+    </form>
+</div>

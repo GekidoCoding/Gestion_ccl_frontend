@@ -6,8 +6,8 @@ import {Mouvement} from '../../model/mouvement/mouvement';
 import {MouvementService} from "../../services/mouvement/mouvement.service";
 import {Infrastructure} from "../../model/infrastructure/infrastructure";
 import {NgbModal, NgbModalOptions} from "@ng-bootstrap/ng-bootstrap";
-import {ClientDetailComponent} from "../../components/application/client-detail/client-detail.component";
-import {MouvementAddComponent} from "../../components/application/mouvement-add/mouvement-add.component";
+import {ClientDetailComponent} from "../../components/client/client-detail/client-detail.component";
+import {MouvementAddComponent} from "../../components/mouvement/mouvement-add/mouvement-add.component";
 import {TypeMouvementService} from "../../services/type-mouvement/type-mouvement.service";
 import {ModeleInfra} from "../../model/modele-infra/modele-infra";
 import {ModeleInfraService} from "../../services/modele-infra/modele-infra.service";
@@ -72,7 +72,7 @@ export class CalendarComponent implements OnInit {
         next: (mouvements: Mouvement[]) => {
           this.events = mouvements.map(mouvement => ({
             title: `${mouvement.infrastructure.nom || 'Événement'} \n 
-             ${mouvement.typeMouvement.nom} de ${mouvement.client.nom}`,
+             ${mouvement.typeMouvement.nom} de ${mouvement.client.designationClient}`,
             start: parseISO(mouvement.periodeDebut),
             end: mouvement.periodeFin ? parseISO(mouvement.periodeFin) : undefined,
             color: {
@@ -104,7 +104,7 @@ export class CalendarComponent implements OnInit {
 
           return {
             title: `${mouvement.infrastructure.nom || 'Événement'} \n 
-             ${mouvement.typeMouvement.nom} de ${mouvement.client.nom}`,
+             ${mouvement.typeMouvement.nom} de ${mouvement.client.designationClient}`,
             start: parseISO(mouvement.periodeDebut),
             end: mouvement.periodeFin ? parseISO(mouvement.periodeFin) : undefined,
             color: {

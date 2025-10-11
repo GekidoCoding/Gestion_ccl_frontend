@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "modele-front-lucy": {
+    "gestion-ccl-frontend": {
       "projectType": "application",
       "root": "",
       "sourceRoot": "src",
@@ -12,7 +12,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/modele-front-lucy",
+            "outputPath": "dist/gestion-ccl-frontend",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -49,13 +49,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumWarning": "2mb",
+                  "maximumError": "4mb"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "2mb",
+                  "maximumError": "4mb"
                 }
               ],
               "fileReplacements": [
@@ -81,10 +81,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "modele-front-lucy:build:production"
+              "browserTarget": "gestion-ccl-frontend:build:production"
             },
             "development": {
-              "browserTarget": "modele-front-lucy:build:development"
+              "browserTarget": "gestion-ccl-frontend:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -92,7 +92,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "modele-front-lucy:build"
+            "browserTarget": "gestion-ccl-frontend:build"
           }
         },
         "test": {
@@ -147,7 +147,7 @@
       }
     }
   },
-  "defaultProject": "modele-front-lucy",
+  "defaultProject": "gestion-ccl-frontend",
   "schematics": {
     "@schematics/angular:component": {
       "style": "scss"

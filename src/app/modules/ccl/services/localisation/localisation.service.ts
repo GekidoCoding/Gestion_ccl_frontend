@@ -11,7 +11,7 @@ import {environment} from "../../../../../environments/environment";
   providedIn: 'root'
 })
 export class LocalisationService {
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/localisation';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/localisation';
 
   constructor(private http: HttpClient) {}
 
@@ -26,7 +26,7 @@ export class LocalisationService {
     return this.http.get<Page<Localisation>>(`${this.apiUrl}/pagination`, { params });
   }
   getById(id: string): Observable<Localisation> {
-    return this.http.get<Localisation>(`${this.apiUrl}/${id}`);
+    return this.http.get<Localisation>( `${this.apiUrl}/${id}`);
   }
 
   create(activite: any): Observable<Localisation> {

@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { Subscription } from 'rxjs';
-import { AccountService } from './modules/ccl/services/account.service';
+import { AccountService } from './modules/general/services/account.service';
 
 @Component({
   selector: 'app-root',
@@ -48,4 +48,5 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.isLoginSubscription?.unsubscribe();
   }
+
 }

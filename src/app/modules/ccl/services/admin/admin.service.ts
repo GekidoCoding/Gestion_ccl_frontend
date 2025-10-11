@@ -10,7 +10,7 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class AdminService {
-  private apiUrl =  environment.PRINCIPAL+environment.PREFIX+'/admin';
+  private apiUrl =  environment.SERVER_URL+environment.PREFIX+'/admin';
 
   constructor(private http: HttpClient) { }
 

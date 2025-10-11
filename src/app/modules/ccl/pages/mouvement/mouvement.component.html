@@ -1,6 +1,6 @@
 <div class="main-content">
     <app-loading [loading]="isLoading"></app-loading>
-    <div class="table-title">Mouvements</div>
+    <div class="table-title">Gestion des Mouvements</div>
     <div class="list-container">
         <div class="results-count">Résultats trouvés : {{ totalItems }}</div>
 
@@ -8,18 +8,12 @@
             <h3>Statistiques du client</h3>
             <div class="form-row">
                 <div class="form-group col-md-2">
-                    <label>Nom & prenom / Raison sociale</label>
-                    <p>
-                        {{
-                            (client.nom || client.prenom)
-                                ? (client.nom + ' ' + client.prenom)
-                                : (client.raisonSociale || 'N/A')
-                        }}
-                    </p>
+                    <label>Designation client</label>
+                    <p>{{ client.designationClient || 'N/A' }}</p>
                 </div>
                 <div class="form-group col-md-2">
                     <label>Type du client</label>
-                    <p>{{ client.typeClient.typeClient || 'N/A' }}</p>
+                    <p>{{ client.typeClient?.typeClient || 'N/A' }}</p>
                 </div>
                 <div class="form-group col-md-2">
                     <label>Contact(s)</label>
@@ -42,21 +36,19 @@
         </div>
 
         <div class="statistics-section" *ngIf="infrastructure.id">
-            <h3>Statistiques de l'infrastructure </h3>
+            <h3>Statistiques de l'infrastructure</h3>
             <div class="form-row">
                 <div class="form-group col-md-2">
-                    <label>Nom & numero </label>
-                    <p> {{infrastructure.nom}} {{infrastructure.numero}} </p>
+                    <label>Nom & numéro</label>
+                    <p>{{ infrastructure.nom }} {{ infrastructure.numero }}</p>
                 </div>
-
                 <div class="form-group col-md-2">
-                    <label>Modele </label>
-                    <p>{{ infrastructure.modeleInfra.nom || 'N/A' }}</p>
+                    <label>Modèle</label>
+                    <p>{{ infrastructure.modeleInfra?.nom || 'N/A' }}</p>
                 </div>
-
                 <div class="form-group col-md-2">
-                    <label> Categorie </label>
-                    <p>{{ infrastructure.modeleInfra.catInfra.nom || 'N/A' }}</p>
+                    <label>Catégorie</label>
+                    <p>{{ infrastructure.modeleInfra?.catInfra?.nom || 'N/A' }}</p>
                 </div>
                 <div class="form-group col-md-2">
                     <label>Total Mouvements</label>
@@ -68,7 +60,7 @@
                 </div>
             </div>
             <div class="action-buttons">
-                <button type="button" style="font-size: 0.9rem" class="btn btn-eye" (click)="navigateToDetailClient(client.id)">
+                <button type="button" style="font-size: 0.9rem" class="btn btn-eye" (click)="navigateToDetailInfra(infrastructure.id)">
                     <i class="fas fa-info-circle"></i> Détail
                 </button>
             </div>
@@ -97,33 +89,26 @@
             <form #searchForm="ngForm" (ngSubmit)="applySearch()">
                 <div class="form-row">
                     <div class="form-group col-md-2">
+                        <label>Identifiant</label>
+                        <input type="text" placeholder="MVT-" class="form-control" [(ngModel)]="searchCriteria.id" name="identifiant">
+                    </div>
+                    <div class="form-group col-md-2">
                         <label>Type Mouvement</label>
-                        <select class="form-control" name="typeMouvement" required
-                                [(ngModel)]="searchCriteria.typeMouvement.id"
-                                [ngModel]="searchCriteria.typeMouvement.id ?? null">
+                        <select class="form-control" name="typeMouvement" [(ngModel)]="searchCriteria.typeMouvement.id">
                             <option [ngValue]="null">-- Sélectionner le type de mouvement --</option>
                             <option *ngFor="let type of typeMouvements" [ngValue]="type.id">{{ type.nom }}</option>
                         </select>
                     </div>
                     <div class="form-group col-md-2">
-                        <label>Catégorie d'infrastructure</label>
-                        <select class="form-control" name="catInfra" required
-                                [(ngModel)]="searchCriteria.infrastructure.modeleInfra.catInfra.id"
-                                [ngModel]="searchCriteria.infrastructure.modeleInfra.catInfra.id ?? null">
-                            <option [ngValue]="null">-- Sélectionner une catégorie --</option>
-                            <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.nom }}</option>
-                        </select>
-                    </div>
-                    <div class="form-group col-md-2">
-                        <label>Historique des mouvements entre</label>
-                        <input type="datetime-local" class="form-control" [(ngModel)]="periodeDebut" name="periodeDebut">
+                        <label>Historique entre</label>
+                        <input type="datetime-local" class="form-control" [(ngModel)]="searchCriteria.periodeDebut" name="periodeDebut">
                     </div>
                     <div class="form-group col-md-2">
                         <label>Et</label>
-                        <input type="datetime-local" class="form-control" [(ngModel)]="periodeFin" name="periodeFin">
+                        <input type="datetime-local" class="form-control" [(ngModel)]="searchCriteria.periodeFin" name="periodeFin">
                     </div>
                     <div class="form-group col-md-2" style="margin-top: 15px">
-                        <button (click)="resetSearchFormCriteria()" class="btn btn-red" style="margin-right: 5%">
+                        <button (click)="resetSearchFormCriteria()" class="btn btn-red">
                             <i class="fas fa-times"></i> Effacer
                         </button>
                         <button type="submit" class="btn btn-search">
@@ -138,10 +123,11 @@
             <table class="table table-normal">
                 <thead>
                 <tr>
+                    <th class="sortable">Identifiant</th>
                     <th class="sortable">Date et Heure</th>
                     <th class="sortable">Type Mouvement</th>
                     <th *ngIf="client.id" class="sortable">Infrastructures</th>
-                    <ng-container *ngIf="!client?.id">
+                    <ng-container *ngIf="!client.id">
                         <th class="sortable">Client</th>
                         <th class="sortable">Infrastructures</th>
                     </ng-container>
@@ -149,39 +135,32 @@
                 </tr>
                 </thead>
                 <tbody>
-                <ng-container *ngFor="let item of filteredItems; let i = index">
-                    <tr class="row-animation" [ngClass]="'tr-' + item.typeMouvement.nom">
-                        <td class="nom-column">{{ item.dhMouvement }}</td>
-                        <td class="nom-column">{{ item.typeMouvement.nom }}</td>
-                        <td class="nom-column-line" *ngIf="client?.id">
+                <tr *ngFor="let item of filteredItems; let i = index" class="row-animation" [ngClass]="'tr-' + item.typeMouvement.nom">
+                    <td class="nom-column">{{ '#' + item.id }}</td>
+                    <td class="nom-column">{{ item.dhMouvement }}</td>
+                    <td class="nom-column">{{ item.typeMouvement.nom }}</td>
+                    <td class="nom-column-line" *ngIf="client.id">
+                        <u (click)="openInfrasPopup(item)">Voir Infrastructures Concernées</u>
+                    </td>
+                    <ng-container *ngIf="!client.id">
+                        <td class="nom-column-line">
+                            <u (click)="navigateToDetailClient(item.client.id)">
+                                {{ item.client.designationClient || 'N/A' }}
+                            </u>
+                        </td>
+                        <td class="nom-column-line">
                             <u (click)="openInfrasPopup(item)">Voir Infrastructures Concernées</u>
                         </td>
-                        <ng-container *ngIf="!client?.id">
-                            <td class="nom-column-line">
-                                <u (click)="navigateToDetailClient(item.client.id)">
-                                    {{
-                                        item.client
-                                            ? (item.client.nom && item.client.prenom
-                                                ? item.client.nom+" "+ item.client.prenom
-                                                : item.client.raisonSociale || 'N/A')
-                                            : 'N/A'
-                                    }}
-                                </u>
-                            </td>
-                            <td class="nom-column-line">
-                                <u (click)="openInfrasPopup(item)">Voir Infrastructures Concernées</u>
-                            </td>
-                        </ng-container>
-                        <td class="action-column action-buttons-cell">
-                            <button class="btn btn-eye" (click)="openMouvementDetail(item.id)">
-                                <i class="fas fa-info-circle"></i> Détail
-                            </button>
-                            <button class="btn btn-black" type="button" (click)="openHistoriquePopup(item.id)">
-                                <i class="fas fa-history"></i> Historique
-                            </button>
-                        </td>
-                    </tr>
-                </ng-container>
+                    </ng-container>
+                    <td class="action-column action-buttons-cell">
+                        <button class="btn btn-eye" (click)="openMouvementDetail(item.id)">
+                            <i class="fas fa-info-circle"></i> Détail
+                        </button>
+                        <button class="btn btn-black" type="button" (click)="openHistoriquePopup(item.id)">
+                            <i class="fas fa-history"></i> Historique
+                        </button>
+                    </td>
+                </tr>
                 </tbody>
             </table>
             <div *ngIf="filteredItems.length === 0" class="no-results">Aucun résultat trouvé.</div>
@@ -191,26 +170,10 @@
             <div class="pagination-container">
                 <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage === 0" (click)="changePage(currentPage)"><i class="fas fa-arrow-left"></i></button>
                 <div class="pagination-buttons">
-                    <span *ngFor="let page of pageNumbers" class="page-number btn btn-blue page-animation" [class.active]="page === currentPage + 1" (click)="changePage(page)">{{page}}</span>
+                    <span *ngFor="let page of pageNumbers" class="page-number btn btn-blue page-animation" [class.active]="page === currentPage + 1" (click)="changePage(page)">{{ page }}</span>
                 </div>
                 <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage + 1 === totalPages || totalPages === 0" (click)="changePage(currentPage + 2)"><i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
     </div>
-
-    <ng-template #clientAddModal let-modal>
-        <div class="modal-header">
-            <h5 class="modal-title">Ajouter un Nouveau Client</h5>
-            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
-                <span aria-hidden="true">×</span>
-            </button>
-        </div>
-        <div class="modal-body">
-            <app-client-add-form
-                    [isLoading]="isLoading"
-                    (formSubmit)="handleClientAdd($event); modal.close('Save click')"
-                    (formCancel)="modal.dismiss('Cancel click')"
-            ></app-client-add-form>
-        </div>
-    </ng-template>
 </div>

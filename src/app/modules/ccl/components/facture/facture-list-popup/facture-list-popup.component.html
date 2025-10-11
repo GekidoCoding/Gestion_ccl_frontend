@@ -1,0 +1,85 @@
+<div class="modal-header">
+    <h5 class="modal-title">Liste Des Factures De ce Mouvement</h5>
+    <button type="button" class="close" (click)="activeModal.dismiss('Cross Click')" aria-label="Close">
+        <span aria-hidden="true">×</span>
+    </button>
+</div>
+    <div class="modal-body">
+        <div class="statistics-section" *ngIf="mouvement">
+            <h3>Statistiques du Mouvement</h3>
+            <div class="form-row">
+                <div class="form-group col-md-2 ">
+                    <label>ID</label>
+                    <p>{{ mouvement.id || 'N/A' }}</p>
+                </div>
+                <div class="form-group col-md-2">
+                    <label>Type</label>
+                    <p>{{ mouvement.typeMouvement.nom || 'N/A' }}</p>
+                </div>
+                <div class="form-group col-md-2">
+                    <label>Client</label>
+                    <p>{{ componentUtil.getClientName(mouvement.client) }}</p>
+                </div>
+                <div class="form-group col-md-2">
+                    <label>Periode Debut</label>
+                    <p>{{ mouvement.periodeDebut}}</p>
+                </div>
+                <div class="form-group col-md-2">
+                    <label>Periode Fin</label>
+                    <p>{{ mouvement.periodeFin }}</p>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-green" (click)="openInfrasPopup(mouvement)" >Voir Infrastructures Concernées</button>
+                </div>
+
+            </div>
+        </div>
+<!--        <div class="action-buttons">-->
+<!--            <button type="button" (click)="openAddFacture()" class="btn btn-add" >-->
+<!--                <i class="fa fa-plus"></i> Ajouter Facture-->
+<!--            </button>-->
+<!--        </div>-->
+
+        <div class="table-controls">
+            <div class="table-responsive">
+                <table class="table table-normal" >
+                    <thead>
+                    <tr>
+                        <th>Date de creation</th>
+                        <th>Etat actuel</th>
+                        <th>Montant(Ar)</th>
+                        <th>Total Du(Ar)</th>
+                        <th> remise(en %)</th>
+                        <th> reste(Ar)</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="row-animation" *ngFor="let item of items">
+                        <td class="name-column">{{ item.dhCreation }}</td>
+                        <td class="name-column">{{ item.etat.etat }}</td>
+                        <td class="name-column">{{item.montantTotal}}</td>
+                        <td class="name-column">{{item.totalDu}}</td>
+                        <td class="name-column">{{item.remise}}</td>
+                        <td class="name-column">{{item.reste}}</td>
+                        <td class="action-column action-buttons-cell">
+                            <button *ngIf="item.etat.code!=codeReelle&&item.etat.code!=codePayee"  class="btn btn-green" (click)="openSendEmailFacture(item.id)" >
+                                <i class="fa fa-paper-plane"></i>
+                            </button>
+                            <button *ngIf="item.etat.code!=codeReelle&&item.etat.code!=codePayee"  class="btn btn-blue" (click)="export(item.id)" >
+                                <i class="fa fa-download"></i>
+                            </button>
+                            <button class="btn btn-eye" (click)="openDetailFacture(item)">
+                                <i class="fa fa-info-circle"></i>
+                            </button>
+                            <button *ngIf="item.etat.code==codeReelle||item.etat.code==codePayee" class="btn btn-blue" (click)="openListePaiement(item)">
+                                <i class="fa fa-dollar-sign"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div *ngIf="items.length === 0 " class="no-results">Aucune factures trouvée pour ce mouvement.</div>
+            </div>
+        </div>
+    </div>

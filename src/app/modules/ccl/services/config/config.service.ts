@@ -7,7 +7,7 @@ import {environment} from "../../../../../environments/environment";
   providedIn: 'root'
 })
 export class ConfigService {
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/config';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/config';
 
   constructor(private http: HttpClient) {}
 
@@ -26,6 +26,14 @@ export class ConfigService {
 
   getRenseignementId(): Observable<string> {
     return this.http.get(`${this.apiUrl}/type_renseignement/id`, { responseType: 'text' });
+  }
+
+  getEtatCodeReelle(): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/etat_code/reelle`);
+  }
+
+  getEtatCodePayee(): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/etat_code/payee`);
   }
 
 

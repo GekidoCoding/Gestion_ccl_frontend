@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 
 import { ToastrService } from 'ngx-toastr';
-import {BaseCrudComponent} from "../../../components/base/base-crud.component";
+import {BaseCrudComponent} from "../../../base/base-crud.component";
 import {Frequence} from "../../../model/frequence/frequence";
 import {FrequenceService} from "../../../services/frequence/frequence.service";
 import {Page} from "../../../interface/page.interface";

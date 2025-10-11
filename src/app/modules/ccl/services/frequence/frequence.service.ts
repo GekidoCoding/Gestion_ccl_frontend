@@ -10,7 +10,7 @@ import {environment} from "../../../../../environments/environment";
   providedIn: 'root'
 })
 export class FrequenceService {
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/frequence';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/frequence';
 
   constructor(private http: HttpClient) { }
 

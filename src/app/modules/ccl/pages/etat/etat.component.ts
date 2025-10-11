@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
-import { BaseCrudComponent, Page } from '../../components/base/base-crud.component';
+import { BaseCrudComponent, Page } from '../../base/base-crud.component';
 import { Etat } from '../../model/etat/etat';
 import { EtatService } from '../../services/etat/etat.service';
 import { ToastrService } from 'ngx-toastr';
@@ -8,7 +8,7 @@ import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-etat',
   templateUrl: './etat.component.html',
-  styleUrls: ['../../components/base/base-crud.component.scss']
+  styleUrls: ['../../base/base-crud.component.scss']
 })
 export class EtatComponent extends BaseCrudComponent<Etat> {
   constructor(modalService: NgbModal, private etatService: EtatService, protected toastr: ToastrService) {

@@ -10,7 +10,7 @@ import {environment} from "../../../../../environments/environment";
   providedIn: 'root'
 })
 export class EtatService {
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/etat';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/etat';
 
   constructor(private http: HttpClient) { }
 
@@ -34,6 +34,9 @@ export class EtatService {
   }
   getEtatProforma(): Observable<Etat> {
     return this.http.get<Etat>(`${this.apiUrl}/proforma`);
+  }
+  getEtatReelle(): Observable<Etat> {
+    return this.http.get<Etat>(`${this.apiUrl}/reelle`);
   }
 
   create(etat: Etat): Observable<Etat> {

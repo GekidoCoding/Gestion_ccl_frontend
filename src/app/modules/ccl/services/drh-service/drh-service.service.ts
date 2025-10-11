@@ -9,7 +9,7 @@ import {environment} from "../../../../../environments/environment";
   providedIn: 'root'
 })
 export class DrhServiceService {
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/drh_service';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/drh_service';
 
   constructor(private http: HttpClient) { }
 

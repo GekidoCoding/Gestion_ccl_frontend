@@ -7,5 +7,4 @@ export class Agent {
     public codeService!: string;
     public libelleService!: string;
     public mail!: string;
-
 }

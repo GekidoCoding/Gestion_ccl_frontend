@@ -10,7 +10,7 @@ import {environment} from "../../../../../environments/environment";
   providedIn: 'root'
 })
 export class InfrastructureService {
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/infrastructure';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/infrastructure';
 
   constructor(private http: HttpClient) { }
 
@@ -25,16 +25,20 @@ export class InfrastructureService {
     return this.http.get<Page<Infrastructure>>(`${this.apiUrl}/pagination`, { params });
   }
 
+  checkInfrastructureSimilarity(infrastructure :Infrastructure): Observable<Infrastructure[]> {
+    return this.http.post<Infrastructure[]>(`${this.apiUrl}/check/similarity`,infrastructure );
+  }
+
   getById(id: string): Observable<Infrastructure> {
     return this.http.get<Infrastructure>(`${this.apiUrl}/${id}`);
   }
 
   create(infrastructure: Infrastructure): Observable<Infrastructure> {
-    return this.http.post<Infrastructure>(`${this.apiUrl}/create`, infrastructure);
+    return this.http.post<Infrastructure>(`${this.apiUrl}/create/new`, infrastructure);
   }
 
   update(id: string, infrastructure: Infrastructure): Observable<Infrastructure> {
-    return this.http.put<Infrastructure>(`${this.apiUrl}/update/${id}`, infrastructure);
+    return this.http.put<Infrastructure>(`${this.apiUrl}/update/new/${id}`, infrastructure);
   }
 
   delete(id: string): Observable<Infrastructure> {

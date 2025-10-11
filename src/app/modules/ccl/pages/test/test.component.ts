@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import {NgbModal, NgbModalOptions} from "@ng-bootstrap/ng-bootstrap";
-import {FactureAddComponent} from "../../components/application/facture/facture-add/facture-add.component";
+import {FactureAddComponent} from "../../components/facture/facture-add/facture-add.component";
 import {
   FactureListPopupComponent
-} from "../../components/application/facture/facture-list-popup/facture-list-popup.component";
+} from "../../components/facture/facture-list-popup/facture-list-popup.component";
 
 @Component({
   selector: 'app-test',

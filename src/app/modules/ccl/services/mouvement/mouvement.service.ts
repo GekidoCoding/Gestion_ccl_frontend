@@ -11,7 +11,7 @@ import {environment} from "../../../../../environments/environment";
   providedIn: 'root'
 })
 export class MouvementService {
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/mouvement';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/mouvement';
 
   constructor(private http: HttpClient) { }
 
@@ -63,23 +63,11 @@ export class MouvementService {
   }
 
   create( modeleInfra: Mouvement): Observable<Mouvement> {
-    return this.http.post<Mouvement>(`${this.apiUrl}/create`, modeleInfra);
+    return this.http.post<Mouvement>(`${this.apiUrl}/create/new`, modeleInfra);
   }
+
   update(id: string, mouvement: Mouvement): Observable<Mouvement> {
-    return this.http.put<Mouvement>(`${this.apiUrl}/update/${id}`, mouvement).pipe(
-        catchError((error: HttpErrorResponse) => {
-          console.error('Error updating mouvement:', error);
-
-          let errorMsg = 'Erreur inconnue';
-          if (error.error instanceof ErrorEvent) {
-            errorMsg = `Erreur client: ${error.error.message}`;
-          } else {
-            errorMsg = `Erreur serveur: ${error.status} - ${error.message}`;
-          }
-
-          return throwError(() => new Error(errorMsg));
-        })
-    );
+    return this.http.put<Mouvement>(`${this.apiUrl}/update/new/${id}`, mouvement);
   }
 
   delete(id: string): Observable<Mouvement> {
@@ -94,6 +82,9 @@ export class MouvementService {
           .set('page', page.toString())
           .set('pageSize', pageSize.toString());
       if(criteria){
+        if(criteria.id){
+          params = params.set('id' , criteria.id);
+        }
         if(criteria.typeMouvement.id){
           params = params.set('typeMouvementId', criteria.typeMouvement.id);
         }

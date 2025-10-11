@@ -1,0 +1,197 @@
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
+import { Client } from '../../../model/client/client';
+import { TypeClient } from '../../../model/type-client/type-client';
+import { TypeClientService } from '../../../services/type-client/type-client.service';
+import { ToastrService } from 'ngx-toastr';
+import { ClientUtil } from '../../../util/client.util';
+import { ClientService } from '../../../services/client/client.service';
+import {NgbActiveModal, NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {YesNoWarningComponent} from "../../yes-no-warning/yes-no-warning.component";
+
+@Component({
+  selector: 'app-client-add-form',
+  templateUrl: './client-add-form.component.html',
+  styleUrls: ['./client-add-form.component.scss']
+})
+export class ClientAddFormComponent implements OnInit {
+  @Input() isLoading: boolean = false;
+  @Output() loadData = new EventEmitter<void>();
+  @ViewChild('clientForm') clientForm!: NgForm;
+
+  typeClients: TypeClient[] = [];
+  client: Client = new Client();
+  contactsValid: boolean = true;
+  emailValid: boolean = true;
+  cinValid: boolean = true;
+  contactsFormatError: boolean = false;
+  contactsDuplicateError: boolean = false;
+  invalidContacts: string[] = [];
+  duplicateContacts: string[] = [];
+
+  constructor(
+      private typeClientService: TypeClientService,
+      private clientService: ClientService,
+      private toastr: ToastrService,
+      private clientUtil: ClientUtil,
+      public activeModal: NgbActiveModal, // Changed to use NgbActiveModal
+      private modalService:NgbModal
+  ) {}
+
+  ngOnInit() {
+    this.client.typeClient.id = '';
+    this.loadTypeClients();
+  }
+
+  loadTypeClients() {
+    this.isLoading = true;
+    this.typeClientService.getAll().subscribe({
+      next: (types) => {
+        this.typeClients = types;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des types de client:', error);
+        this.toastr.error('Erreur lors du chargement des types de client');
+        this.isLoading = false;
+      }
+    });
+  }
+
+  handleAddFormSubmit() {
+      this.clientService.checkSimilarity(this.client).subscribe({
+        next: (clients: Client[]) => {
+          if (clients.length > 0) {
+            const message: string = ClientUtil.getWarningMessageSimilarityFromList(clients);
+            const composant = this.modalService.open(YesNoWarningComponent);
+            composant.componentInstance.message = message;
+            composant.componentInstance.confirm.subscribe({
+              next: () => {
+                this.addClient();
+              }
+            });
+            composant.componentInstance.decline.subscribe({
+              next: () => {
+                composant.close();
+              }
+            });
+          } else {
+           this.addClient();
+          }
+        },
+        error: (error) => {
+          console.error('Erreur lors de la vérification de similarité:', error);
+          this.toastr.error('Erreur lors de la vérification de similarité');
+        }
+      });
+  }
+  addClient(){
+    this.clientService.create(this.client).subscribe({
+      next: (created) => {
+        this.toastr.success('Client ajouté avec succès !');
+        this.loadData.emit();
+        this.activeModal.close();
+
+      },
+      error: (error) => {
+        console.error('Erreur lors de l\'ajout du client', error);
+        this.toastr.error('Erreur lors de l\'ajout du client');
+      }
+    });
+  }
+  submitForm() {
+    this.clientForm.control.markAllAsTouched();
+    this.validateField('typeClient');
+    this.validateField('nom');
+    this.validateField('raisonSociale');
+    this.validateField('adresse');
+    this.validateField('cin');
+    this.verifContacts();
+    this.verifEmail();
+
+    if (this.clientForm.valid && this.contactsValid && this.emailValid && this.cinValid) {
+      this.handleAddFormSubmit();
+    }
+  }
+
+  verifEmail(): boolean {
+    const email = this.client.email;
+    if (!email) {
+      this.emailValid = true;
+      return true;
+    }
+
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    this.emailValid = regex.test(email);
+    return this.emailValid;
+  }
+
+  verifContacts(): boolean {
+    this.contactsFormatError = false;
+    this.contactsDuplicateError = false;
+    this.invalidContacts = [];
+    this.duplicateContacts = [];
+
+    let numeros: string = this.client.contacts;
+    if (!numeros) {
+      this.contactsValid = false;
+      return false;
+    }
+
+    if (numeros.includes(",") || numeros.includes(" ")) {
+      this.contactsValid = false;
+      return false;
+    }
+
+    let liste = numeros.split(";").map(num => num.trim()).filter(num => num !== "");
+    const regex = /^(0\d{8,9}|\+261\d{8,9})$/;
+    let invalids = liste.filter(num => !regex.test(num));
+    if (invalids.length > 0) {
+      this.contactsValid = false;
+      this.contactsFormatError = true;
+      this.invalidContacts = invalids;
+      return false;
+    }
+
+    let duplicates = liste.filter((num, index) => liste.indexOf(num) !== index);
+    if (duplicates.length > 0) {
+      this.contactsValid = false;
+      this.contactsDuplicateError = true;
+      this.duplicateContacts = [...new Set(duplicates)];
+      return false;
+    }
+
+    this.contactsValid = true;
+    return true;
+  }
+
+  validateField(field: string) {
+    if (field === 'cin' && this.client.cin) {
+      this.cinValid = /^\d{12,}$/.test(this.client.cin.toString());
+    } else if (field === 'cin' && !this.client.cin) {
+      this.cinValid = true; // CIN is optional
+    } else if (field === 'designationClient' && !this.client.designationClient) {
+      this.clientForm.form.get('nom')?.setErrors({ required: true });
+    } else if (field === 'adresse' && !this.client.adresse) {
+      this.clientForm.form.get('adresse')?.setErrors({ required: true });
+    } else if (field === 'typeClient' && !this.client.typeClient.id) {
+      this.clientForm.form.get('typeClient')?.setErrors({ required: true });
+    }
+  }
+
+  cancelForm() {
+    this.client = new Client();
+    this.contactsValid = true;
+    this.emailValid = true;
+    this.cinValid = true;
+    this.contactsFormatError = false;
+    this.contactsDuplicateError = false;
+    this.invalidContacts = [];
+    this.duplicateContacts = [];
+    this.clientForm?.resetForm();
+    this.activeModal.dismiss('Cancel');
+  }
+
+  protected readonly TypeClient = TypeClient;
+  protected readonly Client = Client;
+}

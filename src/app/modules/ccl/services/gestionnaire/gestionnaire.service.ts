@@ -10,7 +10,7 @@ import {environment} from "../../../../../environments/environment";
   providedIn: 'root'
 })
 export class GestionnaireService {
-  private apiUrl = environment.PRINCIPAL+environment.PREFIX+'/gestionnaire';
+  private apiUrl = environment.SERVER_URL+environment.PREFIX+'/gestionnaire';
 
   constructor(private http: HttpClient) { }
 

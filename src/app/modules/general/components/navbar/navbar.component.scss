@@ -1,0 +1,638 @@
+@import "../../../ccl/base/base-crud.component";
+
+.notification-sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: clamp(20vw, 350px, 25vw);
+    height: 100vh;
+    background-color: #272b68;
+    z-index: 1100;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    border-left: 4px solid map-get($colors, border-grey);
+
+    &.open {
+        transform: translateX(0);
+    }
+
+    @media (max-width: 768px) {
+        width: clamp(70vw, 90%, 80vw);
+    }
+
+    @media (max-width: 576px) {
+        width: 100%;
+    }
+}
+
+.sidebar-header {
+    background-color: map-get($colors, blue);
+    padding: clamp(0.8vw, 1.5rem, 1.2vw);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #ffffff;
+    border-top-left-radius: clamp(0.3vw, 0.5rem, 0.8vw);
+
+    h3 {
+        margin: 0;
+        font-size: clamp(0.8vw, 1.2rem, 1.5vw);
+        font-weight: 600;
+        font-family: $font-family-base;
+        @include responsive-text(1.2rem);
+
+        @media (max-width: 768px) {
+            font-size: clamp(1.5vw, 1.5rem, 2vw);
+        }
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        color: #ffffff;
+        font-size: clamp(0.8vw, 1.2rem, 1.5vw);
+        cursor: pointer;
+        padding: clamp(0.2vw, 0.4rem, 0.5vw);
+
+        &:hover {
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            font-size: clamp(1.5vw, 1.5rem, 2vw);
+            padding: clamp(0.5vw, 0.8rem, 1vw);
+        }
+    }
+
+    .sidebar-controls {
+        display: flex;
+        align-items: center;
+        gap: clamp(0.5vw, 0.8rem, 1vw);
+
+        select {
+            padding: clamp(0.2vw, 0.4rem, 0.5vw);
+            font-size: clamp(0.6vw, 0.9rem, 1vw);
+            border-radius: clamp(0.15vw, 0.3rem, 0.4vw);
+            border: 1px solid #ffffff;
+            background-color: map-get($colors, #ffffff);
+            color: #02185e;
+            cursor: pointer;
+
+            &:focus {
+                outline: none;
+                border-color: lighten(map-get($colors, blue), 20%);
+            }
+
+            @media (max-width: 768px) {
+                font-size: clamp(1.2vw, 1rem, 1.5vw);
+                padding: clamp(0.3vw, 0.5rem, 0.6vw);
+            }
+        }
+
+        .mark-all-read-btn {
+            @include button-variant(map-get($colors, green));
+            font-size: clamp(0.6vw, 0.9rem, 1vw);
+            padding: clamp(0.2vw, 0.4rem, 0.5vw) clamp(0.4vw, 0.75rem, 0.8vw);
+            border-radius: clamp(0.15vw, 0.3rem, 0.4vw);
+            white-space: nowrap;
+
+            @media (max-width: 768px) {
+                font-size: clamp(1.2vw, 1rem, 1.5vw);
+                padding: clamp(0.3vw, 0.5rem, 0.6vw) clamp(0.6vw, 0.8rem, 1vw);
+            }
+        }
+    }
+}
+
+.sidebar-content {
+    flex: 1;
+    overflow-y: scroll;
+    padding: clamp(0.8vw, 1.5rem, 1.2vw);
+    background-color: map-get($colors, light-grey);
+    scrollbar-width: thin;
+    scrollbar-color: map-get($colors, blue) map-get($colors, soft-white);
+    scroll-behavior: smooth;
+
+    &::-webkit-scrollbar {
+        width: clamp(0.3vw, 6px, 0.5vw);
+    }
+
+    &::-webkit-scrollbar-track {
+        background: map-get($colors, soft-white);
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: map-get($colors, blue);
+        border-radius: clamp(0.15vw, 3px, 0.3vw);
+    }
+
+    &:hover::-webkit-scrollbar-thumb {
+        background: lighten(map-get($colors, blue), 10%);
+    }
+
+    @media (max-width: 768px) {
+        padding: clamp(0.6vw, 1rem, 1vw);
+    }
+}
+
+.notification-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.no-notifications {
+    padding: clamp(0.6vw, 1rem, 1vw);
+    color: map-get($colors, text-color);
+    font-family: $font-family-base;
+    font-size: clamp(0.8vw, 1.2rem, 1.5vw);
+    text-align: center;
+    background-color: map-get($colors, soft-white);
+    border-bottom: clamp(0.05vw, 1px, 0.1vw) solid map-get($colors, border-grey);
+
+    @media (max-width: 768px) {
+        font-size: clamp(1.2vw, 1rem, 1.5vw);
+    }
+}
+.notification-item {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.6vw, 1rem, 1vw);
+    padding: clamp(0.6vw, 1rem, 1vw);
+    border-bottom: clamp(0.05vw, 1px, 0.1vw) solid map-get($colors, border-grey);
+    background-color: map-get($colors, soft-white);
+    position: relative;
+    @include responsive-text(0.9rem);
+
+    &.danger {
+        background-color: #ecf0fd;
+        i {
+            color: #FF0000FF !important;
+            opacity: 0.7;
+        }
+        button i.fa-eye {
+            color: #000b88 !important;
+        }
+        button{
+            i{
+
+            }
+        }
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 6px;
+            background-color: #ff0000;
+            border-radius: 0 2px 2px 0;
+        }
+    }
+
+    &.signalement {
+        i {
+            color: #bcbc00 !important;
+            opacity: 0.7;
+        }
+        button i.fa-eye {
+            color: #000b88 !important; // bleu bootstrap, tu peux changer en ton code couleur
+        }
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 6px;
+            background-color: #bcbc00;
+            border-radius: 0 2px 2px 0;
+        }
+    }
+
+    &.non-danger {
+        background-color: #f3f6ff;
+    }
+
+    &.read {
+        background-color: rgba(135, 135, 135, 0.17);
+        color: rgba(102, 102, 102, 0.23) !important;
+
+        i {
+            color: #666 !important;
+            opacity: 0.7;
+        }
+        button i.fa-eye {
+            color: #000b88 !important; // bleu bootstrap, tu peux changer en ton code couleur
+        }
+    }
+
+
+    &:hover {
+        background-color: lighten(map-get($colors, blue), 60%);
+    }
+
+    i {
+        color: map-get($colors, blue);
+        font-size: clamp(0.7vw, 1rem, 1.2vw);
+        flex-shrink: 0;
+
+        @media (max-width: 768px) {
+            font-size: clamp(1.5vw, 1.2rem, 2vw);
+        }
+    }
+
+    span {
+        flex: 1;
+        color: map-get($colors, text-color);
+        font-family: $font-family-base;
+        @include responsive-text(0.9rem);
+    }
+
+    .btn-green {
+        @include button-variant(map-get($colors, green));
+        font-size: clamp(0.6vw, 0.85rem, 1vw);
+        padding: clamp(0.2vw, 0.4rem, 0.5vw) clamp(0.4vw, 0.75rem, 0.8vw);
+        border-radius: clamp(0.15vw, 0.3rem, 0.4vw);
+        white-space: nowrap;
+
+        @media (max-width: 768px) {
+            font-size: clamp(1.2vw, 1rem, 1.5vw);
+            padding: clamp(0.5vw, 0.6rem, 0.8vw) clamp(0.8vw, 1rem, 1.2vw);
+        }
+    }
+
+    @media (max-width: 576px) {
+        flex-wrap: wrap;
+        gap: clamp(0.5vw, 0.8rem, 1vw);
+        padding: clamp(0.5vw, 0.8rem, 1vw);
+
+        .btn-green {
+            width: 100%;
+            text-align: center;
+        }
+    }
+}
+
+#deco:hover {
+    cursor: pointer;
+}
+
+.toggled:hover {
+    transform: scale(1.3);
+    transition: transform .5s ease;
+}
+
+.dispNone {
+    display: none !important;
+}
+
+.userLi:hover,
+.NomPrenom:hover,
+.decoM:hover,
+.nomUser:hover {
+    transform: scale(1.02) !important;
+    transition: transform .5s ease !important;
+    cursor: pointer;
+}
+
+.menuOption:hover,
+.imageProfil:hover,
+.siteP:hover {
+    transform: scale(1.04) !important;
+    transition: transform .5s ease !important;
+}
+
+.siteP {
+    font-weight: 600;
+    cursor: pointer;
+    color: white;
+    text-decoration: none;
+}
+
+.nav-link:not(i),
+.dropdown-item {
+    font-weight: bolder;
+    font-size: .8em !important;
+}
+
+.nav-link i {
+    font-size: 1.8em;
+}
+
+.nav-link {
+    cursor: pointer;
+}
+
+.badge {
+    position: absolute;
+    font-size: 9.5px;
+    text-align: center;
+    top: 0;
+    right: -8px;
+    background-color: #df1010;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    font-weight: bold;
+}
+
+/* Notification Bell Styling */
+.notification-bell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.notification-bell i {
+    font-size: 18px;
+    color: white;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.notification-bell:hover i {
+    transform: scale(1.1);
+    color: #ff4d4d;
+}
+
+.notification-bell.active i {
+    color: #ff4d4d;
+    transform: scale(1.1);
+}
+
+/* Action Buttons Styling */
+.action-buttons {
+    margin-left: auto;
+}
+
+.action-buttons .btn {
+    margin-left: 5px;
+    background-color: #103373 !important;
+    border-color: #fff;
+    color: #fff;
+    font-size: 12px;
+    padding: 2px 8px;
+}
+
+.action-buttons .btn:hover {
+    background-color: #0a1f4e !important;
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(90deg, #bf0000, #fa0000);
+    border: none;
+    border-radius: 20px;
+    padding: 8px 12px;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.logout-btn i {
+    margin-right: 5px;
+    font-size: 16px;
+}
+
+.logout-btn span {
+    margin-top: 2px;
+}
+
+.logout-btn:hover {
+    transform: scale(1.05);
+    //background: linear-gradient(90deg, #fb2a2a, #f61010);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.logout-btn:active {
+    animation: pulse 0.2s ease-in-out;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Dropdown Toggle Arrow Styling */
+.dropdown-toggle-arrow {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: 5px;
+    vertical-align: middle;
+    border-top: 4px solid #fff;
+    border-right: 4px solid transparent;
+    border-left: 4px solid transparent;
+}
+
+.dropdown-toggle-arrow::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-top: 4px solid #fff;
+    border-right: 4px solid transparent;
+    border-left: 4px solid transparent;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+}
+
+.nav-link.dropdown-toggle:hover .dropdown-toggle-arrow {
+    border-top-color: #ddd;
+}
+
+/* Ensure dropdown is fully visible and aligned */
+.dropdown-menu {
+    min-width: 180px !important;
+    transform: translateX(0) !important;
+    top: 100% !important;
+    left: auto !important;
+    right: 0 !important;
+}
+
+.dropdown-menu-end {
+    right: 0 !important;
+    left: auto !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        justify-content: center !important;
+    }
+
+    .navbar-nav {
+        flex-direction: column !important;
+        align-items: flex-start;
+        flex-wrap: nowrap;
+    }
+
+    .dropdown-menu-end {
+        right: 0 !important;
+        left: auto !important;
+        min-width: 180px;
+        position: absolute;
+    }
+
+    .nomUser {
+        font-size: 0.9em;
+        margin-right: 5px;
+        display: none;
+    }
+
+    .imageProfil {
+        width: 30px !important;
+        margin: 5px !important;
+    }
+
+    .notification-bell i {
+        font-size: 16px;
+    }
+
+    .badge {
+        font-size: 8px;
+        width: 16px;
+        height: 16px;
+        line-height: 16px;
+        right: -6px;
+    }
+
+    .logout-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .logout-btn i {
+        font-size: 14px;
+    }
+
+    .nav-link:not(i),
+    .dropdown-item {
+        font-size: 0.75em !important;
+    }
+
+    .navbar-toggle span {
+        font-size: 0.9em;
+    }
+
+    .siteP {
+        font-size: 0.9em;
+    }
+
+    .action-buttons {
+        margin-top: 5px;
+        text-align: right;
+    }
+
+    .action-buttons .btn {
+        margin-left: 5px;
+        font-size: 10px;
+        padding: 2px 6px;
+    }
+
+    .dropdown-toggle-arrow {
+        margin-left: 3px;
+        border-top-width: 3px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .navbar-nav {
+        flex-direction: column !important;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+    }
+
+    .nav-item {
+        margin: 5px 0;
+    }
+
+    .dropdown-menu-end {
+        right: 0 !important;
+        left: auto !important;
+        min-width: 160px;
+        position: absolute;
+        top: 100% !important;
+    }
+
+    .nomUser {
+        font-size: 0.85em;
+        display: none;
+    }
+
+    .imageProfil {
+        width: 28px !important;
+        margin: 5px !important;
+    }
+
+    .notification-bell i {
+        font-size: 14px;
+    }
+
+    .badge {
+        font-size: 7px;
+        width: 14px;
+        height: 14px;
+        line-height: 14px;
+        right: -5px;
+    }
+
+    .logout-btn {
+        padding: 5px 8px;
+        font-size: 11px;
+    }
+
+    .logout-btn i {
+        font-size: 13px;
+    }
+
+    .nav-link:not(i),
+    .dropdown-item {
+        font-size: 0.7em !important;
+    }
+
+    .navbar-toggle span {
+        font-size: 0.85em;
+    }
+
+    .siteP {
+        font-size: 0.85em;
+    }
+
+    .navbar-wrapper,
+    .navbar-toggle {
+        flex-shrink: 0;
+    }
+
+    .action-buttons {
+        margin-top: 5px;
+        text-align: right;
+    }
+
+    .action-buttons .btn {
+        margin-left: 3px;
+        font-size: 10px;
+        padding: 2px 4px;
+    }
+
+    .dropdown-toggle-arrow {
+        margin-left: 2px;
+        border-top-width: 3px;
+    }
+}

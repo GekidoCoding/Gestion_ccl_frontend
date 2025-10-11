@@ -1,0 +1,85 @@
+<div class="modal-header">
+    <h5 class="modal-title">Liste Des Paiements du facture </h5>
+    <button type="button" class="close" (click)="activeModal.dismiss('Cross Click')" aria-label="Close">
+        <span aria-hidden="true">×</span>
+    </button>
+</div>
+
+<app-loading [loading]="isLoading"></app-loading>
+
+<div class="modal-body">
+    <div class="statistics-section" *ngIf="factureSelected">
+        <h3>Statistiques de la facture </h3>
+        <div class="form-row">
+            <div class="form-group col-md-2">
+                <label>Client concerner </label>
+                <p>
+                    {{
+                        (factureSelected?.mouvement?.client?.designationClient || 'N/A')
+                    }}
+                </p>
+
+            </div>
+
+            <div class="form-group col-md-2">
+                <label>Montant total ( en Ariary)</label>
+                <p>{{ factureSelected.montantTotal || 'N/A' }}</p>
+            </div>
+            <div class="form-group col-md-2">
+                <label>Remise  </label>
+                <p>{{ factureSelected.remise || 0 }}</p>
+            </div>
+            <div class="form-group col-md-2">
+                <label>Total du( en Ariary) </label>
+                <p>{{ factureSelected.totalDu || 'N/A' }}</p>
+            </div>
+            <div class="form-group col-md-2">
+                <label>Reste( en Ariary) </label>
+                <p>{{ factureSelected.reste ||0 }}</p>
+            </div>
+            <div class="form-group col-md-2">
+                <label>Etat  </label>
+                <p>{{ factureSelected.etat.etat }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-buttons mb-3" *ngIf="factureSelected.etat.code==codeReelle">
+        <button type="button" class="btn btn-add" (click)="openAddModal()" >
+            <i class="fa fa-plus"></i> Ajouter un paiement
+        </button>
+    </div>
+
+    <div class="table-controls">
+        <div class="table-responsive">
+            <table class="table table-normal" *ngIf="items.length > 0">
+                <thead class="thead-light">
+                <tr>
+                    <th scope="col">Acompte versé</th>
+                    <th scope="col">Date de paiement</th>
+                    <th scope="col">Mode de paiment</th>
+                    <th scope="col">Monnaie</th>
+                    <th scope="col" class="text-center">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let item of items" class="row-animation">
+                    <td>{{ item.acompteVerse }}</td>
+                    <td>{{item.datePaiement}}</td>
+                    <td>{{ item.modePaiement.libelle}}</td>
+                    <td>{{ item.monnaie??0}}</td>
+                    <td class="action-column action-buttons-cell">
+                        <button class="btn btn-blue" (click)="export(item.id)" >
+                            <i class="fa fa-download"></i>
+                        </button>
+                        <button class="btn btn-red" (click)="openDeleteConfirmation(item.id)" >
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div *ngIf="items.length === 0 && !isLoading" class="text-muted mt-3">Aucun paiement trouvé pour cette facture.</div>
+        </div>
+    </div>
+</div>
