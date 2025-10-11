@@ -67,6 +67,7 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
 
   ngOnInit() {
     this.searchCriteria.id = 'MVT-';
+    this.searchCriteria.typeMouvement.id='';
     this.type = this.route.snapshot.paramMap.get('type') || 'all';
     this.id = this.route.snapshot.paramMap.get('id') || '';
     this.loadTypeMouvements();
@@ -282,6 +283,26 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
       this.applySearch();
       this.showConfirmation = false;
     }
+  }
+  deleteSelectedItems(modal: any) {
+    this.isLoading = true;
+    const deleteObservables = Object.keys(this.selectedIds).map(id =>
+        this.mouvementService.delete(id)
+    );
+
+    Promise.all(deleteObservables.map(obs => obs.toPromise())).then(() => {
+      this.currentPage = 0;
+      this.loadData();
+      this.selectedIds = {};
+      this.selectAll = false;
+      this.isSelectionMode = false;
+      modal.close();
+      this.showSuccessMessage('Annulatin réussie !');
+    }).catch(error => {
+      console.error('Error deleting :', error);
+    }).finally(() => {
+      this.isLoading = false;
+    });
   }
 
   public applySearch(): void {

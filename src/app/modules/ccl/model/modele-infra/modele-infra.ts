@@ -4,7 +4,7 @@ export class ModeleInfra {
     public id!: string;
     public nom!: string;
     public catInfra!: CategorieInfra;
-
+    public couleur!:string;
 
     constructor() {
         this.catInfra = new CategorieInfra();

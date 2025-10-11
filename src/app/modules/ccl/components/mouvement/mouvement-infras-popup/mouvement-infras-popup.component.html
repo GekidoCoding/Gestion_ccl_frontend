@@ -6,11 +6,11 @@
 </div>
 <app-loading [loading]="isLoading"></app-loading>
 <div class="modal-body">
-<!--    <div class="action-buttons mb-3">-->
-<!--        <button type="button" class="btn btn-add" (click)="openAddInfrastructureModal()">-->
-<!--            <i class="fas fa-plus"></i> Ajouter une Infrastructure-->
-<!--        </button>-->
-<!--    </div>-->
+    <div class="action-buttons mb-3">
+        <button type="button" class="btn btn-add" (click)="openAddInfrastructureModal()">
+            <i class="fas fa-plus"></i> Ajouter une Infrastructure
+        </button>
+    </div>
     <div  *ngIf="mouvementInfras.length > 0">
         <table class="table table-normal">
             <thead>

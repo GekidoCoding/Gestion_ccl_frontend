@@ -262,7 +262,7 @@ export class InfrastructureListPopupComponent implements OnInit {
     }
     this.modelesInfraSelectionned = {};
     this.modelesIds = [];
-    this.newItem.modeleInfra = { id: '', nom: '', catInfra: { id: '', nom: '' } };
+    this.newItem.modeleInfra =new ModeleInfra();
   }
 
   // Pagination method

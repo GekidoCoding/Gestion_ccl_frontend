@@ -218,7 +218,7 @@ export class InfrastructureAddFormComponent implements OnInit {
       this.filteredModeles = [...this.allModeles];
     }
 
-    this.newItem.modeleInfra = { id: '', nom: '', catInfra: { id: '', nom: '' } };
+    this.newItem.modeleInfra =new ModeleInfra();
     this.categoryChange.emit(categoryId);
   }
 }

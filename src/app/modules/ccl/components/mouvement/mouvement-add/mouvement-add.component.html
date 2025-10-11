@@ -10,7 +10,7 @@
 
         <div class="form-row">
             <div class="form-group col-md-12">
-                <div class="checkbox-item form-check-inline" s>
+                <div class="checkbox-item form-check-inline" >
                     <input style="width: 40px" type="checkbox" class="form-check-input" [(ngModel)]="isRestriction" (ngModelChange)="loadTypeMouvements()" name="isRestriction" id="isRestriction">
                     <label style="margin-top: 9px"  class="form-check-label" for="isRestriction">Désactiver les restrictions <small class="text-danger ms-2">(à appuyer qu'en cas d'urgence)</small></label>
                 </div>
@@ -147,6 +147,13 @@
                 <input type="number" class="form-control" [(ngModel)]="newItem.nombre" name="nombre" (ngModelChange)="validateCapacity()">
                 <div class="warning-message" *ngIf="!capacityValid">
                     <i class="fas fa-exclamation-triangle"></i> Le nombre de personnes dépasse la capacité totale des infrastructures ({{ totalCapacity }}).
+                </div>
+            </div>
+            <div class="form-group col-md-12" *ngIf="isReservation" [ngClass]="{'form-group-error': !capacityValid || !isRestriction}">
+                <label>Obervation</label>
+                <textarea class="form-control" placeholder="Exemple : Obligation du directeur General" [(ngModel)]="newItem.observation" name="observation"></textarea>
+                <div class="error-message" *ngIf="!capacityValid ||  !isRestriction">
+                    <i class="fas fa-exclamation-circle"></i> Le champ observation est requise s'il y a une excéption.
                 </div>
             </div>
 

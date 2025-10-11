@@ -5,6 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { ModeleInfra } from '../../model/modele-infra/modele-infra';
 import {Page} from "../../interface/page.interface";
 import {environment} from "../../../../../environments/environment";
+import {Color} from "chart.js";
 
 @Injectable({
   providedIn: 'root'
@@ -41,4 +42,9 @@ export class ModeleInfraService {
   delete(id: string): Observable<ModeleInfra> {
     return this.http.delete<ModeleInfra>(`${this.apiUrl}/delete/${id}`);
   }
+
+  getColorsExist():Observable<string[]>{
+    return this.http.get<string[]>(`${this.apiUrl}/colors`);
+  }
+
 }

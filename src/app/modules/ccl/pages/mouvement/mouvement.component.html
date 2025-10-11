@@ -32,6 +32,7 @@
                 <button type="button" style="font-size: 0.9rem" class="btn btn-eye" (click)="navigateToDetailClient(client.id)">
                     <i class="fas fa-info-circle"></i> Détail
                 </button>
+
             </div>
         </div>
 
@@ -82,6 +83,12 @@
                 <button type="button" class="btn btn-add" (click)="openAddModal()">
                     <i class="fas fa-plus"></i> Ajouter un Mouvement
                 </button>
+                <button type="button" class="btn btn-select" (click)="toggleSelectionMode()">
+                    <i class="fa" [ngClass]="isSelectionMode ? 'fa-sign-out-alt' : 'fa-check-square'"></i> {{ isSelectionMode ? 'Quitter' : 'Sélectionner pour annuler' }}
+                </button>
+                <button type="button" class="btn btn-delete" (click)="openDeleteModal(deleteModal)" [disabled]="selectedCount === 0" *ngIf="isSelectionMode">
+                    <i class="fa fa-times"></i>Annuler
+                </button>
             </div>
         </div>
 
@@ -94,8 +101,8 @@
                     </div>
                     <div class="form-group col-md-2">
                         <label>Type Mouvement</label>
-                        <select class="form-control" name="typeMouvement" [(ngModel)]="searchCriteria.typeMouvement.id">
-                            <option [ngValue]="null">-- Sélectionner le type de mouvement --</option>
+                        <select class="form-control" name="typeMouvement" [(ngModel)]="searchCriteria.typeMouvement.id" [ngModel]="searchCriteria.typeMouvement.id??''">
+                            <option [ngValue]="">-- Sélectionner le type de mouvement --</option>
                             <option *ngFor="let type of typeMouvements" [ngValue]="type.id">{{ type.nom }}</option>
                         </select>
                     </div>
@@ -123,6 +130,7 @@
             <table class="table table-normal">
                 <thead>
                 <tr>
+                    <th></th>
                     <th class="sortable">Identifiant</th>
                     <th class="sortable">Date et Heure</th>
                     <th class="sortable">Type Mouvement</th>
@@ -136,6 +144,9 @@
                 </thead>
                 <tbody>
                 <tr *ngFor="let item of filteredItems; let i = index" class="row-animation" [ngClass]="'tr-' + item.typeMouvement.nom">
+                    <td  class="checkbox-column">
+                        <input *ngIf="isSelectionMode && item.typeMouvement.niveauProcessus>1" type="checkbox" [(ngModel)]="selectedIds[item.id]" (ngModelChange)="updateSelect(item.id)">
+                    </td>
                     <td class="nom-column">{{ '#' + item.id }}</td>
                     <td class="nom-column">{{ item.dhMouvement }}</td>
                     <td class="nom-column">{{ item.typeMouvement.nom }}</td>
@@ -177,3 +188,16 @@
         </div>
     </div>
 </div>
+<ng-template #deleteModal let-modal>
+    <div class="modal-header">
+        <h5 class="modal-title">Confirmation d'Annulation</h5>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="modal-body">
+        <p>Voulez-vous vraiment annuler cet(ces) <strong>{{ selectedCount }}</strong> reservations (s) ?</p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-red" (click)="modal.dismiss('Cancel click')"><i class="fas fa-times"></i> Annuler</button>
+        <button type="button" class="btn btn-green" (click)="deleteSelectedItems(modal)"><i class="fas fa-check"></i> Oui</button>
+    </div>
+</ng-template>

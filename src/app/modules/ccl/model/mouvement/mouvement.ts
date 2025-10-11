@@ -15,7 +15,7 @@ export class Mouvement {
     dhMouvement!: string;
     nombre!:number;
     mouvementInfras!:MouvementInfra[];
-
+    observation!:string;
     constructor() {
         this.typeMouvement = new TypeMouvement();
         this.client = new Client();

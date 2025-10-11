@@ -308,8 +308,8 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
     }
     this.modelesInfraSelectionned = {};
     this.modelesIds = [];
-    if (this.selectedItem) this.selectedItem.modeleInfra = { id: '', nom: '', catInfra: { id: '', nom: '' } };
-    if (this.newItem.modeleInfra) this.newItem.modeleInfra = { id: '', nom: '', catInfra: { id: '', nom: '' } };
+    if (this.selectedItem) this.selectedItem.modeleInfra = new ModeleInfra();
+    if (this.newItem.modeleInfra) this.newItem.modeleInfra =new ModeleInfra();
   }
 
   updateLocalisationSelection(localisationId: string) {

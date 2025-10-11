@@ -59,6 +59,8 @@ import { TypeClientComponent } from './pages/type-client/type-client.component';
 import { TypeClientAddComponent } from './components/type-client/type-client-add/type-client-add.component';
 import { TypeClientUpdateComponent } from './components/type-client/type-client-update/type-client-update.component';
 import { SendEmailFactureComponent } from './components/send-email-facture/send-email-facture.component';
+import { ModeleInfraAddFormComponent } from './components/modele-infra/modele-infra-add-form/modele-infra-add-form.component';
+import { ModeleInfraUpdateFormComponent } from './components/modele-infra/modele-infra-update-form/modele-infra-update-form.component';
 
 registerLocaleData(localeFr);
 
@@ -105,6 +107,8 @@ registerLocaleData(localeFr);
     TypeClientAddComponent,
     TypeClientUpdateComponent,
     SendEmailFactureComponent,
+    ModeleInfraAddFormComponent,
+    ModeleInfraUpdateFormComponent,
   ],
   imports: [
     CommonModule,
