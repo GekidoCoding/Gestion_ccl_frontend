@@ -1,0 +1,157 @@
+<div class="modal-header">
+    <h5 class="modal-title">Détails du Mouvement</h5>
+    <button type="button" class="close" (click)="closeModal()" aria-label="Fermer">
+        <span aria-hidden="true">×</span>
+    </button>
+</div>
+
+<div class="modal-body" #captureZone>
+    <app-loading [loading]="isLoading"></app-loading>
+    <form>
+        <div class="form-row">
+            <div class="form-group col-md-12">
+                <label>Infrastructures réservées:</label>
+                <div class="table-responsive">
+                    <table class="table table-normal">
+                        <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Modèle</th>
+                            <th>Tarif</th>
+                            <th>Fréquence</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr *ngFor="let infra of mouvement.infrastructures">
+                            <td>{{ infra.nom }}</td>
+                            <td>{{ infra.modele }}</td>
+                            <td>{{ infra.tarif | number }} Ar</td>
+                            <td>{{ infra.frequence }}</td>
+                        </tr>
+                        <tr *ngIf="!mouvement.infrastructures || mouvement.infrastructures.length === 0">
+                            <td colspan="4">Aucune infrastructure réservée</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="form-group col-md-12">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Client</label>
+                        <input type="text" class="form-control" [value]="mouvement.client" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group col-md-4">
+                <label>Période de début</label>
+                <input type="text" class="form-control" [value]="mouvement.periodeDebut" readonly>
+            </div>
+
+            <div class="form-group col-md-4">
+                <label>Période de fin</label>
+                <input type="text" class="form-control" [value]="mouvement.periodeFin" readonly>
+            </div>
+
+            <div class="form-group col-md-2">
+                <label>Nombre</label>
+                <input type="number" class="form-control" [value]="mouvement.nombrePersonne" readonly>
+            </div>
+
+            <div class="form-group col-md-10" *ngIf="mouvement.observation">
+                <label>Observation</label>
+                <textarea type="text" class="form-control" [value]="mouvement.observation" readonly></textarea>
+            </div>
+
+            <div class="form-group col-md-12">
+                <label>Historiques du mouvement:</label>
+                <div class="table-responsive">
+                    <table class="table table-normal">
+                        <thead>
+                        <tr>
+                            <th>Action</th>
+                            <th>Date d'action</th>
+                            <th>Matricule</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr *ngFor="let histo of mouvement.historiqueMvts">
+                            <td>{{ histo.typeMouvement.nom }}</td>
+                            <td>{{ histo.dhAction }}</td>
+                            <td>{{ histo.gestionnaire.matriculeGestionnaire }}</td>
+                        </tr>
+                        <tr *ngIf="!mouvement.historiqueMvts || mouvement.historiqueMvts.length === 0">
+                            <td colspan="3">Aucun historique de mouvement</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="form-group col-md-12">
+                <label>Historiques des factures :</label>
+                <div class="table-responsive">
+                    <table class="table table-normal">
+                        <thead>
+                        <tr>
+                            <th>Référence</th>
+                            <th>État</th>
+                            <th>Total dû</th>
+                            <th>Remise</th>
+                            <th>Date de création</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <ng-container *ngFor="let facture of mouvement.histoFactures; let i = index">
+                            <tr>
+                                <td>{{ facture.ref }}</td>
+                                <td>{{ facture.etatFacture }}</td>
+                                <td>{{ facture.totalDu | number }} Ar</td>
+                                <td>{{ facture.remise | number }} Ar</td>
+                                <td>{{ facture.dhCreation }}</td>
+                            </tr>
+                            <tr *ngIf="facture.paiements && facture.paiements.length > 0">
+                                <td colspan="5">
+                                    <div class="paiements-container">
+                                        <label>Historiques des paiements du facture ref : <strong>{{ facture.ref }}</strong></label>
+                                        <table class="table table-normal table-paiements">
+                                            <thead>
+                                            <tr>
+                                                <th>Acompte versé</th>
+                                                <th>Reste</th>
+                                                <th>Date de paiement</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr *ngFor="let paiement of facture.paiements">
+                                                <td>{{ paiement.acompteVerse | number }} Ar</td>
+                                                <td>{{ paiement.reste | number }} Ar</td>
+                                                <td>{{ paiement.datePaiement }}</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                        </ng-container>
+                        <tr *ngIf="!mouvement.histoFactures || mouvement.histoFactures.length === 0">
+                            <td colspan="5">Aucune facture</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-black" style="background-color: #3e3e3e" (click)="captureModal()">
+                <i class="fas fa-camera"></i> Capturer
+            </button>
+            <button type="button" class="btn btn-red" (click)="closeModal()">
+                <i class="fas fa-times"></i> Fermer
+            </button>
+        </div>
+    </form>
+</div>

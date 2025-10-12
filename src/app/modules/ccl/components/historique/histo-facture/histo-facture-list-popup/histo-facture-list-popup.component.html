@@ -20,8 +20,8 @@
             </div>
 
             <div class="form-group col-md-2">
-                <label>Montant total ( en Ariary)</label>
-                <p>{{ selected.montantTotal || 'N/A' }}</p>
+                <label>Total Du ( en Ariary)</label>
+                <p>{{ selected.totalDu || 'N/A' }}</p>
             </div>
             <div class="form-group col-md-2">
                 <label>Remise ( en %) </label>
@@ -41,6 +41,8 @@
                 <th>Date et Heure</th>
                 <th>etat</th>
                 <th>Reference</th>
+                <th>Total Du</th>
+                <th>Remise</th>
                 <th>Matricule</th>
                 <th>Montant total (en Ariary)</th>
             </tr>
@@ -50,9 +52,10 @@
                 <td  class="name-column">{{item.dhAction}}</td>
                 <td  class="name-column">{{item.etat.etat}}</td>
                 <td  class="name-column">{{item.refFacture||'N/A'}}</td>
+                <td  class="name-column">{{item.totalDu||'N/A'}}</td>
+                <td  class="name-column">{{item.remise||'N/A'}}</td>
                 <td  class="name-column">{{item.gestionnaire.matriculeGestionnaire||'N/A'}}</td>
                 <td class="name-column">{{item.montant}}</td>
-
             </tr>
             </tbody>
         </table>

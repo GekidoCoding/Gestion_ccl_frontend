@@ -1,22 +1,25 @@
-import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
-import {NgbModal, NgbModalOptions} from '@ng-bootstrap/ng-bootstrap';
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { Infrastructure } from "../../../model/infrastructure/infrastructure";
-import { Localisation } from "../../../model/localisation/localisation";
-import { Etat } from "../../../model/etat/etat";
-import { CategorieInfra } from "../../../model/categorie-infra/categorie-infra";
-import { ModeleInfra } from "../../../model/modele-infra/modele-infra";
-import { InfrastructureService } from "../../../services/infrastructure/infrastructure.service";
-import { LocalisationService } from "../../../services/localisation/localisation.service";
-import { EtatService } from "../../../services/etat/etat.service";
-import { CategorieInfraService } from "../../../services/categorie-infra/categorie-infra.service";
-import { ModeleInfraService } from "../../../services/modele-infra/modele-infra.service";
-import { DetailInfrastructureComponent } from "../detail-infrastructure/detail-infrastructure.component";
-import {Page} from "../../../interface/page.interface";
-import {InfrastructureAddFormComponent} from "../infrastructure-add-form/infrastructure-add-form.component";
-import {InfrastructureComponent} from "../../../pages/infrastructure/infrastructure.component";
-import {YesNoWarningComponent} from "../../yes-no-warning/yes-no-warning.component";
-import {InfrastructureUtil} from "../../../util/infrastructure.util";
+import { Infrastructure } from '../../../model/infrastructure/infrastructure';
+import { Localisation } from '../../../model/localisation/localisation';
+import { Etat } from '../../../model/etat/etat';
+import { CategorieInfra } from '../../../model/categorie-infra/categorie-infra';
+import { ModeleInfra } from '../../../model/modele-infra/modele-infra';
+import { InfrastructureService } from '../../../services/infrastructure/infrastructure.service';
+import { LocalisationService } from '../../../services/localisation/localisation.service';
+import { EtatService } from '../../../services/etat/etat.service';
+import { CategorieInfraService } from '../../../services/categorie-infra/categorie-infra.service';
+import { ModeleInfraService } from '../../../services/modele-infra/modele-infra.service';
+import { DetailInfrastructureComponent } from '../detail-infrastructure/detail-infrastructure.component';
+import { Page } from '../../../interface/page.interface';
+import { InfrastructureAddFormComponent } from '../infrastructure-add-form/infrastructure-add-form.component';
+import { YesNoWarningComponent } from '../../yes-no-warning/yes-no-warning.component';
+import { InfrastructureUtil } from '../../../util/infrastructure.util';
+import { FormControl } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 
 @Component({
   selector: 'app-infrastructure-list-popup',
@@ -26,9 +29,10 @@ import {InfrastructureUtil} from "../../../util/infrastructure.util";
 export class InfrastructureListPopupComponent implements OnInit {
   @Output() infrastructureSelected = new EventEmitter<Infrastructure>();
   @Input() infrastructureNotInSelections: Infrastructure[] = [];
-  @ViewChild(InfrastructureComponent) addFormComponent!: InfrastructureAddFormComponent;
+  @ViewChild(InfrastructureAddFormComponent) addFormComponent!: InfrastructureAddFormComponent;
   items: Infrastructure[] = [];
   filteredItems: Infrastructure[] = [];
+  allItems: Infrastructure[] = [];
   localisations: Localisation[] = [];
   etats: Etat[] = [];
   categories: CategorieInfra[] = [];
@@ -55,6 +59,10 @@ export class InfrastructureListPopupComponent implements OnInit {
   pageNumbers: number[] = [];
   readonly itemsPerPage: number = 10; // Fixed page size
 
+  // Autocomplete properties
+  designationCtrl = new FormControl('');
+  filteredDesignations: Observable<Infrastructure[]>;
+
   constructor(
       private modalService: NgbModal,
       private infrastructureService: InfrastructureService,
@@ -64,14 +72,49 @@ export class InfrastructureListPopupComponent implements OnInit {
       private modeleInfraService: ModeleInfraService,
       private toastr: ToastrService,
       public modal: NgbModal
-  ) {}
+  ) {
+    this.filteredDesignations = this.designationCtrl.valueChanges.pipe(
+        startWith(''),
+        map(value => this._filterDesignations(value || ''))
+    );
+  }
 
   ngOnInit() {
+    this.loadAllItems();
     this.loadInfrastructures();
     this.loadLocalisations();
     this.loadEtats();
     this.loadCategories();
     this.loadModeles();
+  }
+
+  private _filterDesignations(value: string | Infrastructure): Infrastructure[] {
+    const filterValue = typeof value === 'string' ? value.toLowerCase() : value.nom.toLowerCase();
+    return this.allItems.filter(item =>
+        item.nom.toLowerCase().includes(filterValue)
+    );
+  }
+
+  displayValueFn(value:string): string {
+    return value;
+  }
+
+  onDesignationSelected(event: MatAutocompleteSelectedEvent) {
+    const selectedInfrastructure: Infrastructure = event.option.value;
+    this.designationCtrl.setValue(selectedInfrastructure.nom);
+    this.searchCriteria.nom = selectedInfrastructure.nom;
+  }
+
+  loadAllItems() {
+    this.infrastructureService.getAll().subscribe({
+      next: (data) => {
+        this.allItems = data;
+      },
+      error: (error) => {
+        console.error('Error loading all infrastructures:', error);
+        this.toastr.error('Erreur lors du chargement des infrastructures');
+      }
+    });
   }
 
   // Helper method to generate visible page numbers
@@ -160,10 +203,13 @@ export class InfrastructureListPopupComponent implements OnInit {
 
   resetSearchForm() {
     this.searchCriteria = new Infrastructure();
+    this.designationCtrl.setValue('');
     this.debutSearch = '';
     this.finSearch = '';
     this.modelesIds = [];
     this.localisationIds = [];
+    this.localisationSelectionned = {};
+    this.modelesInfraSelectionned = {};
     this.currentPage = 0; // Reset to first page
     this.loadInfrastructures();
   }
@@ -176,9 +222,9 @@ export class InfrastructureListPopupComponent implements OnInit {
   }
 
   applySearch() {
-    this.currentPage=0;
+    this.currentPage = 0;
     this.isLoading = true;
-    const nom = this.searchCriteria.nom?.trim() || undefined;
+    const nom = typeof this.designationCtrl.value === 'string' ? this.designationCtrl.value : this.designationCtrl.value?.nom || '';
     const numero = this.searchCriteria.numero?.trim() || undefined;
     const categorieInfraId = this.searchCriteria.modeleInfra?.catInfra?.id || undefined;
 
@@ -226,6 +272,7 @@ export class InfrastructureListPopupComponent implements OnInit {
 
   resetSearchCriteria() {
     this.searchCriteria = new Infrastructure();
+    this.designationCtrl.setValue('');
     this.localisationSelectionned = {};
     this.modelesInfraSelectionned = {};
     this.localisationIds = [];
@@ -244,8 +291,6 @@ export class InfrastructureListPopupComponent implements OnInit {
     this.toastr.error(message);
   }
 
-
-
   navigateToDetailInfra(id: string) {
     const modal = this.modalService.open(DetailInfrastructureComponent, { size: 'lg', centered: true, backdrop: 'static' });
     modal.componentInstance.infrastructureId = id;
@@ -262,7 +307,7 @@ export class InfrastructureListPopupComponent implements OnInit {
     }
     this.modelesInfraSelectionned = {};
     this.modelesIds = [];
-    this.newItem.modeleInfra =new ModeleInfra();
+    this.newItem.modeleInfra = new ModeleInfra();
   }
 
   // Pagination method
@@ -271,11 +316,13 @@ export class InfrastructureListPopupComponent implements OnInit {
     this.currentPage = page - 1;
     this.loadInfrastructures();
   }
+
   create(infrastructure: Infrastructure) {
     this.infrastructureService.create(infrastructure).subscribe({
       next: () => {
         this.currentPage = 0;
         this.showSuccessMessage('Infrastructure ajoutée avec succès !');
+        this.loadInfrastructures();
       },
       error: (error) => {
         console.error('Error adding infrastructure:', error);
@@ -286,12 +333,12 @@ export class InfrastructureListPopupComponent implements OnInit {
 
   addItem(infrastructure: Infrastructure) {
     this.infrastructureService.checkInfrastructureSimilarity(infrastructure).subscribe({
-      next: (data:Infrastructure[]) => {
+      next: (data: Infrastructure[]) => {
         console.log(JSON.stringify(data));
-        if(data.length>0){
-          let message :string = InfrastructureUtil.getWarningMessageSimilarityFromList(data );
-          let composant= this.modalService.open(YesNoWarningComponent );
-          composant.componentInstance.message=message;
+        if (data.length > 0) {
+          let message: string = InfrastructureUtil.getWarningMessageSimilarityFromList(data);
+          let composant = this.modalService.open(YesNoWarningComponent);
+          composant.componentInstance.message = message;
           composant.componentInstance.confirm.subscribe({
             next: () => {
               this.create(infrastructure);
@@ -301,16 +348,15 @@ export class InfrastructureListPopupComponent implements OnInit {
             next: () => {
               composant.close();
             }
-          })
-        }else{
+          });
+        } else {
           this.create(infrastructure);
         }
       },
       error: () => {
         this.showErrorMessage('Erreur lors de verification de similarite');
       }
-    })
-
+    });
   }
 
   openAddModalPopup() {
@@ -329,7 +375,5 @@ export class InfrastructureListPopupComponent implements OnInit {
     modalComponent.componentInstance.cancel.subscribe(() => {
       modalComponent.dismiss('Cancel click');
     });
-
   }
-
 }

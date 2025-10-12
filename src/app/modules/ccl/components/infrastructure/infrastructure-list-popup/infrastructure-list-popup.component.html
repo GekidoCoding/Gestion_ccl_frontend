@@ -12,7 +12,13 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Nom</label>
-                        <input type="text" class="form-control" [(ngModel)]="searchCriteria.nom" name="nom">
+                        <input type="text" class="form-control" placeholder="Ex : Chambre101" name="nom"
+                               [formControl]="designationCtrl" [matAutocomplete]="autoDesignation">
+                        <mat-autocomplete #autoDesignation="matAutocomplete" [displayWith]="displayValueFn" >
+                            <mat-option *ngFor="let item of filteredDesignations | async" [value]="item.nom">
+                                {{ item.nom }}
+                            </mat-option>
+                        </mat-autocomplete>
                     </div>
                     <div class="form-group">
                         <label>Catégorie</label>
@@ -20,7 +26,7 @@
                                 [(ngModel)]="searchCriteria.modeleInfra.catInfra.id"
                                 [ngModel]="searchCriteria.modeleInfra.catInfra.id ?? null"
                                 name="catInfra"
-                                (ngModelChange)="onCategoryChange(searchCriteria.modeleInfra.catInfra.id)">
+                                (ngModelChange)="onCategoryChange($event)">
                             <option [ngValue]="null">Toutes</option>
                             <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.nom }}</option>
                         </select>
@@ -98,12 +104,12 @@
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <div class="pagination-buttons">
-                    <span *ngFor="let page of pageNumbers"
-                          class="page-number btn btn-blue page-animation"
-                          [class.active]="page === currentPage + 1"
-                          (click)="changePage(page)">
-                        {{page}}
-                    </span>
+          <span *ngFor="let page of pageNumbers"
+                class="page-number btn btn-blue page-animation"
+                [class.active]="page === currentPage + 1"
+                (click)="changePage(page)">
+            {{page}}
+          </span>
                     <span *ngIf="totalPages > 5" class="page-ellipsis">...</span>
                 </div>
                 <button type="button" class="btn btn-blue btn-arrow" [disabled]="currentPage + 1 === totalPages || totalPages === 0" (click)="changePage(currentPage + 2)">
@@ -113,15 +119,3 @@
         </div>
     </div>
 </div>
-
-<!-- <ng-template #addModal let-modal>
-    <app-infrastructure-add-form
-        [newItem]="newItem"
-        [localisations]="localisations"
-        [etats]="etats"
-        [categories]="categories"
-        [filteredModeles]="filteredModeles"
-        (submitForm)="handleAddFormSubmit($event); modal.close('Save click')"
-        (cancel)="modal.dismiss('Cancel click')"
-    ></app-infrastructure-add-form>
-</ng-template> -->

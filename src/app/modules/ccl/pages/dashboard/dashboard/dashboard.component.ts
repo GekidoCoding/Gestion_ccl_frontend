@@ -11,6 +11,7 @@ import {ModeleInfra} from "../../../model/modele-infra/modele-infra";
 import {ModeleInfraService} from "../../../services/modele-infra/modele-infra.service";
 import {CategorieInfra} from "../../../model/categorie-infra/categorie-infra";
 import {CategorieInfraService} from "../../../services/categorie-infra/categorie-infra.service";
+import html2canvas from "html2canvas";
 
 Chart.register(...registerables);
 
@@ -22,6 +23,7 @@ Chart.register(...registerables);
 export class DashboardComponent implements OnInit {
   @ViewChild('pieChart') pieChartRef!: ElementRef;
   @ViewChild('lineChart') lineChartRef!: ElementRef;
+  @ViewChild('captureZone') captureZone!: ElementRef;
 
   public date1: string = '';
   public date2: string = '';
@@ -101,6 +103,29 @@ export class DashboardComponent implements OnInit {
     this.loadModeles();
   }
 
+  captureModal(): void {
+    if (!this.captureZone) {
+      this.toastr.error('Zone de capture introuvable');
+      return;
+    }
+
+    html2canvas(this.captureZone.nativeElement, {
+      scale: 2,
+      useCORS: true
+    }).then(canvas => {
+      const imgData = canvas.toDataURL('image/png');
+
+      const link = document.createElement('a');
+      link.href = imgData;
+      link.download = `histo_mouvement-${this.year}.png`;
+      link.click();
+
+      this.toastr.success('Capture enregistrée avec succès');
+    }).catch(err => {
+      console.error(err);
+      this.toastr.error('Erreur lors de la capture du composant');
+    });
+  }
   loadModeles() {
     this.modeleInfraService.getAll().subscribe({
       next: (modeles) => {

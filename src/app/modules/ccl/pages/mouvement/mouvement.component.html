@@ -101,8 +101,8 @@
                     </div>
                     <div class="form-group col-md-2">
                         <label>Type Mouvement</label>
-                        <select class="form-control" name="typeMouvement" [(ngModel)]="searchCriteria.typeMouvement.id" [ngModel]="searchCriteria.typeMouvement.id??''">
-                            <option [ngValue]="">-- Sélectionner le type de mouvement --</option>
+                        <select class="form-control" name="typeMouvement" [(ngModel)]="searchCriteria.typeMouvement.id" [ngModel]="searchCriteria.typeMouvement.id??null">
+                            <option [ngValue]="null">-- Sélectionner le type  --</option>
                             <option *ngFor="let type of typeMouvements" [ngValue]="type.id">{{ type.nom }}</option>
                         </select>
                     </div>

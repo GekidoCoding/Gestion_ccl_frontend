@@ -6,10 +6,13 @@ import { ClientService } from '../../services/client/client.service';
 import { TypeClientService } from '../../services/type-client/type-client.service';
 import { TypeClient } from '../../model/type-client/type-client';
 import { ToastrService } from 'ngx-toastr';
-import {ClientDetailComponent} from "../../components/client/client-detail/client-detail.component";
-import {Router} from "@angular/router";
-import {ClientUtil} from "../../util/client.util";
-import {ClientAddFormComponent} from "../../components/client/client-add-form/client-add-form.component";
+import { ClientDetailComponent } from '../../components/client/client-detail/client-detail.component';
+import { Router } from '@angular/router';
+import { ClientUtil } from '../../util/client.util';
+import { ClientAddFormComponent } from '../../components/client/client-add-form/client-add-form.component';
+import { FormControl } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-client',
@@ -17,28 +20,66 @@ import {ClientAddFormComponent} from "../../components/client/client-add-form/cl
   styleUrls: ['../../base/base-crud.component.scss']
 })
 export class ClientComponent extends BaseCrudComponent<Client> implements OnInit {
+  allItems:Client[]=[];
   typeClients: TypeClient[] = [];
   selectedItem: Client = new Client();
   searchCriteria: Client = new Client();
   selectedInfrastructureIds: string[] = [];
+  designationCtrl = new FormControl('');
+  contactsCtrl = new FormControl('');
+  filteredDesignations: Observable<Client[]>;
+  filteredContacts: Observable<Client[]>;
 
+  filteredItemsHere:Client[]=[];
   constructor(
       modalService: NgbModal,
       private service: ClientService,
       private typeClientService: TypeClientService,
-      protected toastr: ToastrService ,
-      private router:Router,
-      private clientUtil:ClientUtil
+      protected toastr: ToastrService,
+      private router: Router,
+      private clientUtil: ClientUtil
   ) {
     super(modalService, toastr);
+    this.filteredDesignations = this.designationCtrl.valueChanges.pipe(
+        startWith(''),
+        map(value => this._filterDesignations(value || ''))
+    );
+    this.filteredContacts= this.contactsCtrl.valueChanges.pipe(
+        startWith(''),
+        map(value => this._filterContacts(value || ''))
+    );
   }
 
   ngOnInit() {
+    this.loadAllItems();
     this.loadData();
     this.loadTypeClients();
     setTimeout(() => {
       this.isLoading = false;
     }, 3000);
+  }
+  loadAllItems() {
+    this.service.getAll().subscribe({
+      next: (clients) => {
+        this.allItems = clients;
+      },
+      error: (error) => {
+        console.error('Error loading all clients:', error);
+        this.showErrorMessage('Erreur lors du chargement des clients');
+      }
+    });
+  }
+  private _filterDesignations(value: string): Client[] {
+    const filterValue = value.toLowerCase();
+    return this.allItems.filter(client =>
+        client.designationClient.toLowerCase().includes(filterValue)
+    );
+  }
+  private _filterContacts(value: string): Client[] {
+    const filterValue = value.toLowerCase();
+    return this.allItems.filter(client =>
+        client.contacts.toLowerCase().includes(filterValue)
+    );
   }
 
   loadData() {
@@ -46,6 +87,7 @@ export class ClientComponent extends BaseCrudComponent<Client> implements OnInit
     this.service.getPaginated(this.currentPage, this.itemsPerPage).subscribe({
       next: (page: Page<Client>) => {
         this.items = page.content;
+        this.filteredItemsHere = page.content;
         this.totalPages = page.totalPages;
         this.totalItems = page.totalElements;
         this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
@@ -58,6 +100,11 @@ export class ClientComponent extends BaseCrudComponent<Client> implements OnInit
       }
     });
   }
+
+  displayValueFn(value: string): string {
+    return value ;
+  }
+
   changePage(page: number) {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page - 1; // Converti en 0-based pour l'API
@@ -81,23 +128,22 @@ export class ClientComponent extends BaseCrudComponent<Client> implements OnInit
     });
   }
 
-
   openAddModal() {
     this.newItem = this.initializeNewItem();
     const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
-
     const modalRef = this.modalService.open(ClientAddFormComponent, options);
-
     modalRef.componentInstance.loadData.subscribe(() => {
       this.loadData();
     });
   }
 
-
-  reserSearchForm(){
+  reserSearchForm() {
     this.searchCriteria = new Client();
+    this.designationCtrl.setValue('');
+    this.contactsCtrl.setValue('');
     this.loadData();
   }
+
   initializeNewItem(): Partial<Client> {
     return new Client();
   }
@@ -105,8 +151,6 @@ export class ClientComponent extends BaseCrudComponent<Client> implements OnInit
   resetSearchCriteria(): Partial<Client> {
     return new Client();
   }
-
-
 
   confirmUpdate(client: Client) {
     this.service.update(client.id, client).subscribe({
@@ -122,13 +166,13 @@ export class ClientComponent extends BaseCrudComponent<Client> implements OnInit
     });
   }
 
-  openDetailModal(item:Client) {
-      const options :NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
-      const component =  this.modalService.open(ClientDetailComponent, options);
-      component.componentInstance.clientId = item.id;
-      component.componentInstance.loadData.subscribe(() => {
-        this.loadData();
-      });
+  openDetailModal(item: Client) {
+    const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
+    const component = this.modalService.open(ClientDetailComponent, options);
+    component.componentInstance.clientId = item.id;
+    component.componentInstance.loadData.subscribe(() => {
+      this.loadData();
+    });
   }
 
   openUpdateModal(content: any, item: Client) {
@@ -144,7 +188,6 @@ export class ClientComponent extends BaseCrudComponent<Client> implements OnInit
     const deleteObservables = Object.keys(this.selectedIds).map(id =>
         this.service.delete(id)
     );
-
     Promise.all(deleteObservables.map(obs => obs.toPromise())).then(() => {
       this.currentPage = 0;
       this.loadData();
@@ -158,19 +201,27 @@ export class ClientComponent extends BaseCrudComponent<Client> implements OnInit
       this.showErrorMessage('Erreur lors de la suppression des clients : La suppression de clients liés à des mouvements n\'est pas autorisée.');
     });
   }
+
   navigateToMovements(id: string) {
     this.router.navigate([`/cnaps/gestion/ccl/mouvement/client/${id}`]);
   }
+
   applySearches() {
-    this.service.searchClients(this.searchCriteria, this.selectedInfrastructureIds, this.currentPage, this.itemsPerPage)
-        .subscribe(result => {
-          this.items = result.content;
-          this.totalPages = result.totalPages;
-          this.totalItems = result.totalElements;
-          this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-          this.isLoading = false;
-        });
+    this.searchCriteria.designationClient = this.designationCtrl.value || '';
+    this.searchCriteria.contacts = this.contactsCtrl.value || '';
+    this.service.searchClients(this.searchCriteria, this.selectedInfrastructureIds, this.currentPage, this.itemsPerPage).subscribe({
+      next: (result) => {
+        this.filteredItemsHere = result.content;
+        this.totalPages = result.totalPages;
+        this.totalItems = result.totalElements;
+        this.pageNumbers = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error searching clients:', error);
+        this.showErrorMessage('Erreur lors de la recherche des clients');
+        this.isLoading = false;
+      }
+    });
   }
-
-
 }

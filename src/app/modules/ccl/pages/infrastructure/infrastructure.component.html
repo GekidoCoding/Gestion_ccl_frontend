@@ -23,11 +23,17 @@
         </div>
 
         <div class="search-form slide-in-out" >
-            <form #searchForm="ngForm" (ngSubmit)="applySearch()">
+            <form #searchForm="ngForm" (ngSubmit)="applySearches()">
                 <div class="form-row">
-                    <div class="form-group col-md-2">
-                        <label>Designation</label>
-                        <input type="text" placeholder="Ex : Chambre d' Etoile" class="form-control" [(ngModel)]="searchCriteria.nom" name="nom">
+                    <div class="form-group col-md-6">
+                        <label>Designation </label>
+                        <input type="text" class="form-control" placeholder="Ex : Chambre101" name="designation"
+                               [formControl]="designationCtrl" [matAutocomplete]="autoDesignation">
+                        <mat-autocomplete #autoDesignation="matAutocomplete" [displayWith]="displayValueFn">
+                            <mat-option *ngFor="let item of filteredDesignations | async" [value]="item.nom">
+                                {{ item.nom }}
+                            </mat-option>
+                        </mat-autocomplete>
                     </div>
                     <div class="form-group col-md-2">
                         <label>Numero</label>
@@ -99,7 +105,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <ng-container *ngFor="let item of filteredItems; let i = index">
+                <ng-container *ngFor="let item of items; let i = index">
                     <tr class="row-animation" [ngClass]="{'row-animation-delay': i > 0}" [attr.data-index]="i">
                         <td *ngIf="isSelectionMode" class="checkbox-column">
                             <input type="checkbox" [(ngModel)]="selectedIds[item.id]" (ngModelChange)="updateSelect(item.id)">

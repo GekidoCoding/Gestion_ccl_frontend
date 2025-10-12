@@ -72,6 +72,10 @@
                             <button class="btn btn-eye" (click)="openDetailFacture(item)">
                                 <i class="fa fa-info-circle"></i>
                             </button>
+                            <button class="btn btn-red" (click)="openDeleteModal( item.id)">
+                                <i class="fa fa-trash"></i>
+                            </button>
+
                             <button *ngIf="item.etat.code==codeReelle||item.etat.code==codePayee" class="btn btn-blue" (click)="openListePaiement(item)">
                                 <i class="fa fa-dollar-sign"></i>
                             </button>

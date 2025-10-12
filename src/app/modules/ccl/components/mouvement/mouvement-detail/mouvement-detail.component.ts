@@ -2,7 +2,6 @@ import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angu
 import { NgbActiveModal, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { NgForm } from '@angular/forms';
-// import { saveAs } from 'file-saver';
 import { Mouvement } from '../../../model/mouvement/mouvement';
 import { Infrastructure } from '../../../model/infrastructure/infrastructure';
 import { Client } from '../../../model/client/client';
@@ -19,9 +18,10 @@ import { FactureListPopupComponent } from '../../facture/facture-list-popup/fact
 import { ConfigService } from '../../../services/config/config.service';
 import { FrequenceService } from '../../../services/frequence/frequence.service';
 import { Frequence } from '../../../model/frequence/frequence';
-import {DetailInfrastructureComponent} from "../../infrastructure/detail-infrastructure/detail-infrastructure.component";
-import {FactureService} from "../../../services/facture/facture.service";
-import {YesNoWarningComponent} from "../../yes-no-warning/yes-no-warning.component";
+import { DetailInfrastructureComponent } from '../../infrastructure/detail-infrastructure/detail-infrastructure.component';
+import { FactureService } from '../../../services/facture/facture.service';
+import { YesNoWarningComponent } from '../../yes-no-warning/yes-no-warning.component';
+import { MouvementVisualisationComponent } from '../mouvement-visualisation/mouvement-visualisation.component';
 
 @Component({
   selector: 'app-mouvement-detail',
@@ -45,9 +45,10 @@ export class MouvementDetailComponent implements OnInit {
   capacityValid: boolean = true;
   totalCapacity: number = 0;
   frequences: Frequence[] = [];
-  frequencesValid: boolean = true; // New property for frequency validation
-  defaultFrequence: Frequence = new Frequence(); // Default frequency
-  register:boolean  = false;
+  frequencesValid: boolean = true;
+  defaultFrequence: Frequence = new Frequence();
+  register: boolean = false;
+
   constructor(
       public activeModal: NgbActiveModal,
       public modalService: NgbModal,
@@ -78,11 +79,11 @@ export class MouvementDetailComponent implements OnInit {
 
   loadFrequenceDefault() {
     this.frequenceService.findDefaultFrequence().subscribe({
-      next: data => {
+      next: (data) => {
         this.defaultFrequence = { ...data };
       },
-      error: err => {
-        this.toastr.error("Erreur lors du chargement de la fréquence par défaut");
+      error: (err) => {
+        this.toastr.error('Erreur lors du chargement de la fréquence par défaut');
       }
     });
   }
@@ -108,7 +109,7 @@ export class MouvementDetailComponent implements OnInit {
             ...data,
             client: { ...data.client },
             typeMouvement: { ...data.typeMouvement },
-            mouvementInfras: data.mouvementInfras ? data.mouvementInfras.map(mi => ({
+            mouvementInfras: data.mouvementInfras ? data.mouvementInfras.map((mi) => ({
               ...mi,
               infrastructure: { ...mi.infrastructure },
               mouvement: { ...mi.mouvement },
@@ -167,9 +168,10 @@ export class MouvementDetailComponent implements OnInit {
   filterTypeMouvements() {
     const currentNiveau = this.selectedItem?.typeMouvement?.niveauProcessus ?? null;
     if (currentNiveau != null) {
-      this.filteredTypeMouvements = this.typeMouvements.filter(type =>
-          (type.niveauProcessus == null && type.niveauProcessus !== currentNiveau ||
-              type.niveauProcessus >= currentNiveau)
+      this.filteredTypeMouvements = this.typeMouvements.filter(
+          (type) =>
+              (type.niveauProcessus == null && type.niveauProcessus !== currentNiveau) ||
+              type.niveauProcessus >= currentNiveau
       );
     } else {
       this.filteredTypeMouvements = [...this.typeMouvements];
@@ -177,7 +179,7 @@ export class MouvementDetailComponent implements OnInit {
   }
 
   onTypeMouvementChange() {
-    const selectedType = this.typeMouvements.find(type => type.id === this.selectedItem?.typeMouvement.id);
+    const selectedType = this.typeMouvements.find((type) => type.id === this.selectedItem?.typeMouvement.id);
     this.isReservation = selectedType?.nom !== 'Renseignement';
     if (!this.isReservation && this.selectedItem) {
       this.selectedItem.periodeDebut = '';
@@ -193,7 +195,7 @@ export class MouvementDetailComponent implements OnInit {
   }
 
   handleInfrastructureSelected(infra: Infrastructure, content: any) {
-    if (!this.selectedItem.mouvementInfras.some(existing => existing.infrastructure.id === infra.id)) {
+    if (!this.selectedItem.mouvementInfras.some((existing) => existing.infrastructure.id === infra.id)) {
       const mi = new MouvementInfra();
       mi.infrastructure = infra;
       mi.mouvement.id = this.selectedItem.id;
@@ -214,11 +216,13 @@ export class MouvementDetailComponent implements OnInit {
     this.validateCapacity();
     this.validateFrequences();
   }
-  openDetailModal(id:string){
+
+  openDetailModal(id: string) {
     const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
     const modal = this.modalService.open(DetailInfrastructureComponent, options);
     modal.componentInstance.infrastructureId = id;
   }
+
   handleClientSelected(client: Client, content: any) {
     if (this.selectedItem) {
       this.selectedItem.client = { ...client };
@@ -235,34 +239,33 @@ export class MouvementDetailComponent implements OnInit {
     this.clientValid = !!this.selectedItem.client?.id;
   }
 
-  onClickDownload(){
+  onClickDownload() {
     const options = {};
-    const composant  = this.modalService.open(YesNoWarningComponent , options);
-    composant.componentInstance.message="Voulez - vous sauvegarder ce proforma dans les statistiques ?"
+    const composant = this.modalService.open(YesNoWarningComponent, options);
+    composant.componentInstance.message = 'Voulez-vous sauvegarder ce proforma dans les statistiques ?';
     composant.componentInstance.confirm.subscribe({
       next: () => {
-        this.register=true;
+        this.register = true;
         this.onDownloadproforma();
-        this.toastr.success("Proforma sauvegardee avec succes ");
+        this.toastr.success('Proforma sauvegardée avec succès');
       }
     });
     composant.componentInstance.decline.subscribe({
       next: () => {
         this.onDownloadproforma();
       }
-    })
+    });
   }
 
   onDownloadproforma() {
-    this.factureService.downloadProforma(this.selectedItem.id , true)
-        .subscribe((file: Blob) => {
-          const fileURL = window.URL.createObjectURL(file);
-          const link = document.createElement('a');
-          link.href = fileURL;
-          link.download = 'proforma.pdf';
-          link.click();
-          window.URL.revokeObjectURL(fileURL);
-        });
+    this.factureService.downloadProforma(this.selectedItem.id, true).subscribe((file: Blob) => {
+      const fileURL = window.URL.createObjectURL(file);
+      const link = document.createElement('a');
+      link.href = fileURL;
+      link.download = 'proforma.pdf';
+      link.click();
+      window.URL.revokeObjectURL(fileURL);
+    });
   }
 
   validateDates() {
@@ -295,7 +298,7 @@ export class MouvementDetailComponent implements OnInit {
   }
 
   validateFrequences() {
-    this.frequencesValid = this.selectedItem.mouvementInfras.every(mi => mi.frequence?.id);
+    this.frequencesValid = this.selectedItem.mouvementInfras.every((mi) => mi.frequence?.id);
   }
 
   onFrequenceChange() {
@@ -324,12 +327,14 @@ export class MouvementDetailComponent implements OnInit {
           ...data,
           client: { ...data.client },
           typeMouvement: { ...data.typeMouvement },
-          mouvementInfras: data.mouvementInfras ? data.mouvementInfras.map(mi => ({
-            ...mi,
-            infrastructure: { ...mi.infrastructure },
-            mouvement: { ...mi.mouvement },
-            frequence: mi.frequence ? { ...mi.frequence } : { ...this.defaultFrequence }
-          })) : []
+          mouvementInfras: data.mouvementInfras
+              ? data.mouvementInfras.map((mi) => ({
+                ...mi,
+                infrastructure: { ...mi.infrastructure },
+                mouvement: { ...mi.mouvement },
+                frequence: mi.frequence ? { ...mi.frequence } : { ...this.defaultFrequence }
+              }))
+              : []
         };
         this.isEditing = false;
         this.onTypeMouvementChange();
@@ -358,7 +363,14 @@ export class MouvementDetailComponent implements OnInit {
       this.validateCapacity();
       this.validateFrequences();
 
-      if (!this.detailForm.valid || !this.mouvementInfrasValid || !this.clientValid || !this.datesValid || !this.capacityValid || !this.frequencesValid) {
+      if (
+          !this.detailForm.valid ||
+          !this.mouvementInfrasValid ||
+          !this.clientValid ||
+          !this.datesValid ||
+          !this.capacityValid ||
+          !this.frequencesValid
+      ) {
         this.isLoading = false;
         return;
       }
@@ -374,22 +386,37 @@ export class MouvementDetailComponent implements OnInit {
       if (this.selectedItem.dhMouvement) {
         this.selectedItem.dhMouvement = this.selectedItem.dhMouvement + ':00';
       }
-      console.log(JSON.stringify( this.selectedItem.mouvementInfras));
+
       this.mouvementService.update(this.selectedItem.id, this.selectedItem).subscribe({
         next: (data) => {
-          this.selectedItem = data;
-
-          this.mouvementId = this.selectedItem.id;
+          this.selectedItem = {
+            ...data,
+            client: { ...data.client },
+            typeMouvement: { ...data.typeMouvement },
+            mouvementInfras: data.mouvementInfras
+                ? data.mouvementInfras.map((mi) => ({
+                  ...mi,
+                  infrastructure: { ...mi.infrastructure },
+                  mouvement: { ...mi.mouvement },
+                  frequence: mi.frequence ? { ...mi.frequence } : { ...this.defaultFrequence }
+                }))
+                : []
+          };
           this.isEditing = false;
-          this.ngOnInit();
-          this.toastr.success('Mis à jour avec succès !');
+          this.onTypeMouvementChange();
+          this.filterTypeMouvements();
+          this.validateMouvementInfras();
+          this.validateClient();
+          this.validateDates();
+          this.validateCapacity();
+          this.validateFrequences();
           this.afterAction.emit();
+          this.isLoading = false;
         },
         error: (error) => {
-          console.log(JSON.stringify( error));
-          const message = error.error?.message || "Erreur inconnue";
+          console.log(JSON.stringify(error));
+          const message = error.error?.message || 'Erreur inconnue';
           this.toastr.error(message);
-          this.ngOnInit();
           this.isLoading = false;
         }
       });
@@ -404,15 +431,23 @@ export class MouvementDetailComponent implements OnInit {
           ...data,
           client: { ...data.client },
           typeMouvement: { ...data.typeMouvement },
-          mouvementInfras: data.mouvementInfras ? data.mouvementInfras.map(mi => ({
-            ...mi,
-            infrastructure: { ...mi.infrastructure },
-            mouvement: { ...mi.mouvement },
-            frequence: mi.frequence ? { ...mi.frequence } : { ...this.defaultFrequence }
-          })) : []
+          mouvementInfras: data.mouvementInfras
+              ? data.mouvementInfras.map((mi) => ({
+                ...mi,
+                infrastructure: { ...mi.infrastructure },
+                mouvement: { ...mi.mouvement },
+                frequence: mi.frequence ? { ...mi.frequence } : { ...this.defaultFrequence }
+              }))
+              : []
         };
         this.toastr.success('Mouvement classé avec succès');
-        this.loadMouvement();
+        this.onTypeMouvementChange();
+        this.filterTypeMouvements();
+        this.validateMouvementInfras();
+        this.validateClient();
+        this.validateDates();
+        this.validateCapacity();
+        this.validateFrequences();
         this.afterAction.emit();
         this.isLoading = false;
       },
@@ -431,20 +466,28 @@ export class MouvementDetailComponent implements OnInit {
           ...data,
           client: { ...data.client },
           typeMouvement: { ...data.typeMouvement },
-          mouvementInfras: data.mouvementInfras ? data.mouvementInfras.map(mi => ({
-            ...mi,
-            infrastructure: { ...mi.infrastructure },
-            mouvement: { ...mi.mouvement },
-            frequence: mi.frequence ? { ...mi.frequence } : { ...this.defaultFrequence }
-          })) : []
+          mouvementInfras: data.mouvementInfras
+              ? data.mouvementInfras.map((mi) => ({
+                ...mi,
+                infrastructure: { ...mi.infrastructure },
+                mouvement: { ...mi.mouvement },
+                frequence: mi.frequence ? { ...mi.frequence } : { ...this.defaultFrequence }
+              }))
+              : []
         };
         this.toastr.success('Mouvement accordé avec succès');
-        this.loadMouvement();
+        this.onTypeMouvementChange();
+        this.filterTypeMouvements();
+        this.validateMouvementInfras();
+        this.validateClient();
+        this.validateDates();
+        this.validateCapacity();
+        this.validateFrequences();
         this.afterAction.emit();
         this.isLoading = false;
       },
       error: () => {
-        this.toastr.error('Erreur : On ne peut qu\'accorder les réservations');
+        this.toastr.error("Erreur : On ne peut qu'accorder les réservations");
         this.isLoading = false;
       }
     });
@@ -470,6 +513,12 @@ export class MouvementDetailComponent implements OnInit {
   }
 
   get infrastructuresNotInSelections(): Infrastructure[] {
-    return (this.selectedItem.mouvementInfras || []).map(m => m.infrastructure);
+    return (this.selectedItem.mouvementInfras || []).map((m) => m.infrastructure);
+  }
+
+  openVisualisation() {
+    const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
+    const composant = this.modalService.open(MouvementVisualisationComponent, options);
+    composant.componentInstance.mouvementId = this.mouvementId;
   }
 }

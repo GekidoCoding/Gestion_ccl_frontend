@@ -22,6 +22,10 @@ import {
 } from "../../components/infrastructure/infra-tarif-listpopup/infra-tarif-listpopup.component";
 import {YesNoWarningComponent} from "../../components/yes-no-warning/yes-no-warning.component";
 import {InfrastructureUtil} from "../../util/infrastructure.util";
+import {Observable} from "rxjs";
+import {Client} from "../../model/client/client";
+import {FormControl} from "@angular/forms";
+import {map, startWith} from "rxjs/operators";
 
 @Component({
   selector: 'app-infra-crud',
@@ -29,6 +33,8 @@ import {InfrastructureUtil} from "../../util/infrastructure.util";
   styleUrls: ['./infrastructure.component.scss']
 })
 export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> implements OnInit {
+
+  allItems:Infrastructure[]=[];
   localisations: Localisation[] = [];
   etats: Etat[] = [];
   categories: CategorieInfra[] = [];
@@ -45,6 +51,8 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
   finSearch:string='';
   observation: string = '';
 
+  designationCtrl=new FormControl('');
+  filteredDesignations: Observable<Infrastructure[]>;
 
   constructor(
       modalService: NgbModal,
@@ -57,9 +65,14 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
       private router: Router
   ) {
     super(modalService, toastr);
+    this.filteredDesignations = this.designationCtrl.valueChanges.pipe(
+        startWith(''),
+        map(value => this._filterDesignations(value || ''))
+    );
   }
 
   ngOnInit() {
+    this.loadAllItems();
     this.loadLocalisations();
     this.loadEtats();
     this.loadCategories();
@@ -69,7 +82,13 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
       this.isLoading = false;
     }, 3000);
   }
-
+  loadAllItems(){
+    this.service.getAll().subscribe({
+      next:(data)=>{
+        this.allItems = data;
+      }
+    })
+  }
   loadLocalisations() {
     this.localisationService.getAll().subscribe({
       next: (localisations) => this.localisations = localisations,
@@ -148,9 +167,9 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
     this.searchCriteria=new Infrastructure();
     this.loadData();
   }
-  public applySearch(): void {
+  public applySearches(): void {
     this.isLoading = true;
-    const nom = this.searchCriteria.nom?.trim() || undefined;
+    const nom = this.designationCtrl.value;
     const numero = this.searchCriteria.numero?.trim() || undefined;
 
     const categorieInfraId = this.searchCriteria.modeleInfra?.catInfra?.id || undefined;
@@ -177,6 +196,7 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
     ).subscribe({
       next: (page: Page<Infrastructure>) => {
         this.items = page.content;
+
         this.totalPages = page.totalPages;
         this.totalItems = page.totalElements;
       this.pageNumbers = this.getVisiblePageNumbers(this.totalPages, this.currentPage + 1);  // Nouveau getter ci-dessous
@@ -326,4 +346,14 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
       this.showConfirmation = false;
     }
   }
+  displayValueFn(value: string): string {
+    return value ;
+  }
+  private _filterDesignations(value: string): Infrastructure[] {
+    const filterValue = value.toLowerCase();
+    return this.allItems.filter(item =>
+        item.nom.toLowerCase().includes(filterValue)
+    );
+  }
+
 }

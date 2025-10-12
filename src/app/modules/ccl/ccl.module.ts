@@ -61,6 +61,7 @@ import { TypeClientUpdateComponent } from './components/type-client/type-client-
 import { SendEmailFactureComponent } from './components/send-email-facture/send-email-facture.component';
 import { ModeleInfraAddFormComponent } from './components/modele-infra/modele-infra-add-form/modele-infra-add-form.component';
 import { ModeleInfraUpdateFormComponent } from './components/modele-infra/modele-infra-update-form/modele-infra-update-form.component';
+import { MouvementVisualisationComponent } from './components/mouvement/mouvement-visualisation/mouvement-visualisation.component';
 
 registerLocaleData(localeFr);
 
@@ -109,6 +110,7 @@ registerLocaleData(localeFr);
     SendEmailFactureComponent,
     ModeleInfraAddFormComponent,
     ModeleInfraUpdateFormComponent,
+    MouvementVisualisationComponent,
   ],
   imports: [
     CommonModule,

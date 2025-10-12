@@ -6,6 +6,7 @@ import {Page} from "../../interface/page.interface";
 import {Mouvement} from "../../model/mouvement/mouvement";
 import {Facture} from "../../model/facture/facture";
 import {environment} from "../../../../../environments/environment";
+import {MouvementVisualisationDto} from "../../model/dto/mouvement-visualisation-dto/mouvement-visualisation-dto";
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +16,9 @@ export class MouvementService {
 
   constructor(private http: HttpClient) { }
 
+  getVisualisation(mouvementId:string): Observable<MouvementVisualisationDto> {
+    return this.http.get<MouvementVisualisationDto>(`${this.apiUrl}/visualisation/${mouvementId}`);
+  }
 
   getAll(): Observable<Mouvement[]> {
     return this.http.get<Mouvement[]>(`${this.apiUrl}/`);
@@ -98,7 +102,7 @@ export class MouvementService {
           params = params.set('fin', criteria.periodeFin);
         }
       }
-
+      console.log(JSON.stringify(params));
       return this.http.get<Page<Mouvement>>(`${this.apiUrl}/search/criteria` , {params});
   }
 
