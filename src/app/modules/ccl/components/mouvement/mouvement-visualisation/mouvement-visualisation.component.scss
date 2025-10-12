@@ -1,0 +1,22 @@
+@import "../../../base/base-crud.component";
+
+
+.paiements-container {
+  margin-left: 2rem;
+  margin-top: 0.5rem;
+}
+
+.table-paiements {
+  width: calc(100% - 2rem);
+}
+
+.table-paiements th,
+.table-paiements td {
+  padding: 0.75rem;
+  border: 1px solid #dee2e6;
+}
+
+.table-paiements th {
+  background-color: #f8f9fa;
+  font-weight: 500;
+}

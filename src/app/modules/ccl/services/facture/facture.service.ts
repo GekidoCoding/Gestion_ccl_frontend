@@ -24,7 +24,9 @@ export class FactureService {
   getRemise(): Observable<number> {
     return this.http.get<number>(`${this.apiUrl}/config/remise`);
   }
-
+  delete(id:string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/delete/${id}`);
+  }
   getById(id: string): Observable<Facture> {
     return this.http.get<Facture>(`${this.apiUrl}/dto/${id}`);
   }

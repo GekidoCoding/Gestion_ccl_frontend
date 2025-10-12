@@ -12,6 +12,8 @@ import {
 import {PaiementPopupComponent} from "../../paiement/paiement-popup/paiement-popup.component";
 import {ConfigService} from "../../../services/config/config.service";
 import {SendEmailFactureComponent} from "../../send-email-facture/send-email-facture.component";
+import {ToastrService} from "ngx-toastr";
+import {YesNoWarningComponent} from "../../yes-no-warning/yes-no-warning.component";
 
 @Component({
   selector: 'app-facture-list-popup',
@@ -29,6 +31,7 @@ export class FactureListPopupComponent implements OnInit {
       private factureService: FactureService,
       private modalService: NgbModal,
       private configService: ConfigService,
+      private toastService:ToastrService
       ) { }
 
   ngOnInit(): void {
@@ -102,5 +105,32 @@ export class FactureListPopupComponent implements OnInit {
     let composant = this.modalService.open(SendEmailFactureComponent , options);
     composant.componentInstance.idFacture=idFacture;
   }
+  delete(id:string){
+      this.factureService.delete(id).subscribe({
+        next: () => {
+          this.toastService.success("Suppression succes");
+          this.loadData();
+        },
+        error: () => {
+          this.toastService.error("Erreur de suppression");
+        }
+
+      })
+  }
+  openDeleteModal( id: string) {
+    const composant = this.modalService.open(YesNoWarningComponent);
+    composant.componentInstance.message = "Voulez-vous vraiment supprimer cette facture ? Cette action est irréversible.";
+    composant.componentInstance.confirm.subscribe({
+      next: () => {
+        this.delete(id);
+      }
+    });
+    composant.componentInstance.decline.subscribe({
+      next: () => {
+        composant.close();
+      }
+    });
+  }
+
 
 }

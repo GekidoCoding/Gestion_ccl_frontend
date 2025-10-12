@@ -1,4 +1,4 @@
-<div class="main-content-dashboard">
+<div class="main-content-dashboard" #captureZone>
    <app-loading [loading]="loading" ></app-loading>
 
     <div class="content-wrapper" [ngClass]="{ 'loading': loading }">
@@ -66,6 +66,9 @@
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary-dashboard">Filtrer</button>
+                <button type="button" class="btn btn-black" style="background-color: #3e3e3e" (click)="captureModal()">
+                    <i class="fas fa-camera"></i> Capturer
+                </button>
             </form>
         </div>
 

@@ -10,6 +10,8 @@ export class HistoFacture {
     refFacture!: string;
     montant!: number;
     gestionnaire!: Gestionnaire;
+    totalDu!:number;
+    remise!:number;
 
 
     constructor() {

@@ -76,7 +76,7 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
     this.loadTypeClients();
     this.loadGestionnaires();
     this.loadEtats();
-    this.loadMain(); // Moved loadMain before loadData to ensure client/infrastructure is loaded first
+    this.loadMain();
     this.loadData();
   }
 
