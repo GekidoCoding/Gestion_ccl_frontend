@@ -1,5 +1,44 @@
+<div class="modal-header">
+    <h5 class="modal-title">Liste Des Infrastructures</h5>
+    <button type="button" class="close" (click)="activeModal.dismiss('Cross Click')" aria-label="Close"><span aria-hidden="true">×</span></button>
+</div>
 <app-loading [loading]="isLoading"></app-loading>
 <div class="modal-body">
+    <div class="selected-infrastructures" *ngIf="selectedInfrastructures.length > 0">
+        <h5>Infrastructures Sélectionnées</h5>
+        <div class="table-responsive">
+            <table class="table table-normal">
+                <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Numéro</th>
+                    <th>Modèle</th>
+                    <th>Catégorie</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let item of selectedInfrastructures">
+                    <td class="name-column">{{ item.nom }}</td>
+                    <td class="name-column">{{ item.numero }}</td>
+                    <td class="name-column">{{ item.modeleInfra.nom }}</td>
+                    <td class="name-column">{{ item.modeleInfra.catInfra.nom }}</td>
+                    <td class="action-column">
+                        <button class="btn btn-delete" (click)="removeSelectedInfrastructure(item.id)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="validate-button">
+                <button type="button" class="btn btn-green" (click)="validateSelection()">
+                    <i class="fas fa-check"></i> Valider
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="action-buttons">
         <button type="button" class="btn btn-add" (click)="openAddModalPopup()">
             <i class="fa fa-plus"></i> Ajouter Infrastructure
@@ -14,8 +53,8 @@
                         <label>Nom</label>
                         <input type="text" class="form-control" placeholder="Ex : Chambre101" name="nom"
                                [formControl]="designationCtrl" [matAutocomplete]="autoDesignation">
-                        <mat-autocomplete #autoDesignation="matAutocomplete" [displayWith]="displayValueFn" >
-                            <mat-option *ngFor="let item of filteredDesignations | async" [value]="item.nom">
+                        <mat-autocomplete #autoDesignation="matAutocomplete" [displayWith]="displayValueFn" (optionSelected)="onDesignationSelected($event)">
+                            <mat-option *ngFor="let item of filteredDesignations | async" [value]="item">
                                 {{ item.nom }}
                             </mat-option>
                         </mat-autocomplete>
@@ -89,7 +128,7 @@
                         <button class="btn btn-eye" (click)="navigateToDetailInfra(item.id)">
                             <i class="fa fa-info-circle"></i>
                         </button>
-                        <button class="btn btn-green" (click)="selectionnedInfrastructure(item.id)">
+                        <button class="btn btn-green" (click)="selectInfrastructure(item.id)">
                             <i class="fa fa-check"></i>
                         </button>
                     </td>
@@ -108,7 +147,7 @@
                 class="page-number btn btn-blue page-animation"
                 [class.active]="page === currentPage + 1"
                 (click)="changePage(page)">
-            {{page}}
+            {{ page }}
           </span>
                     <span *ngIf="totalPages > 5" class="page-ellipsis">...</span>
                 </div>

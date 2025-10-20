@@ -342,7 +342,7 @@ export class InfrastructureComponent extends BaseCrudComponent<Infrastructure> i
   changePage(page: number) {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page - 1;
-      this.applySearch();
+      this.applySearches();
       this.showConfirmation = false;
     }
   }

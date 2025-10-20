@@ -3,6 +3,8 @@
     <div class="table-title">Gestion des Clients</div>
 
     <div class="list-container">
+        <div class="results-count">Résultats trouvés : {{ totalItems }}</div>
+
         <div class="table-controls">
             <div class="entries-select">
                 <label style="margin-top: 10px;">Afficher</label>
@@ -141,7 +143,7 @@
             <app-client-update-form
                     [client]="selectedItem"
                     [typeClients]="typeClients"
-                    (formSubmit)="confirmUpdate($event); modal.close('Save click')"
+                    (formSubmit)="confirmUpdate($event); modal.close('Save click');loadData()"
                     (formCancel)="modal.dismiss('Cancel click')"
             ></app-client-update-form>
         </div>

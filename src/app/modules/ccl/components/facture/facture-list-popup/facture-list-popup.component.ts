@@ -89,21 +89,42 @@ export class FactureListPopupComponent implements OnInit {
 
   }
 
-  export(id:string) {
-    this.factureService.downloadProformaExist(id)
-        .subscribe((file: Blob) => {
-          const fileURL = window.URL.createObjectURL(file);
-          const link = document.createElement('a');
-          link.href = fileURL;
-          link.download = 'proforma.pdf';
-          link.click();
-          window.URL.revokeObjectURL(fileURL);
-        });
+
+  export(id:string ,  contrat:boolean) {
+    if(contrat){
+      this.factureService.downloadProformaExist(id)
+          .subscribe((file: Blob) => {
+            const fileURL = window.URL.createObjectURL(file);
+            const link = document.createElement('a');
+            link.href = fileURL;
+            link.download = 'proforma.pdf';
+            link.click();
+            window.URL.revokeObjectURL(fileURL);
+          });
+    }
+    else{
+      this.factureService.downloadContrat(id)
+          .subscribe((file: Blob) => {
+            const fileURL = window.URL.createObjectURL(file);
+            const link = document.createElement('a');
+            link.href = fileURL;
+            link.download = 'contrat.pdf';
+            link.click();
+            window.URL.revokeObjectURL(fileURL);
+          });
+    }
+
   }
-  openSendEmailFacture(idFacture : String) {
+  openSendEmailFacture(idFacture : String ,  isContrat:boolean) {
     const options:NgbModalOptions= {size:'lg' , centered:true};
     let composant = this.modalService.open(SendEmailFactureComponent , options);
-    composant.componentInstance.idFacture=idFacture;
+    composant.componentInstance.id=idFacture;
+    if(isContrat){
+      composant.componentInstance.mode='proforma';
+    }else{
+      composant.componentInstance.mode='contrat';
+    }
+
   }
   delete(id:string){
       this.factureService.delete(id).subscribe({

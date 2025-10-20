@@ -99,8 +99,8 @@ export class MouvementInfrasPopupComponent implements OnInit {
     const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
     const modal = this.modalService.open(InfrastructureListPopupComponent, options);
     modal.componentInstance.infrastructureNotInSelections = this.mouvementInfras.map(m => m.infrastructure);
-    modal.componentInstance.infrastructureSelected.subscribe((infra: Infrastructure) => {
-      this.addInfrastructure(infra);
+    modal.componentInstance.infrastructureSelectedChange.subscribe((infras: Infrastructure[]) => {
+      this.addInfrastructures(infras);
       this.afterEmit.emit();
       modal.close();
     });
@@ -112,24 +112,28 @@ export class MouvementInfrasPopupComponent implements OnInit {
     modal.componentInstance.infrastructureId = id;
   }
 
-  addInfrastructure(infra: Infrastructure) {
-    if (!infra || !infra.id) {
-      this.toastr.error('Infrastructure invalide ou sans ID');
-      return;
-    }
-    const newMouvementInfra: MouvementInfra = new MouvementInfra();
-    newMouvementInfra.infrastructure = infra;
-    newMouvementInfra.mouvement.id = this.mouvementId;
-    newMouvementInfra.frequence = { ...this.defaultFrequence };
+  addInfrastructures(infras: Infrastructure[]) {
+    infras.forEach(infra => {
+      if (!infra || !infra.id) {
+        this.toastr.error('Infrastructure invalide ou sans ID');
+        return;
+      }
+      if (!this.mouvementInfras.some(mvt => mvt.infrastructure.id === infra.id)) {
+        const newMouvementInfra: MouvementInfra = new MouvementInfra();
+        newMouvementInfra.infrastructure = infra;
+        newMouvementInfra.mouvement.id = this.mouvementId;
+        newMouvementInfra.frequence = { ...this.defaultFrequence };
 
-    this.mouvementInfraService.create(newMouvementInfra).subscribe({
-      next: (created) => {
-        this.mouvementInfras = [...this.mouvementInfras, created];
-        this.toastr.success('Infrastructure ajoutée avec succès');
-      },
-      error: (error) => {
-        console.error('Error adding mouvementInfra:', error);
-        this.toastr.error('Erreur lors de l\'ajout de l\'infrastructure');
+        this.mouvementInfraService.create(newMouvementInfra).subscribe({
+          next: (created) => {
+            this.mouvementInfras = [...this.mouvementInfras, created];
+            this.toastr.success(`Infrastructure ${infra.nom} ajoutée avec succès`);
+          },
+          error: (error) => {
+            console.error('Error adding mouvementInfra:', error);
+            this.toastr.error(`Erreur lors de l'ajout de l'infrastructure ${infra.nom}`);
+          }
+        });
       }
     });
   }

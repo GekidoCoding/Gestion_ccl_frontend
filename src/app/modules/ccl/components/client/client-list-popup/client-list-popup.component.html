@@ -1,6 +1,12 @@
-<app-loading [loading]="isLoading"></app-loading>
+<div class="modal-header">
+    <h5 class="modal-title">Liste Des Clients</h5>
+    <button type="button" class="close" (click)="activeModal.dismiss('Cross Click')" aria-label="Close">
+        <span aria-hidden="true">×</span>
+    </button>
+</div>
 
 <div class="modal-body">
+    <app-loading [loading]="isLoading"></app-loading>
     <div class="action-buttons mb-3">
         <button type="button" class="btn btn-add" (click)="openAddModal()">
             <i class="fa fa-plus"></i> Ajouter un client

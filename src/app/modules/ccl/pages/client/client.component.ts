@@ -154,7 +154,7 @@ export class ClientComponent extends BaseCrudComponent<Client> implements OnInit
 
   confirmUpdate(client: Client) {
     this.service.update(client.id, client).subscribe({
-      next: (updated) => {
+      next: () => {
         this.currentPage = 0;
         this.loadData();
         this.showSuccessMessage('Modification réussie !');

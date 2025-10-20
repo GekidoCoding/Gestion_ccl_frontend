@@ -69,6 +69,9 @@
                     <td>{{ item.modePaiement.libelle}}</td>
                     <td>{{ item.monnaie??0}}</td>
                     <td class="action-column action-buttons-cell">
+                        <button  class="btn btn-green" (click)="openSendEmailFacture(item.id)">
+                            <i class="fa fa-paper-plane"></i>
+                        </button>
                         <button class="btn btn-blue" (click)="export(item.id)" >
                             <i class="fa fa-download"></i>
                         </button>

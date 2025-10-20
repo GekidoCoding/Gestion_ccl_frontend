@@ -84,11 +84,6 @@ export class DashboardComponent implements OnInit {
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ];
 
-  recentActivities = [
-    { text: 'Nouvel utilisateur inscrit : Jean Dupont', date: 'Il y a 2h' },
-    { text: 'Commande #4579 expédiée', date: 'Il y a 5h' },
-    { text: 'Serveur redémarré avec succès', date: 'Hier' }
-  ];
 
   constructor(private dashboardService: DashboardService, public toastr: ToastrService ,
               private historiqueMvtService: HistoriqueMvtService,
@@ -101,6 +96,40 @@ export class DashboardComponent implements OnInit {
     this.loadData();
     this.loadTypeMouvements();
     this.loadModeles();
+  }
+
+  exportExcel() {
+    this.historiqueMvtService.exportExcelHistorique(
+        this.date1,
+        this.date2,
+        this.year,
+        this.categorieInfraId,
+        this.typeMouvementId,
+        this.modelesIds
+    ).subscribe({
+      next: (res) => {
+        const file: Blob = res.body!;
+        const fileURL = window.URL.createObjectURL(file);
+
+        let filename = 'Historique_Mvt.xlsx';
+        const contentDisposition = res.headers.get('Content-Disposition');
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename="?(.+)"?/);
+          if (match && match[1]) {
+            filename = match[1];
+          }
+        }
+
+        const link = document.createElement('a');
+        link.href = fileURL;
+        link.download = filename;
+        link.click();
+        window.URL.revokeObjectURL(fileURL);
+      },
+      error: (err) => {
+        console.error('Erreur lors de l’export Excel', err);
+      }
+    });
   }
 
   captureModal(): void {

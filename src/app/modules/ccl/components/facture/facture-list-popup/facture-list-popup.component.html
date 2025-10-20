@@ -63,10 +63,10 @@
                         <td class="name-column">{{item.remise}}</td>
                         <td class="name-column">{{item.reste}}</td>
                         <td class="action-column action-buttons-cell">
-                            <button *ngIf="item.etat.code!=codeReelle&&item.etat.code!=codePayee"  class="btn btn-green" (click)="openSendEmailFacture(item.id)" >
+                            <button  class="btn btn-green" (click)="openSendEmailFacture(item.id ,  (item.etat.code!=codeReelle&&item.etat.code!=codePayee))" >
                                 <i class="fa fa-paper-plane"></i>
                             </button>
-                            <button *ngIf="item.etat.code!=codeReelle&&item.etat.code!=codePayee"  class="btn btn-blue" (click)="export(item.id)" >
+                            <button class="btn btn-blue" (click)="export(item.id , (item.etat.code!=codeReelle&&item.etat.code!=codePayee))" >
                                 <i class="fa fa-download"></i>
                             </button>
                             <button class="btn btn-eye" (click)="openDetailFacture(item)">

@@ -11,9 +11,12 @@
             <div class="form-group col-md-12" [ngClass]="{'form-group-error': detailForm.submitted && (!mouvementInfrasValid || !frequencesValid)}">
                 <label>Infrastructures Concernées <strong style="color: red">*</strong>:</label>
                 <div class="input-group-append mb-3" *ngIf="isEditing">
-                    <button type="button" (click)="openPopup(infrastructureListModal); validateMouvementInfras()" class="btn btn-add" [disabled]="isLoading">
+                    <button type="button" (click)="openInfraListPopup(); validateMouvementInfras()" class="btn btn-add" [disabled]="isLoading">
                         <i class="fas fa-building"></i> Sélectionner une Infrastructure
                     </button>
+                </div>
+                <div class="error-message" *ngIf="detailForm.submitted && !mouvementInfrasValid">
+                    <i class="fas fa-exclamation-circle"></i> Veuillez sélectionner au moins une infrastructure.
                 </div>
                 <div class="table-responsive" *ngIf="selectedItem.mouvementInfras.length > 0">
                     <table class="table table-normal">
@@ -50,7 +53,7 @@
                                 </div>
                             </td>
                             <td *ngIf="isEditing">
-                                <button type="button" class="btn btn-delete" (click)="removeInfrastructure(i)" title="Supprimer" [disabled]="isLoading">
+                                <button type="button" class="btn btn-delete" (click)="removeInfrastructure(i)">
                                     <i class="fas fa-trash"></i> Supprimer
                                 </button>
                                 <button class="btn btn-delete" style="color: #a1a100" (click)="openDetailModal(mvt.infrastructure.id)">
@@ -60,23 +63,20 @@
                         </tr>
                         </tbody>
                     </table>
-                    <div class="error-message" *ngIf="detailForm.submitted && !frequencesValid && isEditing">
+                    <div class="error-message" *ngIf="detailForm.submitted && !frequencesValid">
                         <i class="fas fa-exclamation-circle"></i> Toutes les fréquences des infrastructures concernées sont obligatoires.
                     </div>
-                </div>
-                <div class="no-results" *ngIf="selectedItem.mouvementInfras.length === 0">
-                    Aucune infrastructure sélectionnée
-                </div>
-                <div class="error-message" *ngIf="detailForm.submitted && !mouvementInfrasValid && isEditing">
-                    <i class="fas fa-exclamation-circle"></i> Veuillez sélectionner au moins une infrastructure.
                 </div>
             </div>
             <div class="form-group col-md-12" [ngClass]="{'form-group-error': detailForm.submitted && !clientValid}">
                 <label>Client Concerné <strong style="color: red">*</strong>:</label>
                 <div class="input-group-append mb-3" *ngIf="isEditing">
-                    <button type="button" class="btn btn-add" (click)="openPopup(clientListModal)" [disabled]="isLoading">
+                    <button type="button" (click)="openClientListPopup()" class="btn btn-add" [disabled]="isLoading">
                         <i class="fas fa-users"></i> Sélectionner un Client
                     </button>
+                </div>
+                <div class="error-message" *ngIf="detailForm.submitted && !clientValid">
+                    <i class="fas fa-exclamation-circle"></i> Veuillez sélectionner un client.
                 </div>
                 <div class="row" *ngIf="selectedItem?.client?.id">
                     <div class="col-md-6 mb-3">
@@ -105,65 +105,6 @@
                         <input type="text" class="form-control" [value]="selectedItem.client.contacts || 'N/A'" readonly>
                     </div>
                 </div>
-                <div class="error-message" *ngIf="detailForm.submitted && !clientValid && isEditing">
-                    <i class="fas fa-exclamation-circle"></i> Veuillez sélectionner un client.
-                </div>
-            </div>
-            <div class="form-group col-md-12">
-                <label>Date de création</label>
-                <input type="datetime-local" class="form-control" [(ngModel)]="selectedItem.dhMouvement" name="dhMouvement" step="1" readonly>
-            </div>
-            <div class="form-group col-md-12" *ngIf="isReservation" [ngClass]="{'form-group-error': periodeDebut.touched && (!periodeDebut.valid && isEditing || !datesValid && isEditing)}">
-                <label>Période de début de la réservation du client <strong style="color: red">*</strong></label>
-                <input
-                        type="datetime-local"
-                        class="form-control"
-                        [(ngModel)]="selectedItem.periodeDebut"
-                        name="periodeDebut"
-                        #periodeDebut="ngModel"
-                        required
-                        [disabled]="!isEditing"
-                        (ngModelChange)="validateDates()"
-                >
-                <div class="error-message" *ngIf="periodeDebut.touched && !periodeDebut.valid && isEditing">
-                    <i class="fas fa-exclamation-circle"></i> Veuillez entrer une date de début valide.
-                </div>
-                <div class="error-message" *ngIf="periodeDebut.touched && periodeDebut.valid && !datesValid && isEditing">
-                    <i class="fas fa-exclamation-circle"></i> La période de début ne peut pas être postérieure à la période de fin.
-                </div>
-            </div>
-            <div class="form-group col-md-12" *ngIf="isReservation" [ngClass]="{'form-group-error': periodeFin.touched && (!periodeFin.valid && isEditing || !datesValid && isEditing)}">
-                <label>Période fin de la réservation du client <strong style="color: red">*</strong></label>
-                <input
-                        type="datetime-local"
-                        class="form-control"
-                        [(ngModel)]="selectedItem.periodeFin"
-                        name="periodeFin"
-                        #periodeFin="ngModel"
-                        required
-                        [disabled]="!isEditing"
-                        (ngModelChange)="validateDates()"
-                >
-                <div class="error-message" *ngIf="periodeFin.touched && !periodeFin.valid && isEditing">
-                    <i class="fas fa-exclamation-circle"></i> Veuillez entrer une date de fin valide.
-                </div>
-                <div class="error-message" *ngIf="periodeFin.touched && periodeFin.valid && !datesValid && isEditing">
-                    <i class="fas fa-exclamation-circle"></i> La période de fin ne peut pas être antérieure à la période de début.
-                </div>
-            </div>
-            <div class="form-group col-md-12" *ngIf="isReservation" [ngClass]="{'form-group-warning': !capacityValid && isEditing}">
-                <label>Nombre de Personnes</label>
-                <input
-                        type="number"
-                        class="form-control"
-                        [(ngModel)]="selectedItem.nombre"
-                        name="nombre"
-                        [disabled]="!isEditing"
-                        (ngModelChange)="validateCapacity()"
-                >
-                <div class="warning-message" *ngIf="!capacityValid && isEditing">
-                    <i class="fas fa-exclamation-triangle"></i> Le nombre de personnes dépasse la capacité totale des infrastructures ({{ totalCapacity }}).
-                </div>
             </div>
             <div class="form-group col-md-12" [ngClass]="{'form-group-error': typeMouvement.touched && !typeMouvement.valid && isEditing}">
                 <label>Type de Mouvement <strong style="color: red">*</strong></label>
@@ -173,148 +114,121 @@
                         name="typeMouvement"
                         #typeMouvement="ngModel"
                         required
+                        (change)="onTypeMouvementChange()"
                         [disabled]="!isEditing"
-                        (ngModelChange)="onTypeMouvementChange()"
                 >
-                    <option [ngValue]="null">--Sélectionnez le type de mouvement--</option>
+                    <option [ngValue]="null">-- Sélectionnez le type de mouvement --</option>
                     <option *ngFor="let type of filteredTypeMouvements" [ngValue]="type.id">{{ type.nom }}</option>
                 </select>
                 <div class="error-message" *ngIf="typeMouvement.touched && !typeMouvement.valid && isEditing">
-                    <i class="fas fa-exclamation-circle"></i> Veuillez sélectionner un type de mouvement.
+                    <i class="fas fa-exclamation-circle"></i> Le champ Type de Mouvement est requis.
                 </div>
             </div>
-        </div>
-        <div class="error-message" *ngIf="detailForm.submitted && isEditing && (!detailForm.valid || !mouvementInfrasValid || !clientValid || !datesValid || !capacityValid || !frequencesValid)">
-            <i class="fas fa-exclamation-circle"></i> Veuillez corriger les erreurs dans le formulaire avant de soumettre.
+            <div class="form-group col-md-12" *ngIf="isReservation" [ngClass]="{'form-group-error': periodeDebut.touched && (!periodeDebut.valid || !datesValid) && isEditing}">
+                <label>Période de début de la réservation du client <strong style="color: red">*</strong></label>
+                <input
+                        type="datetime-local"
+                        class="form-control"
+                        [(ngModel)]="selectedItem.periodeDebut"
+                        name="periodeDebut"
+                        #periodeDebut="ngModel"
+                        required
+                        (change)="validateDates()"
+                        [disabled]="!isEditing"
+                >
+                <div class="error-message" *ngIf="periodeDebut.touched && !periodeDebut.valid && isEditing">
+                    <i class="fas fa-exclamation-circle"></i> Le champ Période de début est requis.
+                </div>
+                <div class="error-message" *ngIf="periodeDebut.touched && periodeDebut.valid && !datesValid && isEditing">
+                    <i class="fas fa-exclamation-circle"></i> La période de début ne peut pas être postérieure à la période de fin.
+                </div>
+            </div>
+            <div class="form-group col-md-12" *ngIf="isReservation" [ngClass]="{'form-group-error': periodeFin.touched && (!periodeFin.valid || !datesValid) && isEditing}">
+                <label>Période fin de la réservation du client <strong style="color: red">*</strong></label>
+                <input
+                        type="datetime-local"
+                        class="form-control"
+                        [(ngModel)]="selectedItem.periodeFin"
+                        name="periodeFin"
+                        #periodeFin="ngModel"
+                        required
+                        (change)="validateDates()"
+                        [disabled]="!isEditing"
+                >
+                <div class="error-message" *ngIf="periodeFin.touched && !periodeFin.valid && isEditing">
+                    <i class="fas fa-exclamation-circle"></i> Le champ Période de fin est requis.
+                </div>
+                <div class="error-message" *ngIf="periodeFin.touched && periodeFin.valid && !datesValid && isEditing">
+                    <i class="fas fa-exclamation-circle"></i> La période de fin doit être postérieure à la période de début.
+                </div>
+            </div>
+            <div class="form-group col-md-12" *ngIf="isReservation" [ngClass]="{'form-group-warning': !capacityValid && isEditing}">
+                <label>Nombre de Personnes</label>
+                <input
+                        type="number"
+                        class="form-control"
+                        [(ngModel)]="selectedItem.nombre"
+                        name="nombre"
+                        (ngModelChange)="validateCapacity()"
+                        [disabled]="!isEditing"
+                >
+                <div class="warning-message" *ngIf="!capacityValid && isEditing">
+                    <i class="fas fa-exclamation-triangle"></i> Le nombre de personnes dépasse la capacité totale des infrastructures ({{ totalCapacity }}).
+                </div>
+            </div>
+            <div class="form-group col-md-12" [ngClass]="{'form-group-error': !capacityValid && isEditing && !selectedItem.observation }">
+                <label>Observation</label>
+                <textarea
+                        class="form-control"
+                        placeholder="Exemple : Obligation du directeur General"
+                        [(ngModel)]="selectedItem.observation"
+                        name="observation"
+                        [disabled]="!isEditing"
+                ></textarea>
+                <div class="error-message" *ngIf="!capacityValid && isEditing && !selectedItem.observation ">
+                    <i class="fas fa-exclamation-circle"></i> Le champ observation est requis s'il y a une exception.
+                </div>
+            </div>
+            <div class="error-message" *ngIf="detailForm.submitted && (detailForm.invalid || !mouvementInfrasValid || !clientValid || !datesValid || !frequencesValid)">
+                <i class="fas fa-exclamation-circle"></i> Veuillez corriger les erreurs dans le formulaire avant de soumettre.
+            </div>
         </div>
         <div class="modal-footer">
-            <button
-                    *ngIf="!isEditing && selectedItem.typeMouvement.niveauProcessus != 0 && selectedItem.typeMouvement.niveauProcessus != null"
-                    type="button"
-                    class="btn btn-black"
-                    style="background-color: #3e3e3e"
-                    (click)="toggleEditMode()"
-                    [disabled]="isLoading"
-            >
+            <button *ngIf="!isEditing" type="button" class="btn btn-black" (click)="openHistoriquePopup(mouvementId)" [disabled]="isLoading">
+                <i class="fas fa-history"></i> Historique
+            </button>
+            <button *ngIf="!isEditing" type="button" class="btn btn-eye" (click)="openVisualisation()" [disabled]="isLoading">
+                <i class="fas fa-eye"></i> Visualisation
+            </button>
+<!--            <button *ngIf="!isEditing && selectedItem?.typeMouvement?.niveauProcessus === 0" type="button" class="btn btn-green" (click)="accorderMouvement(mouvementId)" [disabled]="isLoading">-->
+<!--                <i class="fas fa-check"></i> Accorder-->
+<!--            </button>-->
+            <button *ngIf="!isEditing && selectedItem?.typeMouvement?.nom !== 'Renseignement'" type="button" class="btn btn-green" (click)="toggleAddFacture()" [disabled]="isLoading">
+                <i class="fas fa-file-invoice"></i> Ajouter Facture
+            </button>
+            <button *ngIf="!isEditing && selectedItem?.typeMouvement?.nom !== 'Renseignement'" type="button" class="btn btn-blue" (click)="toggleListFacture()" [disabled]="isLoading">
+                <i class="fas fa-list"></i> Liste des Factures
+            </button>
+<!--            <button *ngIf="!isEditing && selectedItem?.typeMouvement?.nom !== 'Renseignement'" type="button" class="btn btn-grey" (click)="onClickDownload()" [disabled]="isLoading">-->
+<!--                <i class="fas fa-download"></i> Télécharger Proforma par defaut-->
+<!--            </button>-->
+            <button *ngIf="!isEditing && selectedItem?.typeMouvement?.niveauProcessus !== 2" type="button" class="btn btn-grey" (click)="classerMouvement(mouvementId)" [disabled]="isLoading">
+                <i class="fas fa-archive"></i> Classer
+            </button>
+            <button *ngIf="!isEditing" type="button" class="btn btn-eye" (click)="toggleEditMode()" [disabled]="isLoading">
                 <i class="fas fa-edit"></i> Modifier
             </button>
-            <button
-                    *ngIf="!isEditing && selectedItem.typeMouvement.niveauProcessus != 0 && selectedItem.typeMouvement.niveauProcessus != null"
-                    type="button"
-                    class="btn btn-grey"
-                    (click)="modalService.open(confirmClasserModal)"
-                    [disabled]="isLoading"
-            >
-                <i class="fas fa-file-archive"></i> Classer
-            </button>
-            <button
-                    *ngIf="!isEditing && selectedItem.typeMouvement.nom !== 'Renseignement' && selectedItem.typeMouvement.nom !== 'Classement'"
-                    type="button"
-                    class="btn btn-eye"
-                    (click)="toggleAddFacture()"
-                    [disabled]="isLoading"
-            >
-                <i class="fas fa-plus-circle"></i> Ajouter une facture pour ce mouvement
-            </button>
-            <button
-                    *ngIf="!isEditing && selectedItem.typeMouvement.nom !== 'Renseignement'"
-                    type="button"
-                    class="btn btn-green"
-                    (click)="toggleListFacture()"
-                    [disabled]="isLoading"
-            >
-                <i class="fas fa-file-invoice"></i> Ses factures
-            </button>
-            <button
-                    *ngIf="isEditing"
-                    type="submit"
-                    class="btn btn-green"
-                    [disabled]="detailForm.invalid || !mouvementInfrasValid || !clientValid || !datesValid || !capacityValid || !frequencesValid || isLoading"
-            >
-                <i class="fas fa-check"></i> Confirmer
-            </button>
-            <button type="button" class="btn btn-eye" (click)="openVisualisation()">
-                <i class="fas fa-eye"></i> Visualiser
-            </button>
-            <button *ngIf="isEditing" type="button" class="btn btn-grey" (click)="cancelEdit()" [disabled]="isLoading">
+            <button *ngIf="isEditing" type="button" class="btn btn-red" (click)="cancelEdit()" [disabled]="isLoading">
                 <i class="fas fa-times"></i> Annuler
             </button>
-            <button type="button" class="btn btn-red" (click)="activeModal.dismiss('Cancel click')" [disabled]="isLoading">
+            <button *ngIf="isEditing" type="submit" class="btn btn-green" [disabled]="isLoading || detailForm.invalid || !mouvementInfrasValid || !clientValid || !datesValid || !frequencesValid">
+                <i class="fas fa-check"></i> Confirmer
+            </button>
+            <button  *ngIf="!isEditing"  type="button" class="btn btn-red" (click)="activeModal.dismiss('Cross click')" [disabled]="isLoading">
                 <i class="fas fa-times"></i> Fermer
             </button>
         </div>
     </form>
+
+
 </div>
-
-<ng-template #clientListModal let-modal>
-    <div class="modal-header">
-        <h5 class="modal-title">Liste des clients</h5>
-        <button type="button" class="close" (click)="modal.dismiss('Cross Click')" aria-label="Fermer" [disabled]="isLoading">
-            <span aria-hidden="true">×</span>
-        </button>
-    </div>
-    <app-client-list (clientSelectedChange)="handleClientSelected($event, modal)"></app-client-list>
-</ng-template>
-
-<ng-template #infrastructureListModal let-modal>
-    <div class="modal-header">
-        <h5 class="modal-title">Liste Des Infrastructures</h5>
-        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
-            <span aria-hidden="true">×</span>
-        </button>
-    </div>
-    <app-infrastructure-list-popup
-            (infrastructureSelected)="handleInfrastructureSelected($event, modal)"
-            [infrastructureNotInSelections]="infrastructuresNotInSelections"
-    ></app-infrastructure-list-popup>
-</ng-template>
-
-<ng-template #confirmClasserModal let-modal>
-    <div class="modal-header">
-        <h5 class="modal-title">Confirmation de Classement</h5>
-        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Fermer" [disabled]="isLoading">
-            <span aria-hidden="true">×</span>
-        </button>
-    </div>
-    <div class="modal-body">
-        <p>Voulez-vous vraiment classer ce mouvement ?</p>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-red" (click)="modal.dismiss('Cancel click')" [disabled]="isLoading">
-            <i class="fas fa-times"></i> Annuler
-        </button>
-        <button
-                type="button"
-                class="btn btn-green"
-                (click)="classerMouvement(mouvementId); modal.dismiss('Cancel click')"
-                [disabled]="isLoading"
-        >
-            <i class="fas fa-check"></i> Oui
-        </button>
-    </div>
-</ng-template>
-
-<ng-template #confirmAccorderModal let-modal>
-    <div class="modal-header">
-        <h5 class="modal-title">Confirmation d'Accord</h5>
-        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Fermer" [disabled]="isLoading">
-            <span aria-hidden="true">×</span>
-        </button>
-    </div>
-    <div class="modal-body">
-        <p>Voulez-vous vraiment accorder, c'est-à-dire mettre en occupation cette réservation ?</p>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-red" (click)="modal.dismiss('Cancel click')" [disabled]="isLoading">
-            <i class="fas fa-times"></i> Annuler
-        </button>
-        <button
-                type="button"
-                class="btn btn-green"
-                (click)="accorderMouvement(mouvementId); modal.dismiss('Cancel click')"
-                [disabled]="isLoading"
-        >
-            <i class="fas fa-check"></i> Oui
-        </button>
-    </div>
-</ng-template>

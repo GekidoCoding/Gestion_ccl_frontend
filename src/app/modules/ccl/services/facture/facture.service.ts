@@ -44,6 +44,13 @@ export class FactureService {
         { responseType: 'blob' }
     );
   }
+  downloadContrat(idFacture: string): Observable<Blob> {
+    return this.http.post(
+        `${this.apiUrl}/export-contrat/${idFacture}`,
+        {},
+        { responseType: 'blob' }
+    );
+  }
   downloadProformaExist(idFacture: string): Observable<Blob> {
     return this.http.post(
         `${this.apiUrl}/export-proforma/exist/${idFacture}`,
@@ -59,14 +66,29 @@ export class FactureService {
     );
   }
 
-  sendFactureEmail(idFacture: string, destinataires: string[]): Observable<string> {
+  sendFactureEmail(id: string, destinataires: string[]): Observable<string> {
     const body = {
-      idFacture,
+      id,
       destinataires
     };
     return this.http.post<string>(`${this.apiUrl}/sendEmail/facture`, body);
   }
 
+  sendContratEmail(id: string, destinataires: string[]): Observable<string> {
+    const body = {
+      id,
+      destinataires
+    };
+    return this.http.post<string>(`${this.apiUrl}/sendEmail/contrat`, body);
+  }
+
+  sendPaiementEmail(id: string, destinataires: string[]): Observable<string> {
+    const body = {
+      id,
+      destinataires
+    };
+    return this.http.post<string>(`${this.apiUrl}/sendEmail/paiement`, body);
+  }
 
 
 
