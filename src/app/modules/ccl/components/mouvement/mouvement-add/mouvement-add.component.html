@@ -4,15 +4,15 @@
         <span aria-hidden="true">×</span>
     </button>
 </div>
+
 <div class="modal-body">
     <app-loading [loading]="isLoading"></app-loading>
     <form #mouvementForm="ngForm" (ngSubmit)="allActions()">
-
         <div class="form-row">
             <div class="form-group col-md-12">
-                <div class="checkbox-item form-check-inline" >
+                <div class="checkbox-item form-check-inline">
                     <input style="width: 40px" type="checkbox" class="form-check-input" [(ngModel)]="isRestriction" (ngModelChange)="loadTypeMouvements()" name="isRestriction" id="isRestriction">
-                    <label style="margin-top: 9px"  class="form-check-label" for="isRestriction">Désactiver les restrictions <small class="text-danger ms-2">(à appuyer qu'en cas d'urgence)</small></label>
+                    <label style="margin-top: 9px" class="form-check-label" for="isRestriction">Désactiver les restrictions <small class="text-danger ms-2">(à appuyer qu'en cas d'urgence)</small></label>
                 </div>
             </div>
             <div class="form-group col-md-12" [ngClass]="{'form-group-error': typeMouvement.touched && !typeMouvement.valid}">
@@ -28,7 +28,7 @@
             <div class="form-group col-md-12" [ngClass]="{'form-group-error': mouvementForm.submitted && (!mouvementInfrasValid || !frequencesValid)}">
                 <label>Infrastructures Concernées <strong style="color: red">*</strong>:</label>
                 <div class="input-group-append mb-3">
-                    <button type="button" (click)="openPopup(infrastructureListModal)" class="btn btn-add">
+                    <button type="button" (click)="openInfraListPopup()" class="btn btn-add">
                         <i class="fas fa-building"></i> Sélectionner une Infrastructure
                     </button>
                 </div>
@@ -48,7 +48,7 @@
                         </thead>
                         <tbody>
                         <tr *ngFor="let mvt of newItem.mouvementInfras; let i = index;">
-                            <td>{{ mvt.infrastructure.nom+" "+ mvt.infrastructure.numero || 'N/A' }}</td>
+                            <td>{{ mvt.infrastructure.nom + " " + mvt.infrastructure.numero || 'N/A' }}</td>
                             <td>{{ mvt.infrastructure.modeleInfra?.nom || 'N/A' }}</td>
                             <td>{{ mvt.infrastructure.capacite || 'N/A' }}</td>
                             <td>
@@ -87,7 +87,7 @@
             <div class="form-group col-md-12" [ngClass]="{'form-group-error': mouvementForm.submitted && !clientValid}">
                 <label>Client Concerné <strong style="color: red">*</strong>:</label>
                 <div class="input-group-append mb-3">
-                    <button type="button" (click)="openPopup(clientListModal)" class="btn btn-add">
+                    <button type="button" (click)="openClientListPopup()" class="btn btn-add">
                         <i class="fas fa-users"></i> Sélectionner un Client
                     </button>
                 </div>
@@ -150,18 +150,16 @@
                 </div>
             </div>
             <div class="form-group col-md-12" *ngIf="isReservation" [ngClass]="{'form-group-error': !capacityValid || !isRestriction}">
-                <label>Obervation</label>
+                <label>Observation</label>
                 <textarea class="form-control" placeholder="Exemple : Obligation du directeur General" [(ngModel)]="newItem.observation" name="observation"></textarea>
-                <div class="error-message" *ngIf="!capacityValid ||  !isRestriction">
-                    <i class="fas fa-exclamation-circle"></i> Le champ observation est requise s'il y a une excéption.
+                <div class="error-message" *ngIf="!capacityValid || !isRestriction">
+                    <i class="fas fa-exclamation-circle"></i> Le champ observation est requis s'il y a une exception.
                 </div>
             </div>
-
             <div class="error-message" *ngIf="mouvementForm.submitted && (mouvementForm.invalid || !mouvementInfrasValid || !clientValid || !datesValid)">
                 <i class="fas fa-exclamation-circle"></i> Veuillez corriger les erreurs dans le formulaire avant de soumettre.
             </div>
         </div>
-
         <div class="modal-footer">
             <button type="button" class="btn btn-red" (click)="activeModal.dismiss('Cross click')"><i class="fas fa-times"></i> Annuler</button>
             <button type="submit" class="btn btn-green" [disabled]="mouvementForm.invalid || !mouvementInfrasValid || !clientValid || !datesValid">
@@ -170,26 +168,4 @@
         </div>
     </form>
 
-    <ng-template #clientListModal let-modal>
-        <div class="modal-header">
-            <h5 class="modal-title">Liste Des Clients</h5>
-            <button type="button" class="close" (click)="modal.dismiss('Cross Click')" aria-label="Close">
-                <span aria-hidden="true">×</span>
-            </button>
-        </div>
-        <app-client-list
-                [clientSelected]="newItem.client"
-                (clientSelectedChange)="handleClientSelected($event, modal)"
-        ></app-client-list>
-    </ng-template>
-    <ng-template #infrastructureListModal let-modal>
-        <div class="modal-header">
-            <h5 class="modal-title">Liste Des Infrastructures</h5>
-            <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close"><span aria-hidden="true">×</span></button>
-        </div>
-        <app-infrastructure-list-popup
-                (infrastructureSelected)="handleInfrastructureSelected($event, modal)"
-                [infrastructureNotInSelections]="infrastructuresNotInSelections"
-        ></app-infrastructure-list-popup>
-    </ng-template>
 </div>

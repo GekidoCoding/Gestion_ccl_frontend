@@ -10,6 +10,7 @@ import {FactureService} from "../../../services/facture/facture.service";
 import {Facture} from "../../../model/facture/facture";
 import {WarningPopupComponent} from "../../warning-popup/warning-popup.component";
 import {ConfigService} from "../../../services/config/config.service";
+import {SendEmailFactureComponent} from "../../send-email-facture/send-email-facture.component";
 
 
 @Component({
@@ -73,6 +74,13 @@ export class PaiementPopupComponent implements OnInit {
     });
   }
 
+  openSendEmailFacture(id : String) {
+    const options:NgbModalOptions= {size:'lg' , centered:true};
+    let composant = this.modalService.open(SendEmailFactureComponent , options);
+    composant.componentInstance.id=id;
+    composant.componentInstance.mode='paiement'
+
+  }
 
   openAddModal() {
     const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };

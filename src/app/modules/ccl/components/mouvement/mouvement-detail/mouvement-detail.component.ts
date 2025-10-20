@@ -22,6 +22,10 @@ import { DetailInfrastructureComponent } from '../../infrastructure/detail-infra
 import { FactureService } from '../../../services/facture/facture.service';
 import { YesNoWarningComponent } from '../../yes-no-warning/yes-no-warning.component';
 import { MouvementVisualisationComponent } from '../mouvement-visualisation/mouvement-visualisation.component';
+import {
+  InfrastructureListPopupComponent
+} from "../../infrastructure/infrastructure-list-popup/infrastructure-list-popup.component";
+import {ClientListPopupComponent} from "../../client/client-list-popup/client-list-popup.component";
 
 @Component({
   selector: 'app-mouvement-detail',
@@ -48,6 +52,7 @@ export class MouvementDetailComponent implements OnInit {
   frequencesValid: boolean = true;
   defaultFrequence: Frequence = new Frequence();
   register: boolean = false;
+  infrastructuresNotInSelections: Infrastructure[] = [];
 
   constructor(
       public activeModal: NgbActiveModal,
@@ -116,6 +121,7 @@ export class MouvementDetailComponent implements OnInit {
               frequence: mi.frequence ? { ...mi.frequence } : { ...this.defaultFrequence }
             })) : []
           };
+          this.infrastructuresNotInSelections = this.selectedItem.mouvementInfras.map(mi => mi.infrastructure);
           this.onTypeMouvementChange();
           this.filterTypeMouvements();
           this.validateMouvementInfras();
@@ -194,24 +200,26 @@ export class MouvementDetailComponent implements OnInit {
     this.filterTypeMouvements();
   }
 
-  handleInfrastructureSelected(infra: Infrastructure, content: any) {
-    if (!this.selectedItem.mouvementInfras.some((existing) => existing.infrastructure.id === infra.id)) {
-      const mi = new MouvementInfra();
-      mi.infrastructure = infra;
-      mi.mouvement.id = this.selectedItem.id;
-      mi.frequence = { ...this.defaultFrequence };
-
-      this.selectedItem.mouvementInfras.push(mi);
-
-      this.validateMouvementInfras();
-      this.validateCapacity();
-      this.validateFrequences();
-    }
-    content.dismiss('Cross Click');
+  handleInfrastructureSelected(infras: Infrastructure[]) {
+    infras.forEach(infra => {
+      if (!this.selectedItem.mouvementInfras.some(existing => existing.infrastructure.id === infra.id)) {
+        const mi = new MouvementInfra();
+        mi.infrastructure = infra;
+        mi.mouvement.id = this.selectedItem.id;
+        mi.frequence = { ...this.defaultFrequence };
+        this.selectedItem.mouvementInfras.push(mi);
+        this.infrastructuresNotInSelections.push(infra);
+      }
+    });
+    this.validateMouvementInfras();
+    this.validateCapacity();
+    this.validateFrequences();
   }
 
   removeInfrastructure(index: number) {
+    const infra = this.selectedItem.mouvementInfras[index].infrastructure;
     this.selectedItem.mouvementInfras = this.selectedItem.mouvementInfras.filter((_, i) => i !== index);
+    this.infrastructuresNotInSelections = this.infrastructuresNotInSelections.filter(i => i.id !== infra.id);
     this.validateMouvementInfras();
     this.validateCapacity();
     this.validateFrequences();
@@ -223,11 +231,10 @@ export class MouvementDetailComponent implements OnInit {
     modal.componentInstance.infrastructureId = id;
   }
 
-  handleClientSelected(client: Client, content: any) {
+  handleClientSelected(client: Client) {
     if (this.selectedItem) {
       this.selectedItem.client = { ...client };
       this.validateClient();
-      content.dismiss('Cross Click');
     }
   }
 
@@ -274,7 +281,7 @@ export class MouvementDetailComponent implements OnInit {
       return;
     }
     if (!this.selectedItem.periodeDebut || !this.selectedItem.periodeFin) {
-      this.datesValid = true; // Will be caught by required validation
+      this.datesValid = true;
       return;
     }
     const debut = new Date(this.selectedItem.periodeDebut);
@@ -336,6 +343,7 @@ export class MouvementDetailComponent implements OnInit {
               }))
               : []
         };
+        this.infrastructuresNotInSelections = this.selectedItem.mouvementInfras.map(mi => mi.infrastructure);
         this.isEditing = false;
         this.onTypeMouvementChange();
         this.filterTypeMouvements();
@@ -402,6 +410,7 @@ export class MouvementDetailComponent implements OnInit {
                 }))
                 : []
           };
+          this.infrastructuresNotInSelections = this.selectedItem.mouvementInfras.map(mi => mi.infrastructure);
           this.isEditing = false;
           this.onTypeMouvementChange();
           this.filterTypeMouvements();
@@ -410,6 +419,7 @@ export class MouvementDetailComponent implements OnInit {
           this.validateDates();
           this.validateCapacity();
           this.validateFrequences();
+          this.loadMouvement();
           this.afterAction.emit();
           this.isLoading = false;
         },
@@ -440,6 +450,7 @@ export class MouvementDetailComponent implements OnInit {
               }))
               : []
         };
+        this.infrastructuresNotInSelections = this.selectedItem.mouvementInfras.map(mi => mi.infrastructure);
         this.toastr.success('Mouvement classé avec succès');
         this.onTypeMouvementChange();
         this.filterTypeMouvements();
@@ -475,6 +486,7 @@ export class MouvementDetailComponent implements OnInit {
               }))
               : []
         };
+        this.infrastructuresNotInSelections = this.selectedItem.mouvementInfras.map(mi => mi.infrastructure);
         this.toastr.success('Mouvement accordé avec succès');
         this.onTypeMouvementChange();
         this.filterTypeMouvements();
@@ -512,13 +524,29 @@ export class MouvementDetailComponent implements OnInit {
     modal.componentInstance.mouvementId = mouvementId;
   }
 
-  get infrastructuresNotInSelections(): Infrastructure[] {
-    return (this.selectedItem.mouvementInfras || []).map((m) => m.infrastructure);
-  }
-
   openVisualisation() {
     const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
     const composant = this.modalService.open(MouvementVisualisationComponent, options);
     composant.componentInstance.mouvementId = this.mouvementId;
+  }
+  openInfraListPopup(){
+    const options:NgbModalOptions= {size: 'lg', centered: true };
+    let composant=this.modalService.open(InfrastructureListPopupComponent,options);
+    composant.componentInstance.infrastructureNotInSelections=this.infrastructuresNotInSelections;
+    composant.componentInstance.infrastructureSelectedChange.subscribe({
+      next: (data: Infrastructure[]) => {
+        this.handleInfrastructureSelected(data );
+      }
+    })
+  }
+  openClientListPopup(){
+    const options:NgbModalOptions= {size: 'lg', centered: true };
+    let composant=this.modalService.open(ClientListPopupComponent,options);
+    composant.componentInstance.clientSelected=this.selectedItem.client;
+    composant.componentInstance.clientSelectedChange.subscribe({
+      next: (data: Client) => {
+        this.handleClientSelected(data);
+      }
+    })
   }
 }

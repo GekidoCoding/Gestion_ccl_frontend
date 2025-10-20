@@ -15,9 +15,14 @@ import { InfrastructureService } from '../../../services/infrastructure/infrastr
 import { MouvementInfra } from '../../../model/mouvement-infra/mouvement-infra';
 import { FrequenceService } from '../../../services/frequence/frequence.service';
 import { Frequence } from '../../../model/frequence/frequence';
-import {DetailInfrastructureComponent} from "../../infrastructure/detail-infrastructure/detail-infrastructure.component";
-import {WarningPopupComponent} from "../../warning-popup/warning-popup.component";
-import {ComponentUtil} from "../../../util/component-util";
+import { DetailInfrastructureComponent } from '../../infrastructure/detail-infrastructure/detail-infrastructure.component';
+import { WarningPopupComponent } from '../../warning-popup/warning-popup.component';
+import { ComponentUtil } from '../../../util/component-util';
+import {
+  InfrastructureListPopupComponent
+} from "../../infrastructure/infrastructure-list-popup/infrastructure-list-popup.component";
+import {ClientListPopupComponent} from "../../client/client-list-popup/client-list-popup.component";
+
 @Component({
   selector: 'app-mouvement-add',
   templateUrl: './mouvement-add.component.html',
@@ -28,8 +33,8 @@ export class MouvementAddComponent implements OnInit {
   @Input() client: Client = new Client();
   @Output() afterAdd = new EventEmitter<void>();
   @ViewChild('mouvementForm') mouvementForm!: NgForm;
-  @Input( ) newItem: Mouvement = new Mouvement();
-  public componentUtil:ComponentUtil = new ComponentUtil();
+  @Input() newItem: Mouvement = new Mouvement();
+  public componentUtil: ComponentUtil = new ComponentUtil();
   typeMouvements: TypeMouvement[] = [];
   clients: Client[] = [];
   isReservation: boolean = true;
@@ -44,7 +49,9 @@ export class MouvementAddComponent implements OnInit {
   frequences: Frequence[] = [];
   defaultFrequence: Frequence = new Frequence();
   frequencesValid: boolean = true;
-  isRestriction :boolean =true;
+  isRestriction: boolean = true;
+  infrastructuresNotInSelections: Infrastructure[] = [];
+
   constructor(
       public activeModal: NgbActiveModal,
       private modalService: NgbModal,
@@ -71,8 +78,9 @@ export class MouvementAddComponent implements OnInit {
       const mi = new MouvementInfra();
       mi.infrastructure = this.infrastructure;
       mi.mouvement = new Mouvement();
-      mi.frequence = { ...this.defaultFrequence }; // Create a new instance
+      mi.frequence = { ...this.defaultFrequence };
       this.newItem.mouvementInfras = [mi];
+      this.infrastructuresNotInSelections.push(this.infrastructure);
       this.mouvementInfrasValid = true;
       this.validateCapacity();
       this.validateFrequences();
@@ -119,10 +127,9 @@ export class MouvementAddComponent implements OnInit {
 
   loadTypeMouvements() {
     this.isLoading = true;
-    if(!this.isRestriction){
+    if (!this.isRestriction) {
       this.loadTypeMouvementsNotrier();
-    }
-    else{
+    } else {
       this.typeMouvementService.getTrierAdding().subscribe({
         next: (objs) => {
           this.typeMouvements = objs;
@@ -136,7 +143,6 @@ export class MouvementAddComponent implements OnInit {
         }
       });
     }
-
   }
 
   loadTypeMouvementsNotrier() {
@@ -155,8 +161,6 @@ export class MouvementAddComponent implements OnInit {
     });
   }
 
-
-
   onTypeMouvementChange() {
     const selectedType = this.typeMouvements.find(type => type.id === this.newItem.typeMouvement.id);
     this.isReservation = selectedType?.nom !== 'Renseignement';
@@ -172,36 +176,41 @@ export class MouvementAddComponent implements OnInit {
     }
   }
 
-  handleInfrastructureSelected(infra: Infrastructure, content: any) {
-    if (!this.newItem.mouvementInfras.some(existing => existing.infrastructure.id === infra.id)) {
-      const mi = new MouvementInfra();
-      mi.infrastructure = infra;
-      mi.mouvement = new Mouvement();
-      mi.frequence = { ...this.defaultFrequence }; // Create a new instance
-      this.newItem.mouvementInfras.push(mi);
-      this.mouvementInfrasValid = true;
-    }
-    content.dismiss('Cross Click');
+  handleInfrastructureSelected(infras: Infrastructure[]) {
+    infras.forEach(infra => {
+      if (!this.newItem.mouvementInfras.some(existing => existing.infrastructure.id === infra.id)) {
+        const mi = new MouvementInfra();
+        mi.infrastructure = infra;
+        mi.mouvement = new Mouvement();
+        mi.frequence = { ...this.defaultFrequence };
+        this.newItem.mouvementInfras.push(mi);
+        this.infrastructuresNotInSelections.push(infra);
+      }
+    });
+    // content.dismiss('Cross Click');
     this.validateMouvementInfras();
     this.validateCapacity();
     this.validateFrequences();
   }
 
   removeInfrastructure(index: number) {
+    const infra = this.newItem.mouvementInfras[index].infrastructure;
     this.newItem.mouvementInfras = this.newItem.mouvementInfras.filter((_, i) => i !== index);
+    this.infrastructuresNotInSelections = this.infrastructuresNotInSelections.filter(i => i.id !== infra.id);
     this.validateMouvementInfras();
     this.validateCapacity();
     this.validateFrequences();
   }
-  openDetailModal(id:string){
+
+  openDetailModal(id: string) {
     const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
     const modal = this.modalService.open(DetailInfrastructureComponent, options);
     modal.componentInstance.infrastructureId = id;
   }
-  handleClientSelected(client: Client, content: any) {
+
+  handleClientSelected(client: Client) {
     this.newItem.client = { ...client };
     this.clientValid = !!client.id;
-    content.dismiss('Cross Click');
     this.validateClient();
   }
 
@@ -219,7 +228,7 @@ export class MouvementAddComponent implements OnInit {
       return;
     }
     if (!this.newItem.periodeDebut || !this.newItem.periodeFin) {
-      this.datesValid = true; // Will be caught by required validation
+      this.datesValid = true;
       return;
     }
     const debut = new Date(this.newItem.periodeDebut);
@@ -249,7 +258,6 @@ export class MouvementAddComponent implements OnInit {
   onFrequenceChange() {
     this.validateFrequences();
   }
-
 
   openWarningPopup(message: string) {
     const options: NgbModalOptions = {
@@ -302,15 +310,14 @@ export class MouvementAddComponent implements OnInit {
       this.newItem.dhMouvement = this.newItem.dhMouvement + ':00';
     }
 
-    if(this.isRestriction){
+    if (this.isRestriction) {
       this.creationWithRestrict();
-    }
-    if(!this.isRestriction){
+    } else {
       this.create();
     }
-
   }
-  creationWithRestrict(){
+
+  creationWithRestrict() {
     this.service.getConflictMouvement(this.newItem).subscribe({
       next: result => {
         if (result && result.length > 0) {
@@ -339,8 +346,9 @@ export class MouvementAddComponent implements OnInit {
       }
     });
   }
-  create(){
-    this.service.create(this.newItem ).subscribe({
+
+  create() {
+    this.service.create(this.newItem).subscribe({
       next: (created: Mouvement) => {
         if (created.typeMouvement.nom !== 'Renseignement') {
           this.openFacture(created);
@@ -351,7 +359,7 @@ export class MouvementAddComponent implements OnInit {
         this.isLoading = false;
       },
       error: (error) => {
-        console.log(JSON.stringify( error));
+        console.log(JSON.stringify(error));
         const message = error.error?.message || "Erreur inconnue";
         this.toastr.error(message);
         this.ngOnInit();
@@ -360,15 +368,30 @@ export class MouvementAddComponent implements OnInit {
     });
   }
 
-
-
   openPopup(content: any) {
     const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
     this.modalService.open(content, options);
   }
+  openInfraListPopup(){
 
-  get infrastructuresNotInSelections(): Infrastructure[] {
-    return (this.newItem.mouvementInfras || []).map(m => m.infrastructure);
+    const options:NgbModalOptions= {size: 'lg', centered: true };
+    let composant=this.modalService.open(InfrastructureListPopupComponent,options);
+    composant.componentInstance.infrastructureNotInSelections=this.infrastructuresNotInSelections;
+    composant.componentInstance.infrastructureSelectedChange.subscribe({
+      next: (data: Infrastructure[]) => {
+        this.handleInfrastructureSelected(data );
+      }
+    })
+  }
+  openClientListPopup(){
+    const options:NgbModalOptions= {size: 'lg', centered: true };
+    let composant=this.modalService.open(ClientListPopupComponent,options);
+    composant.componentInstance.clientSelected=this.newItem.client;
+    composant.componentInstance.clientSelectedChange.subscribe({
+      next: (data: Client) => {
+          this.handleClientSelected(data);
+      }
+    })
   }
 
   openFacture(mouvement: Mouvement) {

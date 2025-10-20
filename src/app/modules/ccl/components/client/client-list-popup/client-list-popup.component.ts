@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
+import {NgbActiveModal, NgbModal, NgbModalOptions} from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { Client } from '../../../model/client/client';
 import { TypeClient } from '../../../model/type-client/type-client';
@@ -51,7 +51,8 @@ export class ClientListPopupComponent implements OnInit {
       private service: ClientService,
       private typeClientService: TypeClientService,
       private toastr: ToastrService,
-      private router: Router
+      private router: Router,
+      public activeModal:NgbActiveModal
   ) {
     this.filteredDesignations = this.designationCtrl.valueChanges.pipe(
         startWith(''),
@@ -197,7 +198,7 @@ export class ClientListPopupComponent implements OnInit {
     this.clientSelected = this.items.find(item => item.id === id);
     if (this.clientSelected) {
       this.clientSelectedChange.emit(this.clientSelected);
-      // this.modalService.dismissAll(); // Uncomment if you want to close the modal after selection
+      this.activeModal.dismiss('Cross Click'); // Uncomment if you want to close the modal after selection
     }
   }
 

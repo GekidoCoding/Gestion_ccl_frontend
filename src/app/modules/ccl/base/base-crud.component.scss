@@ -141,7 +141,12 @@ $font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helve
     border-radius: 12px;
   }
 }
-
+.results-count {
+  font-size: clamp(1vw, 1rem, 2vw);
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 15px;
+}
 .color-square {
   display: inline-block;
   width: 16px;

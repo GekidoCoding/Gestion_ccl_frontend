@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
+import {NgbActiveModal, NgbModal, NgbModalOptions} from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { Infrastructure } from '../../../model/infrastructure/infrastructure';
 import { Localisation } from '../../../model/localisation/localisation';
@@ -27,9 +27,8 @@ import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
   styleUrls: ['./infrastructure-list-popup.component.scss']
 })
 export class InfrastructureListPopupComponent implements OnInit {
-  @Output() infrastructureSelected = new EventEmitter<Infrastructure>();
+  @Output() infrastructureSelectedChange = new EventEmitter<Infrastructure[]>();
   @Input() infrastructureNotInSelections: Infrastructure[] = [];
-  @ViewChild(InfrastructureAddFormComponent) addFormComponent!: InfrastructureAddFormComponent;
   items: Infrastructure[] = [];
   filteredItems: Infrastructure[] = [];
   allItems: Infrastructure[] = [];
@@ -51,13 +50,14 @@ export class InfrastructureListPopupComponent implements OnInit {
   modelesIds: string[] = [];
   debutSearch: string = '';
   finSearch: string = '';
+  selectedInfrastructures: Infrastructure[] = [];
 
   // Pagination properties
   currentPage: number = 0;
   totalPages: number = 0;
   totalItems: number = 0;
   pageNumbers: number[] = [];
-  readonly itemsPerPage: number = 10; // Fixed page size
+  readonly itemsPerPage: number = 10;
 
   // Autocomplete properties
   designationCtrl = new FormControl('');
@@ -71,7 +71,8 @@ export class InfrastructureListPopupComponent implements OnInit {
       private catInfraService: CategorieInfraService,
       private modeleInfraService: ModeleInfraService,
       private toastr: ToastrService,
-      public modal: NgbModal
+      public modal: NgbModal,
+      public activeModal:NgbActiveModal
   ) {
     this.filteredDesignations = this.designationCtrl.valueChanges.pipe(
         startWith(''),
@@ -95,7 +96,7 @@ export class InfrastructureListPopupComponent implements OnInit {
     );
   }
 
-  displayValueFn(value:string): string {
+  displayValueFn(value: string): string {
     return value;
   }
 
@@ -117,7 +118,6 @@ export class InfrastructureListPopupComponent implements OnInit {
     });
   }
 
-  // Helper method to generate visible page numbers
   getVisiblePageNumbers(totalPages: number, currentPage: number): number[] {
     if (totalPages <= 0) return [];
     const maxVisible = 5;
@@ -138,9 +138,12 @@ export class InfrastructureListPopupComponent implements OnInit {
         this.totalPages = page.totalPages;
         this.totalItems = page.totalElements;
         this.pageNumbers = this.getVisiblePageNumbers(this.totalPages, this.currentPage + 1);
-        this.filteredItems = this.items.filter(
-            item => !this.infrastructureNotInSelections.some(notSelected => notSelected.id === item.id)
-        );
+        this.filteredItems = this.items
+            .filter(item =>
+                !this.infrastructureNotInSelections.some(notSelected => notSelected.id === item.id) &&
+                !this.selectedInfrastructures.some(selected => selected.id === item.id)
+            )
+            .sort((a, b) => a.nom.localeCompare(b.nom));
         this.isLoading = false;
       },
       error: (error) => {
@@ -194,10 +197,26 @@ export class InfrastructureListPopupComponent implements OnInit {
     });
   }
 
-  selectionnedInfrastructure(id: string) {
-    const selectedInfra = this.items.find(item => item.id === id);
-    if (selectedInfra) {
-      this.infrastructureSelected.emit(selectedInfra);
+  selectInfrastructure(id: string) {
+    const infra = this.items.find(item => item.id === id);
+    if (infra && !this.selectedInfrastructures.some(selected => selected.id === infra.id)) {
+      this.selectedInfrastructures.push(infra);
+      this.selectedInfrastructures.sort((a, b) => a.nom.localeCompare(b.nom));
+      this.loadInfrastructures(); // Refresh filtered items to exclude newly selected infrastructure
+    }
+  }
+
+  removeSelectedInfrastructure(id: string) {
+    this.selectedInfrastructures = this.selectedInfrastructures.filter(item => item.id !== id);
+    this.loadInfrastructures(); // Refresh filtered items to include removed infrastructure
+  }
+
+  validateSelection() {
+    if (this.selectedInfrastructures.length > 0) {
+      this.infrastructureSelectedChange.emit([...this.selectedInfrastructures]);
+      this.activeModal.dismiss();
+    } else {
+      this.toastr.warning('Veuillez sélectionner au moins une infrastructure.');
     }
   }
 
@@ -210,7 +229,7 @@ export class InfrastructureListPopupComponent implements OnInit {
     this.localisationIds = [];
     this.localisationSelectionned = {};
     this.modelesInfraSelectionned = {};
-    this.currentPage = 0; // Reset to first page
+    this.currentPage = 0;
     this.loadInfrastructures();
   }
 
@@ -249,9 +268,12 @@ export class InfrastructureListPopupComponent implements OnInit {
         this.totalPages = page.totalPages;
         this.totalItems = page.totalElements;
         this.pageNumbers = this.getVisiblePageNumbers(this.totalPages, this.currentPage + 1);
-        this.filteredItems = this.items.filter(
-            item => !this.infrastructureNotInSelections.some(notSelected => notSelected.id === item.id)
-        );
+        this.filteredItems = this.items
+            .filter(item =>
+                !this.infrastructureNotInSelections.some(notSelected => notSelected.id === item.id) &&
+                !this.selectedInfrastructures.some(selected => selected.id === item.id)
+            )
+            .sort((a, b) => a.nom.localeCompare(b.nom));
         this.isLoading = false;
       },
       error: (error) => {
@@ -279,7 +301,7 @@ export class InfrastructureListPopupComponent implements OnInit {
     this.modelesIds = [];
     this.debutSearch = '2025-01-01T00:00';
     this.finSearch = '2025-01-02T00:00';
-    this.currentPage = 0; // Reset to first page
+    this.currentPage = 0;
     this.loadInfrastructures();
   }
 
@@ -310,7 +332,6 @@ export class InfrastructureListPopupComponent implements OnInit {
     this.newItem.modeleInfra = new ModeleInfra();
   }
 
-  // Pagination method
   changePage(page: number) {
     if (page < 1 || page > this.totalPages || page === this.currentPage + 1) return;
     this.currentPage = page - 1;
@@ -334,7 +355,6 @@ export class InfrastructureListPopupComponent implements OnInit {
   addItem(infrastructure: Infrastructure) {
     this.infrastructureService.checkInfrastructureSimilarity(infrastructure).subscribe({
       next: (data: Infrastructure[]) => {
-        console.log(JSON.stringify(data));
         if (data.length > 0) {
           let message: string = InfrastructureUtil.getWarningMessageSimilarityFromList(data);
           let composant = this.modalService.open(YesNoWarningComponent);
@@ -358,6 +378,7 @@ export class InfrastructureListPopupComponent implements OnInit {
       }
     });
   }
+
 
   openAddModalPopup() {
     const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };

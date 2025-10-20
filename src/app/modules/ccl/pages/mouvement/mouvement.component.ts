@@ -297,7 +297,7 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
       this.selectAll = false;
       this.isSelectionMode = false;
       modal.close();
-      this.showSuccessMessage('Annulatin réussie !');
+      this.showSuccessMessage('Annulation réussie !');
     }).catch(error => {
       console.error('Error deleting :', error);
     }).finally(() => {
@@ -403,26 +403,6 @@ export class MouvementComponent extends BaseCrudComponent<Mouvement> implements 
     });
   }
 
-  openDetailModal(item: Client) {}
-
-  openClientAddModal(content: any) {
-    const options: NgbModalOptions = { size: 'lg', centered: true, backdrop: 'static' };
-    this.modalService.open(content, options);
-  }
-
-  handleClientAdd(client: Client) {
-    this.clientService.create(client).subscribe({
-      next: (created) => {
-        this.loadClients();
-        this.toastr.success('Client ajouté avec succès !');
-        this.loadData(); // Ensure data is reloaded after client creation
-      },
-      error: (error) => {
-        console.error('Error adding client:', error);
-        this.toastr.error('Erreur lors de l\'ajout du client');
-      }
-    });
-  }
 
   sortByColumn(column: string) {
     if (this.sortConfig.column === column) {

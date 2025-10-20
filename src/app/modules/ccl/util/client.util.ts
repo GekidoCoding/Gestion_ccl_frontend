@@ -64,7 +64,7 @@ export class ClientUtil {
 
     static getWarningMessageSimilarityFromList(list: Client[]): string {
         if (!list || list.length === 0) return '';
-        const details = list.map(i => `- ${i.designationClient || '(inconnu)'}`).join('\n');
-        return `Des Clients similaires existent déjà :\n${details}\n\nVoulez-vous quand même créer celle-ci ?`;
+        const details = list.map(i => `- ${i.designationClient+' '+i.contacts || '(inconnu)'}`).join('\n');
+        return `Des Clients similaires( nom ou contacts ) existent déjà :\n${details}\n\nVoulez-vous quand même créer celle-ci ?`;
     }
 }

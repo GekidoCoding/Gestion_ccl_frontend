@@ -11,11 +11,11 @@
             <i class="fas fa-plus"></i> Ajouter une Infrastructure
         </button>
     </div>
-    <div  *ngIf="mouvementInfras.length > 0">
+    <div *ngIf="mouvementInfras.length > 0">
         <table class="table table-normal">
             <thead>
             <tr>
-                <th>Nom & Numero</th>
+                <th>Nom & Numéro</th>
                 <th>Modèle</th>
                 <th>Capacité</th>
                 <th>Fréquence</th>
@@ -35,7 +35,6 @@
                             #frequence="ngModel"
                             required
                             (ngModelChange)="onFrequenceChange(i)"
-                            readonly
                     >
                         <option [ngValue]="null">-- Sélectionnez la fréquence du tarif --</option>
                         <option *ngFor="let frequence of frequences" [ngValue]="frequence.id">{{ frequence.libelle }}</option>
@@ -49,7 +48,7 @@
                         <i class="fas fa-trash"></i> Supprimer
                     </button>
                     <button class="btn btn-delete" style="color: #a1a100" (click)="openDetailModal(mvt.infrastructure.id)">
-                        <i class="fa fa-info-circle"></i> Detail
+                        <i class="fa fa-info-circle"></i> Détail
                     </button>
                 </td>
             </tr>
@@ -61,7 +60,7 @@
     </div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-red" (click)="activeModal.dismiss('Cross click')"><i class="fas fa-times"></i>Fermer</button>
+    <button type="button" class="btn btn-red" (click)="activeModal.dismiss('Cross click')"><i class="fas fa-times"></i> Fermer</button>
 </div>
 
 <ng-template #deleteModal let-modal>
@@ -75,7 +74,7 @@
         <p>Voulez-vous vraiment supprimer l'infrastructure "<strong>{{ selectedNom }}</strong>" (Numéro: <strong>{{ selectedNumero }}</strong>) ?</p>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-red" (click)="modal.dismiss('Cancel click')"><i class="fas fa-times"></i>Annuler</button>
-        <button type="button" class="btn btn-green" (click)="deleteInfrastructure(selectedInfraId); modal.close('Save click')"><i class="fas fa-check"></i>Oui</button>
+        <button type="button" class="btn btn-red" (click)="modal.dismiss('Cancel click')"><i class="fas fa-times"></i> Annuler</button>
+        <button type="button" class="btn btn-green" (click)="deleteInfrastructure(selectedInfraId); modal.close('Save click')"><i class="fas fa-check"></i> Oui</button>
     </div>
 </ng-template>
